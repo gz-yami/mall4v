@@ -20,7 +20,6 @@ const resourceCdn3 = 'https://unpkg.com/tinymce-all-in-one@4.9.3/tinymce.min.js'
 
 export default {
   name: 'Tinymce',
-  components: {  },
   props: {
     id: {
       type: String,
