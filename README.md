@@ -30,11 +30,10 @@ vue中后台：https://gitee.com/gz-yami/mall4v
 
 后台：<http://mall4j-admin.mall4j.com>  账号：admin/123456
 
-小程序：1. 扫描二维码
+小程序：扫描二维码
 
 ![小程序](https://gitee.com/gz-yami/mall4j/raw/master/screenshot/miniQrcode.jpg)
 
-​		2. 搜索小程序 **mall4j商城** 
 
 
 
@@ -83,7 +82,5 @@ npm run build
 - QQ群：722835385
 
   ![QQ群](https://gitee.com/gz-yami/mall4j/raw/master/screenshot/qqGroup.png)
-
-- 论坛：<http://bbs.mall4j.com>
 
 - 商务邮箱：yamitech@163.com
