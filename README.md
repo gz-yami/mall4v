@@ -75,12 +75,4 @@ npm run build
 
 
 
-## 提交反馈
-
-提问之前，请先阅读[提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)：
-
-- QQ群：722835385
-
-  ![QQ群](https://gitee.com/gz-yami/mall4j/raw/master/screenshot/qqGroup.png)
-
-- 商务邮箱：yamitech@163.com
+更多内容请查看 主项目 https://gitee.com/gz-yami/mall4j
