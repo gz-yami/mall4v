@@ -16,6 +16,14 @@
 <!--      </template>-->
 
       <template slot-scope="scope"
+              slot="pic">
+              <span class="avue-crud__img" v-if="scope.row.pic">
+                <i :src="scope.row.pic" class="el-icon-document"></i>
+              </span>
+              <span v-else>-</span>
+      </template>
+
+      <template slot-scope="scope"
                 slot="status">
         <el-tag v-if="scope.row.status === 0"
                 size="small"
