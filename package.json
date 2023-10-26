@@ -13,7 +13,7 @@
     "core-js": "3.6.5",
     "crypto-js": "^4.1.1",
     "element-ui": "2.15.7",
-    "lodash": "4.17.5",
+    "lodash": "4.17.21",
     "svg-sprite-loader": "3.7.3",
     "vue": "2.6.14",
     "vue-cookie": "1.1.4",
