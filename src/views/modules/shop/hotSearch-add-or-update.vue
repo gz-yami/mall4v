@@ -7,11 +7,11 @@
     >
       <!-- native modifier has been removed, please confirm whether the function has been affected  -->
       <el-form
-        ref="dataForm"
+        ref="dataFormRef"
         :model="dataForm"
         :rules="dataRule"
         label-width="80px"
-        @keyup.enter="dataFormSubmit()"
+        @keyup.enter="onSubmit()"
       >
         <el-form-item
           label="标题"
@@ -74,7 +74,7 @@
           <el-button @click="visible = false">取消</el-button>
           <el-button
             type="primary"
-            @click="dataFormSubmit()"
+            @click="onSubmit()"
           >确定</el-button>
         </span>
       </template>
@@ -82,86 +82,81 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { Debounce } from '@/utils/debounce'
-export default {
 
-  components: {},
+
   emits: ['refreshDataList'],
 
-  data () {
-    return {
-      dataForm: {
-        hotSearchId: 0,
-        title: '',
-        content: '',
-        recDate: '',
-        seq: 0,
-        status: 0
-      },
-      page: {
-        total: 0, // 总页数
-        currentPage: 1, // 当前页数
-        pageSize: 10 // 每页显示多少条
-      },
-      addProdVisible: false,
-      visible: false,
-      resourcesUrl: process.env.VUE_APP_RESOURCES_URL,
-      dataRule: {
-        title: [
-          { required: true, message: '标题不能为空', trigger: 'blur' },
-          { min: 1, max: 50, message: '长度在1到50个字符内', trigger: 'blur' },
-          { pattern: /\s\S+|S+\s|\S/, message: '标题不能为空', trigger: 'blur' }
-        ],
-        content: [
-          { required: true, message: '内容不能为空', trigger: 'blur' },
-          { min: 1, max: 255, message: '长度在1到255个字符内', trigger: 'blur' },
-          { pattern: /\s\S+|S+\s|\S/, message: '内容不能为空', trigger: 'blur' }
-        ]
-      }
-    }
-  },
 
-  methods: {
-    init (id) {
-      this.dataForm.hotSearchId = id || 0
-      this.visible = true
-      this.$nextTick(() => {
-        this.$refs.dataForm.resetFields()
-        if (this.dataForm.hotSearchId) {
-          this.$http({
-            url: this.$http.adornUrl('/admin/hotSearch/info/' + this.dataForm.hotSearchId),
-            method: 'get',
-            params: this.$http.adornParams()
-          }).then(({ data }) => {
-            this.dataForm = data
-          })
-        }
-      })
-    },
-    // 表单提交
-    dataFormSubmit: Debounce(function () {
-      this.$refs.dataForm.validate(valid => {
-        if (valid) {
-          const param = this.dataForm
-          this.$http({
-            url: this.$http.adornUrl('/admin/hotSearch'),
-            method: param.hotSearchId ? 'put' : 'post',
-            data: this.$http.adornData(param)
-          }).then(({ data }) => {
-            this.$message({
-              message: '操作成功',
-              type: 'success',
-              duration: 1500,
-              onClose: () => {
-                this.visible = false
-                this.$emit('refreshDataList', this.page)
-              }
-            })
-          })
-        }
-      })
-    })
-  }
+var dataForm = reactive({
+  hotSearchId: 0,
+  title: '',
+  content: '',
+  recDate: '',
+  seq: 0,
+  status: 0
+})
+var page = reactive({
+  total: 0, // 总页数
+  currentPage: 1, // 当前页数
+  pageSize: 10 // 每页显示多少条
+})
+var addProdVisible = ref(false)
+var visible = ref(false)
+const resourcesUrl = import.meta.env.VITE_APP_RESOURCES_URL
+var dataRule = {
+  title: [
+    { required: true, message: '标题不能为空', trigger: 'blur' },
+    { min: 1, max: 50, message: '长度在1到50个字符内', trigger: 'blur' },
+    { pattern: /\s\S+|S+\s|\S/, message: '标题不能为空', trigger: 'blur' }
+  ],
+  content: [
+    { required: true, message: '内容不能为空', trigger: 'blur' },
+    { min: 1, max: 255, message: '长度在1到255个字符内', trigger: 'blur' },
+    { pattern: /\s\S+|S+\s|\S/, message: '内容不能为空', trigger: 'blur' }
+  ]
 }
+
+
+const init  = (id) => {
+  dataForm.hotSearchId = id || 0
+  visible = true
+  nextTick(() => {
+    dataFormRef.value?.resetFields()
+    if (dataForm.hotSearchId) {
+      http({
+        url: http.adornUrl('/admin/hotSearch/info/' + dataForm.hotSearchId),
+        method: 'get',
+        params: http.adornParams()
+      }).then(({ data }) => {
+        dataForm = data
+      })
+    }
+  })
+}
+// 表单提交
+const onSubmit: Debounce(function  = () => {
+  dataFormRef.value?.validate(valid => {
+    if (valid) {
+      const param = dataForm
+      http({
+        url: http.adornUrl('/admin/hotSearch'),
+        method: param.hotSearchId ? 'put' : 'post',
+        data: http.adornData(param)
+      }).then(({ data }) => {
+        ElMessage({
+          message: '操作成功',
+          type: 'success',
+          duration: 1500,
+          onClose: () => {
+            visible = false
+            emit('refreshDataList', page)
+          }
+        })
+      })
+    }
+  })
+})
+
 </script>

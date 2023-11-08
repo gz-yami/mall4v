@@ -96,36 +96,32 @@
   </div>
 </template>
 
-<script>
-export default {
+<script setup>
 
-  props: {
-    value: {
-      default: null,
-      type: Number
-    }
-  },
+const props = defineProps({
+  value: {
+    default: null,
+    type: Number
+  }
+})
   emits: ['input'],
 
-  data () {
-    return {
-      transportId: null,
-      transportList: [{
-        transportId: null,
-        transName: ''
-      }],
-      transportInfo: {
-        hasFreeCondition: false,
-        transfeeFrees: [{ freeCityList: [] }]
-      }
-    }
-  },
+
+let transportId = null
+var transportList = [{
+  transportId: null,
+  transName: ''
+}]
+var transportInfo = {
+  hasFreeCondition: false,
+  transfeeFrees: [{ freeCityList: [] }]
+}
 
   computed: {
     tableTitle () {
       const titles = [['首件(个)', '运费(元)', '续件(个)', '续费(元)'], ['首重(kg)', '运费(元)', '续重(kg)', '续费(元)'], ['首体积(m³)', '运费(元)', '续体积(m³)', '续费(元)']]
-      if (this.transportInfo.chargeType) {
-        return titles[this.transportInfo.chargeType]
+      if (transportInfo.chargeType) {
+        return titles[transportInfo.chargeType]
       }
       return titles[0]
     }
@@ -133,39 +129,38 @@ export default {
 
   watch: {
     value: function (transportId) {
-      this.transportId = transportId
+      transportId = transportId
     }
   },
 
-  created () {
-    this.getTransportList()
-  },
+onMounted(() => {
+  getTransportList()
+})
 
-  methods: {
-    getTransportList () {
-      this.$http({
-        url: this.$http.adornUrl('/shop/transport/list'),
-        method: 'get',
-        params: this.$http.adornParams({})
-      }).then(({ data }) => {
-        this.transportList = data
-      })
-    },
-    changeTransport (transportId) {
-      this.$emit('input', transportId)
-      if (!transportId) {
-        return
-      }
-      this.$http({
-        url: this.$http.adornUrl(`/shop/transport/info/${transportId}`),
-        method: 'get',
-        params: this.$http.adornParams({})
-      }).then(({ data }) => {
-        this.transportInfo = data
-      })
-    }
-  }
+
+const getTransportList  = () => {
+  http({
+    url: http.adornUrl('/shop/transport/list'),
+    method: 'get',
+    params: http.adornParams({})
+  }).then(({ data }) => {
+    transportList = data
+  })
 }
+const changeTransport  = (transportId) => {
+  emit('update:modelValue', transportId)
+  if (!transportId) {
+    return
+  }
+  http({
+    url: http.adornUrl(`/shop/transport/info/${transportId}`),
+    method: 'get',
+    params: http.adornParams({})
+  }).then(({ data }) => {
+    transportInfo = data
+  })
+}
+
 </script>
 
 <style lang="scss">

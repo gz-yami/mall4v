@@ -8,10 +8,10 @@
   >
     <!-- native modifier has been removed, please confirm whether the function has been affected  -->
     <el-form
-      ref="dataForm"
+      ref="dataFormRef"
       :model="dataForm"
       label-width="80px"
-      @keyup.enter="dataFormSubmit()"
+      @keyup.enter="onSubmit()"
     >
       <el-form-item
         label="模板名称"
@@ -90,16 +90,16 @@
             <el-button
               v-if="isAuth('shop:transfee:update') && scope.$index > 0"
               type="text"
-              size="small"
-              @click="addOrUpdateHandle(`${scope.$index}`)"
+              
+              @click="onAddOrUpdate(`${scope.$index}`)"
             >
               编辑
             </el-button>
             <el-button
               v-if="isAuth('shop:transfee:delete') && scope.$index > 0"
               type="text"
-              size="small"
-              @click="deleteHandle(`${scope.$index}`)"
+              
+              @click="onDelete(`${scope.$index}`)"
             >
               删除
             </el-button>
@@ -229,7 +229,7 @@
             <el-button
               v-if="isAuth('shop:transfee:update')"
               type="text"
-              size="small"
+              
               @click="addOrUpdateTransfeeFree(`${scope.$index}`)"
             >
               编辑
@@ -237,7 +237,7 @@
             <el-button
               v-if="isAuth('shop:transfee:delete')"
               type="text"
-              size="small"
+              
               @click="deleteTransfeeFree(`${scope.$index}`)"
             >
               删除
@@ -314,58 +314,52 @@
         <el-button @click="visible = false">取消</el-button>
         <el-button
           type="primary"
-          @click="dataFormSubmit()"
+          @click="onSubmit()"
         >确定</el-button>
       </span>
     </template>
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update
       v-if="addOrUpdateVisible"
-      ref="addOrUpdate"
+      ref="addOrUpdateRef"
       @refresh-data-list="getDataList"
     />
   </el-dialog>
 </template>
 
-<script>
+<script setup>
 import { Debounce } from '@/utils/debounce'
 import AddOrUpdate from './transcity-add-or-update'
-export default {
 
-  components: {
-    AddOrUpdate
-  },
+
   emits: ['refreshDataList'],
 
-  data () {
-    return {
-      hasFreeCondition: 0,
-      visible: false,
-      addOrUpdateVisible: false,
-      dataForm: {
-        hasFreeCondition: false,
-        transName: '',
-        createTime: '',
-        chargeType: 0,
-        transportId: 0,
-        isFreeFee: 0,
-        transfees: [{ cityList: [], status: 1 }],
-        transfeeFrees: [{ freeCityList: [], freeType: 0 }]
-      },
-      page: {
-        total: 0, // 总页数
-        currentPage: 1, // 当前页数
-        pageSize: 10 // 每页显示多少条
-      },
-      editVisible: false
-    }
-  },
+
+var hasFreeCondition = ref(0)
+var visible = ref(false)
+var addOrUpdateVisible = ref(false)
+var dataForm = reactive({
+  hasFreeCondition: false,
+  transName: '',
+  createTime: '',
+  chargeType: 0,
+  transportId: 0,
+  isFreeFee: 0,
+  transfees: [{ cityList: [], status: 1 }],
+  transfeeFrees: [{ freeCityList: [], freeType: 0 }]
+})
+var page = reactive({
+  total: 0, // 总页数
+  currentPage: 1, // 当前页数
+  pageSize: 10 // 每页显示多少条
+})
+var editVisible = ref(false)
 
   computed: {
     tableTitle () {
       const titles = [['首件(个)', '运费(元)', '续件(个)', '续费(元)'], ['首重(kg)', '运费(元)', '续重(kg)', '续费(元)'], ['首体积(m³)', '运费(元)', '续体积(m³)', '续费(元)']]
-      if (this.dataForm.chargeType) {
-        return titles[this.dataForm.chargeType]
+      if (dataForm.chargeType) {
+        return titles[dataForm.chargeType]
       }
       return titles[0]
     }
@@ -375,173 +369,172 @@ export default {
     // 如果当前对话框不可见，则关闭选择城市的对话框
     visible: function (val) {
       if (!val) {
-        this.addOrUpdateVisible = false
+        addOrUpdateVisible = false
       }
     }
   },
 
-  methods: {
-    init (id) {
-      this.visible = true
-      this.dataForm.transportId = id || 0
-      this.$nextTick(() => {
-        this.$refs.dataForm.resetFields()
-        this.dataForm = {
-          hasFreeCondition: false,
-          transName: '',
-          createTime: '',
-          chargeType: 0,
-          transportId: 0,
-          isFreeFee: 0,
-          transfees: [{ cityList: [], status: 1 }],
-          transfeeFrees: [{ freeCityList: [], freeType: 0 }]
-        }
-      })
-      if (this.dataForm.transportId) {
-        this.$http({
-          // 获取运费模板数据
-          url: this.$http.adornUrl(`/shop/transport/info/${this.dataForm.transportId}`),
-          method: 'get'
-        }).then(({ data }) => {
-          if (data.isFreeFee) {
-            data.transfees[0].status = 0
-          } else {
-            data.transfees[0].status = 1
-          }
-          this.dataForm = data
-          this.dataForm.hasFreeCondition = !!data.hasFreeCondition
-        })
-      }
-    },
-    getDataList (row, cityList, type) {
-      if (type === 0) {
-        this.dataForm.transfees[row].cityList = cityList
-      }
-      if (type === 1) {
-        this.dataForm.transfeeFrees[row].freeCityList = cityList
-      }
-    },
-    // 添加运费项
-    addTransfee () {
-      this.editVisible = true
-      this.dataForm.transfees.push({ cityList: [], status: 1 })
-    },
-    // 删除运费项
-    deleteHandle (rowIndex) {
-      this.dataForm.transfees.splice(rowIndex, 1)
-    },
-    // 可配送区域和运费编辑
-    addOrUpdateHandle (rowIndex) {
-      this.addOrUpdateVisible = true
-      let allSelectCityList = []
-      for (let i = 1; i < this.dataForm.transfees.length; i++) {
-        const cityList = this.dataForm.transfees[i].cityList
-        allSelectCityList = allSelectCityList.concat(cityList)
-      }
-      this.$nextTick(() => {
-        this.$refs.addOrUpdate.init(rowIndex, this.dataForm.transfees[rowIndex].cityList || [], allSelectCityList, 0)
-      })
-    },
-    // 添加指定包邮条件
-    addTransfeeFree () {
-      if (this.dataForm.hasFreeCondition) {
-        this.dataForm.transfeeFrees.push({ freeCityList: [], freeType: 0 })
-      }
-    },
-    // 删除指定包邮条件
-    deleteTransfeeFree (rowIndex) {
-      this.dataForm.transfeeFrees.splice(rowIndex, 1)
-    },
-    // 指定包邮条件编辑
-    addOrUpdateTransfeeFree (rowIndex) {
-      this.addOrUpdateVisible = true
-      let allSelectCityList = []
-      for (let i = 1; i < this.dataForm.transfeeFrees.length; i++) {
-        const freeCityList = this.dataForm.transfeeFrees[i].freeCityList
-        allSelectCityList = allSelectCityList.concat(freeCityList)
-      }
-      this.$nextTick(() => {
-        this.$refs.addOrUpdate.init(rowIndex, this.dataForm.transfeeFrees[rowIndex].freeCityList || [], allSelectCityList, 1)
-      })
-    },
-    // 改变模板类型， 0 买家承担运费 1 卖家包邮
-    changeFreeFee (val) {
-      this.dataForm.hasFreeCondition = false
-      if (val) {
-        this.dataForm.chargeType = 0
-        this.dataForm.transfees = [{ cityList: [], status: 0, firstPiece: 1, firstFee: 0, continuousPiece: 1, continuousFee: 0 }]
+
+const init  = (id) => {
+  visible = true
+  dataForm.transportId = id || 0
+  nextTick(() => {
+    dataFormRef.value?.resetFields()
+    dataForm = {
+      hasFreeCondition: false,
+      transName: '',
+      createTime: '',
+      chargeType: 0,
+      transportId: 0,
+      isFreeFee: 0,
+      transfees: [{ cityList: [], status: 1 }],
+      transfeeFrees: [{ freeCityList: [], freeType: 0 }]
+    }
+  })
+  if (dataForm.transportId) {
+    http({
+      // 获取运费模板数据
+      url: http.adornUrl(`/shop/transport/info/${dataForm.transportId}`),
+      method: 'get'
+    }).then(({ data }) => {
+      if (data.isFreeFee) {
+        data.transfees[0].status = 0
       } else {
-        this.dataForm.transfees = [{ cityList: [], status: 1 }]
+        data.transfees[0].status = 1
       }
-    },
-    /**
-     * 校验输入的数字
-     */
-    checkNumber (row, type) {
-      if (type === 1) {
-        row.firstPiece = this.getNumber(row.firstPiece)
-        row.firstPiece = row.firstPiece === 0 ? 1 : row.firstPiece
-      } else if (type === 3) {
-        row.continuousPiece = this.getNumber(row.continuousPiece)
-        row.continuousPiece = row.continuousPiece === 0 ? 1 : row.continuousPiece
-      }
-    },
-    /**
-     * 保留整数并小于零的数设为0
-     */
-    getNumber (num) {
-      num = Math.round(num)
-      return num < 0 ? 0 : num
-    },
-    // 表单提交
-    dataFormSubmit: Debounce(function () {
-      this.$refs.dataForm.validate((valid) => {
-        if (valid) {
-          for (let i = 1; i < this.dataForm.transfees.length; i++) {
-            const transfee = this.dataForm.transfees[i]
-            if (transfee.cityList.length === 0) {
-              this.$message({
-                message: '请选择可配送区域',
-                type: 'error',
-                duration: 1500
-              })
-              return
-            }
-          }
-          if (this.dataForm.hasFreeCondition) {
-            this.hasFreeCondition = 1
-          } else {
-            this.hasFreeCondition = 0
-          }
-          this.dataForm.transfees[0].cityList = []
-          this.$http({
-            url: this.$http.adornUrl('/shop/transport'),
-            method: this.dataForm.transportId ? 'put' : 'post',
-            data: this.$http.adornData({
-              transportId: this.dataForm.transportId || undefined,
-              transName: this.dataForm.transName,
-              chargeType: this.dataForm.chargeType,
-              isFreeFee: this.dataForm.isFreeFee,
-              transfees: this.dataForm.transfees,
-              transfeeFrees: this.dataForm.transfeeFrees,
-              hasFreeCondition: this.hasFreeCondition
-            })
-          }).then(({ data }) => {
-            this.$message({
-              message: '操作成功',
-              type: 'success',
-              duration: 1500,
-              onClose: () => {
-                this.visible = false
-                this.$emit('refreshDataList', this.page)
-              }
-            })
-          })
-        }
-      })
+      dataForm = data
+      dataForm.hasFreeCondition = !!data.hasFreeCondition
     })
   }
 }
+const getDataList  = (row, cityList, type) => {
+  if (type === 0) {
+    dataForm.transfees[row].cityList = cityList
+  }
+  if (type === 1) {
+    dataForm.transfeeFrees[row].freeCityList = cityList
+  }
+}
+// 添加运费项
+const addTransfee  = () => {
+  editVisible = true
+  dataForm.transfees.push({ cityList: [], status: 1 })
+}
+// 删除运费项
+const onDelete  = (rowIndex) => {
+  dataForm.transfees.splice(rowIndex, 1)
+}
+// 可配送区域和运费编辑
+const onAddOrUpdate  = (rowIndex) => {
+  addOrUpdateVisible = true
+  let allSelectCityList = []
+  for (let i = 1; i < dataForm.transfees.length; i++) {
+    const cityList = dataForm.transfees[i].cityList
+    allSelectCityList = allSelectCityList.concat(cityList)
+  }
+  nextTick(() => {
+    addOrUpdate.value?.init(rowIndex, dataForm.transfees[rowIndex].cityList || [], allSelectCityList, 0)
+  })
+}
+// 添加指定包邮条件
+const addTransfeeFree  = () => {
+  if (dataForm.hasFreeCondition) {
+    dataForm.transfeeFrees.push({ freeCityList: [], freeType: 0 })
+  }
+}
+// 删除指定包邮条件
+const deleteTransfeeFree  = (rowIndex) => {
+  dataForm.transfeeFrees.splice(rowIndex, 1)
+}
+// 指定包邮条件编辑
+const addOrUpdateTransfeeFree  = (rowIndex) => {
+  addOrUpdateVisible = true
+  let allSelectCityList = []
+  for (let i = 1; i < dataForm.transfeeFrees.length; i++) {
+    const freeCityList = dataForm.transfeeFrees[i].freeCityList
+    allSelectCityList = allSelectCityList.concat(freeCityList)
+  }
+  nextTick(() => {
+    addOrUpdate.value?.init(rowIndex, dataForm.transfeeFrees[rowIndex].freeCityList || [], allSelectCityList, 1)
+  })
+}
+// 改变模板类型， 0 买家承担运费 1 卖家包邮
+const changeFreeFee  = (val) => {
+  dataForm.hasFreeCondition = false
+  if (val) {
+    dataForm.chargeType = 0
+    dataForm.transfees = [{ cityList: [], status: 0, firstPiece: 1, firstFee: 0, continuousPiece: 1, continuousFee: 0 }]
+  } else {
+    dataForm.transfees = [{ cityList: [], status: 1 }]
+  }
+}
+/**
+ * 校验输入的数字
+ */
+const checkNumber  = (row, type) => {
+  if (type === 1) {
+    row.firstPiece = getNumber(row.firstPiece)
+    row.firstPiece = row.firstPiece === 0 ? 1 : row.firstPiece
+  } else if (type === 3) {
+    row.continuousPiece = getNumber(row.continuousPiece)
+    row.continuousPiece = row.continuousPiece === 0 ? 1 : row.continuousPiece
+  }
+}
+/**
+ * 保留整数并小于零的数设为0
+ */
+const getNumber  = (num) => {
+  num = Math.round(num)
+  return num < 0 ? 0 : num
+}
+// 表单提交
+const onSubmit: Debounce(function  = () => {
+  dataFormRef.value?.validate((valid) => {
+    if (valid) {
+      for (let i = 1; i < dataForm.transfees.length; i++) {
+        const transfee = dataForm.transfees[i]
+        if (transfee.cityList.length === 0) {
+          ElMessage({
+            message: '请选择可配送区域',
+            type: 'error',
+            duration: 1500
+          })
+          return
+        }
+      }
+      if (dataForm.hasFreeCondition) {
+        hasFreeCondition = 1
+      } else {
+        hasFreeCondition = 0
+      }
+      dataForm.transfees[0].cityList = []
+      http({
+        url: http.adornUrl('/shop/transport'),
+        method: dataForm.transportId ? 'put' : 'post',
+        data: http.adornData({
+          transportId: dataForm.transportId || undefined,
+          transName: dataForm.transName,
+          chargeType: dataForm.chargeType,
+          isFreeFee: dataForm.isFreeFee,
+          transfees: dataForm.transfees,
+          transfeeFrees: dataForm.transfeeFrees,
+          hasFreeCondition: hasFreeCondition
+        })
+      }).then(({ data }) => {
+        ElMessage({
+          message: '操作成功',
+          type: 'success',
+          duration: 1500,
+          onClose: () => {
+            visible = false
+            emit('refreshDataList', page)
+          }
+        })
+      })
+    }
+  })
+})
+
 </script>
 
 <style scoped>

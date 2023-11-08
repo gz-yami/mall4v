@@ -6,11 +6,11 @@
   >
     <!-- native modifier has been removed, please confirm whether the function has been affected  -->
     <el-form
-      ref="dataForm"
+      ref="dataFormRef"
       :model="dataForm"
       :rules="dataRule"
       label-width="80px"
-      @keyup.enter="dataFormSubmit()"
+      @keyup.enter="onSubmit()"
     >
       <el-form-item
         label="公告标题"
@@ -56,97 +56,82 @@
         class="dialog-footer"
       >
         <el-button
-          size="small"
+          
           @click="visible = false"
         >取消</el-button>
         <el-button
-          size="small"
+          
           type="primary"
-          @click="dataFormSubmit()"
+          @click="onSubmit()"
         >确定</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
 
-<script>
+<script setup>
 import TinyMce from '@/components/tiny-mce'
 import { Debounce } from '@/utils/debounce'
-export default {
 
-  components: {
-    TinyMce
-  },
+
   emits: ['refreshDataList'],
 
-  data () {
-    const validateTitle = (rule, value, callback) => {
-      if (!value.trim()) {
-        this.dataForm.title = ''
-        callback(new Error('公告标题不能为空'))
-      } else {
-        callback()
-      }
-    }
-    return {
-      visible: false,
-      roleList: [],
-      dataForm: {
-        title: null,
-        content: null,
-        url: null,
-        status: 1,
-        isTop: 0
-      },
-      dataRule: {
-        title: [
-          { required: true, message: '公告标题不能为空', trigger: 'blur' },
-          { validator: validateTitle, trigger: 'blur' }
-        ]
-      }
-    }
-  },
 
-  methods: {
-    init (id) {
-      this.dataForm.id = id || 0
-      this.visible = true
-      this.$nextTick(() => {
-        this.$refs.dataForm.resetFields()
-        if (this.dataForm.id) {
-          this.$http({
-            url: this.$http.adornUrl('/shop/notice/info/' + this.dataForm.id),
-            method: 'get',
-            params: this.$http.adornParams()
-          }).then(({ data }) => {
-            this.dataForm = data
-          })
-        }
-      })
-    },
-    // 表单提交
-    dataFormSubmit: Debounce(function () {
-      this.$refs.dataForm.validate((valid) => {
-        if (valid) {
-          this.$http({
-            url: this.$http.adornUrl('/shop/notice'),
-            method: this.dataForm.id ? 'put' : 'post',
-            data: this.$http.adornData(this.dataForm)
-          }).then(({ data }) => {
-            this.$message({
-              message: '操作成功',
-              type: 'success',
-              duration: 1500,
-              onClose: () => {
-                this.visible = false
-                this.$emit('refreshDataList')
-                this.dataForm.content = ''
-              }
-            })
-          })
-        }
-      })
-    })
-  }
+var visible = ref(false)
+var roleList = ref([])
+var dataForm = reactive({
+  title: null,
+  content: null,
+  url: null,
+  status: 1,
+  isTop: 0
+})
+var dataRule = {
+  title: [
+    { required: true, message: '公告标题不能为空', trigger: 'blur' },
+    { validator: validateTitle, trigger: 'blur' }
+  ]
 }
+
+
+const init  = (id) => {
+  dataForm.id = id || 0
+  visible = true
+  nextTick(() => {
+    dataFormRef.value?.resetFields()
+    if (dataForm.id) {
+      http({
+        url: http.adornUrl('/shop/notice/info/' + dataForm.id),
+        method: 'get',
+        params: http.adornParams()
+      }).then(({ data }) => {
+        dataForm = data
+      })
+    }
+  })
+}
+// 表单提交
+const onSubmit: Debounce(function  = () => {
+  dataFormRef.value?.validate((valid) => {
+    if (valid) {
+      http({
+        url: http.adornUrl('/shop/notice'),
+        method: dataForm.id ? 'put' : 'post',
+        data: http.adornData(dataForm)
+      }).then(({ data }) => {
+        ElMessage({
+          message: '操作成功',
+          type: 'success',
+          duration: 1500,
+          onClose: () => {
+            visible = false
+            emit('refreshDataList')
+            dataForm.content = ''
+          }
+        })
+      })
+    }
+  })
+})
+
 </script>

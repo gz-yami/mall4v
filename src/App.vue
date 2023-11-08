@@ -6,12 +6,12 @@
   </router-view>
 </template>
 
-<script>
-export default {
+<script setup>
+
   computed: {
     key () {
-      return this.$route.path + Math.random()
+      return useRoute().path + Math.random()
     }
   }
-}
+
 </script>

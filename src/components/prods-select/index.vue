@@ -6,7 +6,7 @@
     :close-on-click-modal="false"
   >
     <el-table
-      ref="prodTable"
+      ref="prodTableRef"
       v-loading="dataListLoading"
       :data="dataList"
       border
@@ -80,136 +80,131 @@
   </el-dialog>
 </template>
 
-<script>
-export default {
+<script setup>
 
-  props: {
-    isSingle: {
-      default: false,
-      type: Boolean
-    }
-  },
+const props = defineProps({
+  isSingle: {
+    default: false,
+    type: Boolean
+  }
+})
   emits: ['refreshSelectProds'],
 
-  data () {
-    return {
-      visible: false,
-      dataForm: {
-        product: ''
-      },
-      singleSelectProdId: 0,
-      allData: [],
-      selectProds: [],
-      dataList: [],
-      pageIndex: 1,
-      pageSize: 10,
-      totalPage: 0,
-      dataListLoading: false,
-      dataListSelections: [],
-      addOrUpdateVisible: false
-    }
-  },
 
-  activated () {
-    this.getDataList()
-  },
+var visible = ref(false)
+var dataForm = reactive({
+  product: ''
+})
+var singleSelectProdId = ref(0)
+var allData = ref([])
+var selectProds = ref([])
+var dataList = ref([])
+var pageIndex = ref(1)
+var pageSize = ref(10)
+var totalPage = ref(0)
+var dataListLoading = ref(false)
+var dataListSelections = ref([])
+var addOrUpdateVisible = ref(false)
 
-  methods: {
-    // 获取数据列表
-    init (selectProds) {
-      this.selectProds = selectProds
-      this.visible = true
-      this.dataListLoading = true
-      if (this.selectProds) {
-        this.selectProds.forEach(row => {
-          this.dataListSelections.push(row)
-        })
-      }
-      this.getDataList()
-    },
-    getDataList () {
-      this.$http({
-        url: this.$http.adornUrl('/prod/prod/page'),
-        method: 'get',
-        params: this.$http.adornParams(
-          Object.assign(
-            {
-              current: this.pageIndex,
-              size: this.pageSize
-            },
-            {
-              prodName: this.dataForm.prodName
-            }
-          )
-        )
-      }).then(({ data }) => {
-        this.dataList = data.records
-        this.totalPage = data.total
-        this.dataListLoading = false
-        if (this.selectProds) {
-          this.$nextTick(() => {
-            this.selectProds.forEach(row => {
-              const index = this.dataList.findIndex((prodItem) => prodItem.prodId === row.prodId)
-              this.$refs.prodTable.toggleRowSelection(this.dataList[index])
-            })
-          })
-        }
-      })
-    },
-    // 每页数
-    sizeChangeHandle (val) {
-      this.pageSize = val
-      this.pageIndex = 1
-      this.getDataList()
-    },
-    // 当前页
-    currentChangeHandle (val) {
-      this.pageIndex = val
-      this.getDataList()
-    },
-    // 单选商品事件
-    getSelectProdRow (row) {
-      this.dataListSelections = [row]
-    },
-    // 多选点击事件
-    selectChangeHandle (selection) {
-      this.dataList.forEach((tableItem) => {
-        const selectedProdIndex = selection.findIndex((selectedProd) => {
-          if (!selectedProd) {
-            return false
-          }
-          return selectedProd.prodId === tableItem.prodId
-        })
-        const dataSelectedProdIndex = this.dataListSelections.findIndex((dataSelectedProd) => dataSelectedProd.prodId === tableItem.prodId)
-        if (selectedProdIndex > -1 && dataSelectedProdIndex === -1) {
-          this.dataListSelections.push(tableItem)
-        } else if (selectedProdIndex === -1 && dataSelectedProdIndex > -1) {
-          this.dataListSelections.splice(dataSelectedProdIndex, 1)
-        }
-      })
-    },
-    // 确定事件
-    submitProds () {
-      if (!this.dataListSelections.length) {
-        this.$message({
-          message: '请选择商品',
-          type: 'error',
-          duration: 1000,
-          onClose: () => {}
-        })
-        return
-      }
-      const prods = []
-      this.dataListSelections.forEach(item => {
-        const prodIndex = prods.findIndex((prod) => prod.prodId === item.prodId)
-        if (prodIndex === -1) {
-          prods.push({ prodId: item.prodId, prodName: item.prodName, pic: item.pic })
-        }
-      })
-      this.$emit('refreshSelectProds', prods)
-      this.dataListSelections = []
-      this.visible = false
-    }
+onActivated(() => {
+  getDataList()
+})
+
+
+// 获取数据列表
+const init  = (selectProds) => {
+  selectProds = selectProds
+  visible = true
+  dataListLoading = true
+  if (selectProds) {
+    selectProds.forEach(row => {
+      dataListSelections.push(row)
+    })
   }
+  getDataList()
 }
+const getDataList  = () => {
+  http({
+    url: http.adornUrl('/prod/prod/page'),
+    method: 'get',
+    params: http.adornParams(
+      Object.assign(
+        {
+          current: pageIndex,
+          size: pageSize
+        },
+        {
+          prodName: dataForm.prodName
+        }
+      )
+    )
+  }).then(({ data }) => {
+    dataList = data.records
+    totalPage = data.total
+    dataListLoading = false
+    if (selectProds) {
+      nextTick(() => {
+        selectProds.forEach(row => {
+          const index = dataList.findIndex((prodItem) => prodItem.prodId === row.prodId)
+          prodTable.toggleRowSelection(thisRef.value?.dataList[index])
+        })
+      })
+    }
+  })
+}
+// 每页数
+const sizeChangeHandle  = (val) => {
+  pageSize = val
+  pageIndex = 1
+  getDataList()
+}
+// 当前页
+const currentChangeHandle  = (val) => {
+  pageIndex = val
+  getDataList()
+}
+// 单选商品事件
+const getSelectProdRow  = (row) => {
+  dataListSelections = [row]
+}
+// 多选点击事件
+const selectChangeHandle  = (selection) => {
+  dataList.forEach((tableItem) => {
+    const selectedProdIndex = selection.findIndex((selectedProd) => {
+      if (!selectedProd) {
+        return false
+      }
+      return selectedProd.prodId === tableItem.prodId
+    })
+    const dataSelectedProdIndex = dataListSelections.findIndex((dataSelectedProd) => dataSelectedProd.prodId === tableItem.prodId)
+    if (selectedProdIndex > -1 && dataSelectedProdIndex === -1) {
+      dataListSelections.push(tableItem)
+    } else if (selectedProdIndex === -1 && dataSelectedProdIndex > -1) {
+      dataListSelections.splice(dataSelectedProdIndex, 1)
+    }
+  })
+}
+// 确定事件
+const submitProds  = () => {
+  if (!dataListSelections.length) {
+    ElMessage({
+      message: '请选择商品',
+      type: 'error',
+      duration: 1000,
+      onClose: () => {}
+    })
+    return
+  }
+  const prods = []
+  dataListSelections.forEach(item => {
+    const prodIndex = prods.findIndex((prod) => prod.prodId === item.prodId)
+    if (prodIndex === -1) {
+      prods.push({ prodId: item.prodId, prodName: item.prodName, pic: item.pic })
+    }
+  })
+  emit('refreshSelectProds', prods)
+  dataListSelections = []
+  visible = false
+}
+
 </script>

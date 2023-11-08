@@ -9,11 +9,11 @@
   >
     <!-- native modifier has been removed, please confirm whether the function has been affected  -->
     <el-form
-      ref="dataForm"
+      ref="dataFormRef"
       :model="dataForm"
       :rules="dataRule"
       label-width="120px"
-      @keyup.enter="dataFormSubmit()"
+      @keyup.enter="onSubmit()"
     >
       <el-form-item
         label="发件人姓名"
@@ -51,60 +51,56 @@
         class="dialog-footer"
       >
         <el-button
-          size="small"
+          
           @click="visible = false"
         >取消</el-button>
         <el-button
           type="primary"
-          size="small"
-          @click="dataFormSubmit()"
+          
+          @click="onSubmit()"
         >确定</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
-<script>
-export default {
+<script setup>
+
   emits: ['inputCallback'],
 
-  data () {
-    return {
-      visible: false,
-      dataForm: {
-        consignmentName: '',
-        consignmentMobile: '',
-        consignmentAddr: ''
-      },
-      dataRule: {
-        consignmentName: [
-          { required: true, message: '不能为空', trigger: 'blur' }
-        ],
-        consignmentMobile: [
-          { required: true, message: '不能为空', trigger: 'blur' }
-        ],
-        consignmentAddr: [
-          { required: true, message: '不能为空', trigger: 'blur' }
-        ]
-      }
-    }
-  },
 
-  methods: {
-    init (orderNumber, dvyId, dvyFlowId) {
-      this.visible = true
-      this.$nextTick(() => {
-        this.$refs.dataForm.resetFields()
-      })
-    },
-    // 表单提交
-    dataFormSubmit () {
-      this.$refs.dataForm.validate((valid) => {
-        if (valid) {
-          this.visible = false
-          this.$emit('inputCallback', this.dataForm)
-        }
-      })
-    }
-  }
+var visible = ref(false)
+var dataForm = reactive({
+  consignmentName: '',
+  consignmentMobile: '',
+  consignmentAddr: ''
+})
+var dataRule = {
+  consignmentName: [
+    { required: true, message: '不能为空', trigger: 'blur' }
+  ],
+  consignmentMobile: [
+    { required: true, message: '不能为空', trigger: 'blur' }
+  ],
+  consignmentAddr: [
+    { required: true, message: '不能为空', trigger: 'blur' }
+  ]
 }
+
+
+const init  = (orderNumber, dvyId, dvyFlowId) => {
+  visible = true
+  nextTick(() => {
+    dataFormRef.value?.resetFields()
+  })
+}
+// 表单提交
+const onSubmit  = () => {
+  dataFormRef.value?.validate((valid) => {
+    if (valid) {
+      visible = false
+      emit('inputCallback', dataForm)
+    }
+  })
+}
+
 </script>

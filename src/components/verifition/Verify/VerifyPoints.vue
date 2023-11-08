@@ -19,7 +19,7 @@
           <i class="iconfont icon-refresh" />
         </div>
         <img
-          ref="canvas"
+          ref="canvasRef"
           :src="pointBackImgBase?('data:image/png;base64,'+pointBackImgBase):defaultImg"
           alt=""
           style="width:100%;height:100%;display:block"
@@ -48,7 +48,7 @@
         </div>
       </div>
     </div>
-    <!-- 'height': this.barSize.height, -->
+    <!-- 'height': barSize.height, -->
     <div
       class="verify-bar-area"
       :style="{'width': setSize.imgWidth,
@@ -69,69 +69,65 @@ import { resetSize, _code_chars, _code_color1, _code_color2 } from './../utils/u
 import { aesEncrypt } from './../utils/ase'
 import { reqGet, reqCheck } from './../api/index'
 
-export default {
-  name: 'VerifyPoints',
-  props: {
-    // 弹出式pop，固定fixed
-    mode: {
-      type: String,
-      default: 'fixed'
-    },
-    captchaType: {
-      type: String
-    },
-    // 间隔
-    vSpace: {
-      type: Number,
-      default: 5
-    },
-    imgSize: {
-      type: Object,
-      default () {
-        return {
-          width: '310px',
-          height: '155px'
-        }
+
+const props = defineProps({
+  // 弹出式pop，固定fixed
+  mode: {
+    type: String,
+    default: 'fixed'
+  },
+  captchaType: {
+    type: String
+  },
+  // 间隔
+  vSpace: {
+    type: Number,
+    default: 5
+  },
+  imgSize: {
+    type: Object,
+    default () {
+      return {
+        width: '310px',
+        height: '155px'
       }
-    },
-    barSize: {
-      type: Object,
-      default () {
-        return {
-          width: '310px',
-          height: '40px'
-        }
-      }
-    },
-    defaultImg: {
-      type: String,
-      default: ''
     }
   },
-  data () {
-    return {
-      secretKey: '', // 后端返回的ase加密秘钥
-      checkNum: 3, // 默认需要点击的字数
-      fontPos: [], // 选中的坐标信息
-      checkPosArr: [], // 用户点击的坐标
-      num: 1, // 点击的记数
-      pointBackImgBase: '', // 后端获取到的背景图片
-      poinTextList: [], // 后端返回的点击字体顺序
-      backToken: '', // 后端返回的token值
-      setSize: {
-        imgHeight: 0,
-        imgWidth: 0,
-        barHeight: 0,
-        barWidth: 0
-      },
-      tempPoints: [],
-      text: '',
-      barAreaColor: undefined,
-      barAreaBorderColor: undefined,
-      showRefresh: true,
-      bindingClick: true
+  barSize: {
+    type: Object,
+    default () {
+      return {
+        width: '310px',
+        height: '40px'
+      }
     }
   },
+  defaultImg: {
+    type: String,
+    default: ''
+  }
+})
+
+var secretKey = ref('') // 后端返回的ase加密秘钥
+var checkNum = ref(3) // 默认需要点击的字数
+var fontPos = ref([]) // 选中的坐标信息
+var checkPosArr = ref([]) // 用户点击的坐标
+var num = ref(1) // 点击的记数
+var pointBackImgBase = ref('') // 后端获取到的背景图片
+var poinTextList = ref([]) // 后端返回的点击字体顺序
+var backToken = ref('') // 后端返回的token值
+var setSize = reactive({
+  imgHeight: 0,
+  imgWidth: 0,
+  barHeight: 0,
+  barWidth: 0
+})
+var tempPoints = ref([])
+var text = ref('')
+var barAreaColor = reactive(undefined)
+var barAreaBorderColor = reactive(undefined)
+var showRefresh = ref(true)
+var bindingClick = ref(true)
   computed: {
     resetSize () {
       return resetSize
@@ -142,132 +138,131 @@ export default {
     type: {
       immediate: true,
       handler () {
-        this.init()
+        init()
       }
     }
   },
-  mounted () {
-    // 禁止拖拽
-    this.$el.onselectstart = function () {
-      return false
-    }
-  },
-  methods: {
-    init () {
-      // 加载页面
-      this.fontPos.splice(0, this.fontPos.length)
-      this.checkPosArr.splice(0, this.checkPosArr.length)
-      this.num = 1
-      this.getPictrue()
-      this.$nextTick(() => {
-        this.setSize = this.resetSize(this)	// 重新设置宽度高度
-        this.$parent.$emit('ready', this)
-      })
-    },
-    canvasClick (e) {
-      this.checkPosArr.push(this.getMousePos(this.$refs.canvas, e))
-      if (this.num == this.checkNum) {
-        this.num = this.createPoint(this.getMousePos(this.$refs.canvas, e))
-        // 按比例转换坐标值
-        this.checkPosArr = this.pointTransfrom(this.checkPosArr, this.setSize)
-        // 等创建坐标执行完
-        setTimeout(() => {
-          // var flag = this.comparePos(this.fontPos, this.checkPosArr);
-          // 发送后端请求
-          const captchaVerification = this.secretKey ? aesEncrypt(this.backToken + '---' + JSON.stringify(this.checkPosArr), this.secretKey) : this.backToken + '---' + JSON.stringify(this.checkPosArr)
-          const data = {
-            captchaType: this.captchaType,
-            pointJson: this.secretKey ? aesEncrypt(JSON.stringify(this.checkPosArr), this.secretKey) : JSON.stringify(this.checkPosArr),
-            token: this.backToken
-          }
-          reqCheck(data).then(res => {
-            if (res.repCode == '0000') {
-              this.barAreaColor = '#4cae4c'
-              this.barAreaBorderColor = '#5cb85c'
-              this.text = '验证成功'
-              this.bindingClick = false
-              if (this.mode == 'pop') {
-                setTimeout(() => {
-                  this.$parent.clickShow = false
-                  this.refresh()
-                }, 1500)
-              }
-              this.$parent.$emit('success', { captchaVerification })
-            } else {
-              this.$parent.$emit('error', this)
-              this.barAreaColor = '#d9534f'
-              this.barAreaBorderColor = '#d9534f'
-              this.text = '验证失败'
-              setTimeout(() => {
-                this.refresh()
-              }, 700)
-            }
-          })
-        }, 400)
-      }
-      if (this.num < this.checkNum) {
-        this.num = this.createPoint(this.getMousePos(this.$refs.canvas, e))
-      }
-    },
+onMounted(() => {
+  // 禁止拖拽
+  $el.onselectstart = function () {
+    return false
+  }
+})
 
-    // 获取坐标
-    getMousePos: function (obj, e) {
-      const x = e.offsetX
-      const y = e.offsetY
-      return { x, y }
-    },
-    // 创建坐标点
-    createPoint: function (pos) {
-      this.tempPoints.push(Object.assign({}, pos))
-      return ++this.num
-    },
-    refresh: function () {
-      this.tempPoints.splice(0, this.tempPoints.length)
-      this.barAreaColor = '#000'
-      this.barAreaBorderColor = '#ddd'
-      this.bindingClick = true
-      this.fontPos.splice(0, this.fontPos.length)
-      this.checkPosArr.splice(0, this.checkPosArr.length)
-      this.num = 1
-      this.getPictrue()
-      this.text = '验证失败'
-      this.showRefresh = true
-    },
-
-    // 请求背景图片和验证图片
-    getPictrue () {
+const init  = () => {
+  // 加载页面
+  fontPos.splice(0, fontPos.length)
+  checkPosArr.splice(0, checkPosArr.length)
+  num = 1
+  getPictrue()
+  nextTick(() => {
+    setSize = resetSize(this)  // 重新设置宽度高度
+    $parent.$emit('ready', this)
+  })
+}
+const canvasClick  = (e) => {
+  checkPosArr.push(getMousePos($refs.canvas, e))
+  if (num == checkNum) {
+    num = createPoint(getMousePos($refs.canvas, e))
+    // 按比例转换坐标值
+    checkPosArr = pointTransfrom(checkPosArr, setSize)
+    // 等创建坐标执行完
+    setTimeout(() => {
+      // var flag = comparePos(fontPos, checkPosArr);
+      // 发送后端请求
+      const captchaVerification = secretKey ? aesEncrypt(backToken + '---' + JSON.stringify(checkPosArr), secretKey) : backToken + '---' + JSON.stringify(checkPosArr)
       const data = {
-        captchaType: this.captchaType,
-        clientUid: localStorage.getItem('point'),
-        ts: Date.now() // 现在的时间戳
+        captchaType: captchaType,
+        pointJson: secretKey ? aesEncrypt(JSON.stringify(checkPosArr), secretKey) : JSON.stringify(checkPosArr),
+        token: backToken
       }
-      reqGet(data).then(res => {
+      reqCheck(data).then(res => {
         if (res.repCode == '0000') {
-          this.pointBackImgBase = res.repData.originalImageBase64
-          this.backToken = res.repData.token
-          this.secretKey = res.repData.secretKey
-          this.poinTextList = res.repData.wordList
-          this.text = '请依次点击【' + this.poinTextList.join(',') + '】'
+          barAreaColor = '#4cae4c'
+          barAreaBorderColor = '#5cb85c'
+          text = '验证成功'
+          bindingClick = false
+          if (mode == 'pop') {
+            setTimeout(() => {
+              $parent.clickShow = false
+              refresh()
+            }, 1500)
+          }
+          $parent.$emit('success', { captchaVerification })
         } else {
-          this.text = res.repMsg
-        }
-
-        // 判断接口请求次数是否失效
-        if (res.repCode == '6201') {
-          this.pointBackImgBase = null
+          $parent.$emit('error', this)
+          barAreaColor = '#d9534f'
+          barAreaBorderColor = '#d9534f'
+          text = '验证失败'
+          setTimeout(() => {
+            refresh()
+          }, 700)
         }
       })
-    },
-    // 坐标转换函数
-    pointTransfrom (pointArr, imgSize) {
-      const newPointArr = pointArr.map(p => {
-        const x = Math.round(310 * p.x / parseInt(imgSize.imgWidth))
-        const y = Math.round(155 * p.y / parseInt(imgSize.imgHeight))
-        return { x, y }
-      })
-      // console.log(newPointArr,"newPointArr");
-      return newPointArr
-    }
+    }, 400)
+  }
+  if (num < checkNum) {
+    num = createPoint(getMousePos($refs.canvas, e))
   }
 }
+
+// 获取坐标
+const getMousePos: function  = (obj, e) => {
+  const x = e.offsetX
+  const y = e.offsetY
+  return { x, y }
+}
+// 创建坐标点
+const createPoint: function  = (pos) => {
+  tempPoints.push(Object.assign({}, pos))
+  return ++num
+}
+const refresh: function  = () => {
+  tempPoints.splice(0, tempPoints.length)
+  barAreaColor = '#000'
+  barAreaBorderColor = '#ddd'
+  bindingClick = true
+  fontPos.splice(0, fontPos.length)
+  checkPosArr.splice(0, checkPosArr.length)
+  num = 1
+  getPictrue()
+  text = '验证失败'
+  showRefresh = true
+}
+
+// 请求背景图片和验证图片
+const getPictrue  = () => {
+  const data = {
+    captchaType: captchaType,
+    clientUid: localStorage.getItem('point'),
+    ts: Date.now() // 现在的时间戳
+  }
+  reqGet(data).then(res => {
+    if (res.repCode == '0000') {
+      pointBackImgBase = res.repData.originalImageBase64
+      backToken = res.repData.token
+      secretKey = res.repData.secretKey
+      poinTextList = res.repData.wordList
+      text = '请依次点击【' + poinTextList.join(',') + '】'
+    } else {
+      text = res.repMsg
+    }
+
+    // 判断接口请求次数是否失效
+    if (res.repCode == '6201') {
+      pointBackImgBase = null
+    }
+  })
+}
+// 坐标转换函数
+const pointTransfrom  = (pointArr, imgSize) => {
+  const newPointArr = pointArr.map(p => {
+    const x = Math.round(310 * p.x / parseInt(imgSize.imgWidth))
+    const y = Math.round(155 * p.y / parseInt(imgSize.imgHeight))
+    return { x, y }
+  })
+  // console.log(newPointArr,"newPointArr");
+  return newPointArr
+}
+
 </script>

@@ -5,41 +5,40 @@
     :height="height"
     aria-hidden="true"
   >
-    <use :xlink:href="getName" />
+    <use :xlink:href="getNameRef" />
   </svg>
 </template>
 
-<script>
-export default {
-  name: 'IconSvg',
-  props: {
-    name: {
-      type: String,
-      required: true
-    },
-    className: {
-      type: String
-    },
-    width: {
-      type: String
-    },
-    height: {
-      type: String
-    }
+<script setup>
+
+const props = defineProps({
+  name: {
+    type: String,
+    required: true
   },
+  className: {
+    type: String
+  },
+  width: {
+    type: String
+  },
+  height: {
+    type: String
+  }
+})
   computed: {
     getName () {
-      return `#icon-${this.name}`
+      return `#icon-${name}`
     },
     getClassName () {
       return [
         'icon-svg',
-          `icon-svg__${this.name}`,
-          this.className && /\S/.test(this.className) ? `${this.className}` : ''
+          `icon-svg__${name}`,
+          className && /\S/.test(className) ? `${className}` : ''
       ]
     }
   }
-}
+
 </script>
 
 <style>

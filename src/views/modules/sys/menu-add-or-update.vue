@@ -6,11 +6,11 @@
   >
     <!-- native modifier has been removed, please confirm whether the function has been affected  -->
     <el-form
-      ref="dataForm"
+      ref="dataFormRef"
       :model="dataForm"
       :rules="dataRule"
       label-width="80px"
-      @keyup.enter="dataFormSubmit()"
+      @keyup.enter="onSubmit()"
     >
       <el-form-item
         label="类型"
@@ -85,7 +85,7 @@
         <el-row>
           <el-col :span="22">
             <el-popover
-              ref="iconListPopover"
+              ref="iconListPopoverRef"
               placement="bottom-start"
               trigger="click"
               popper-class="mod-menu__icon-popover"
@@ -131,141 +131,130 @@
         <el-button @click="visible = false">取消</el-button>
         <el-button
           type="primary"
-          @click="dataFormSubmit()"
+          @click="onSubmit()"
         >确定</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
 
-<script>
+<script setup>
 import { treeDataTranslate, idList } from '@/utils'
 import Icon from '@/icons'
 import { Debounce } from '@/utils/debounce'
-export default {
+
   emits: ['refreshDataList'],
 
-  data () {
-    const validateUrl = (rule, value, callback) => {
-      if (this.dataForm.type === 1 && !/\S/.test(value)) {
-        callback(new Error('菜单URL不能为空'))
-      } else {
-        callback()
-      }
-    }
-    return {
-      visible: false,
-      dataForm: {
-        id: 0,
-        type: 1,
-        typeList: ['目录', '菜单', '按钮'],
-        name: '',
-        parentId: 0,
-        url: '',
-        perms: '',
-        orderNum: 0,
-        icon: '',
-        iconList: []
-      },
-      dataRule: {
-        name: [
-          { required: true, message: '菜单名称不能为空', trigger: 'blur' },
-          { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的菜单名称', trigger: 'blur' }
-        ],
-        url: [
-          { validator: validateUrl, trigger: 'blur' }
-        ]
-      },
-      menuList: [],
-      selectedMenu: [],
-      menuListTreeProps: {
-        value: 'menuId',
-        label: 'name'
-      }
-    }
-  },
 
-  created () {
-    this.iconList = Icon.getNameList()
-  },
-
-  methods: {
-    init (id) {
-      this.dataForm.id = id || 0
-      this.$http({
-        url: this.$http.adornUrl('/sys/menu/list'),
-        method: 'get',
-        params: this.$http.adornParams()
-      }).then(({ data }) => {
-        this.menuList = treeDataTranslate(data, 'menuId')
-      }).then(() => {
-        this.visible = true
-        this.$nextTick(() => {
-          this.$refs.dataForm.resetFields()
-        })
-      }).then(() => {
-        if (this.dataForm.id) {
-          // 修改
-          this.$http({
-            url: this.$http.adornUrl(`/sys/menu/info/${this.dataForm.id}`),
-            method: 'get',
-            params: this.$http.adornParams()
-          }).then(({ data }) => {
-            this.dataForm.id = data.menuId
-            this.dataForm.type = data.type
-            this.dataForm.name = data.name
-            this.dataForm.parentId = data.parentId
-            this.dataForm.url = data.url
-            this.dataForm.perms = data.perms
-            this.dataForm.orderNum = data.orderNum
-            this.dataForm.icon = data.icon
-            this.selectedMenu = idList(this.menuList, data.parentId, 'menuId', 'children').reverse()
-          })
-        } else {
-          this.selectedMenu = []
-        }
-      })
-    },
-    handleSelectMenuChange (val) {
-      this.dataForm.parentId = val[val.length - 1]
-    },
-    // 图标选中
-    iconActiveHandle (iconName) {
-      this.dataForm.icon = iconName
-    },
-    // 表单提交
-    dataFormSubmit: Debounce(function () {
-      this.$refs.dataForm.validate((valid) => {
-        if (valid) {
-          this.$http({
-            url: this.$http.adornUrl('/sys/menu'),
-            method: this.dataForm.id ? 'put' : 'post',
-            data: this.$http.adornData({
-              menuId: this.dataForm.id || undefined,
-              type: this.dataForm.type,
-              name: this.dataForm.name,
-              parentId: this.dataForm.parentId,
-              url: this.dataForm.url,
-              perms: this.dataForm.perms,
-              orderNum: this.dataForm.orderNum,
-              icon: this.dataForm.icon
-            })
-          }).then(({ data }) => {
-            this.$message({
-              message: '操作成功',
-              type: 'success',
-              duration: 1500,
-              onClose: () => {
-                this.visible = false
-                this.$emit('refreshDataList')
-              }
-            })
-          })
-        }
-      })
-    })
-  }
+var visible = ref(false)
+var dataForm = reactive({
+  id: 0,
+  type: 1,
+  typeList: ['目录', '菜单', '按钮'],
+  name: '',
+  parentId: 0,
+  url: '',
+  perms: '',
+  orderNum: 0,
+  icon: '',
+  iconList: []
+})
+var dataRule = reactive({
+  name: [
+    { required: true, message: '菜单名称不能为空', trigger: 'blur' },
+    { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的菜单名称', trigger: 'blur' }
+  ],
+  url: [
+    { validator: validateUrl, trigger: 'blur' }
+  ]
+})
+var menuList = ref([])
+var selectedMenu = ref([])
+var menuListTreeProps = {
+  value: 'menuId',
+  label: 'name'
 }
+
+onMounted(() => {
+  iconList = Icon.getNameList()
+})
+
+
+const init  = (id) => {
+  dataForm.id = id || 0
+  http({
+    url: http.adornUrl('/sys/menu/list'),
+    method: 'get',
+    params: http.adornParams()
+  }).then(({ data }) => {
+    menuList = treeDataTranslate(data, 'menuId')
+  }).then(() => {
+    visible = true
+    nextTick(() => {
+      dataFormRef.value?.resetFields()
+    })
+  }).then(() => {
+    if (dataForm.id) {
+      // 修改
+      http({
+        url: http.adornUrl(`/sys/menu/info/${dataForm.id}`),
+        method: 'get',
+        params: http.adornParams()
+      }).then(({ data }) => {
+        dataForm.id = data.menuId
+        dataForm.type = data.type
+        dataForm.name = data.name
+        dataForm.parentId = data.parentId
+        dataForm.url = data.url
+        dataForm.perms = data.perms
+        dataForm.orderNum = data.orderNum
+        dataForm.icon = data.icon
+        selectedMenu = idList(menuList, data.parentId, 'menuId', 'children').reverse()
+      })
+    } else {
+      selectedMenu = []
+    }
+  })
+}
+const handleSelectMenuChange  = (val) => {
+  dataForm.parentId = val[val.length - 1]
+}
+// 图标选中
+const iconActiveHandle  = (iconName) => {
+  dataForm.icon = iconName
+}
+// 表单提交
+const onSubmit: Debounce(function  = () => {
+  dataFormRef.value?.validate((valid) => {
+    if (valid) {
+      http({
+        url: http.adornUrl('/sys/menu'),
+        method: dataForm.id ? 'put' : 'post',
+        data: http.adornData({
+          menuId: dataForm.id || undefined,
+          type: dataForm.type,
+          name: dataForm.name,
+          parentId: dataForm.parentId,
+          url: dataForm.url,
+          perms: dataForm.perms,
+          orderNum: dataForm.orderNum,
+          icon: dataForm.icon
+        })
+      }).then(({ data }) => {
+        ElMessage({
+          message: '操作成功',
+          type: 'success',
+          duration: 1500,
+          onClose: () => {
+            visible = false
+            emit('refreshDataList')
+          }
+        })
+      })
+    }
+  })
+})
+
 </script>
 
 <style lang="scss">

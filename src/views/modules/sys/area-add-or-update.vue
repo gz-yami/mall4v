@@ -6,11 +6,11 @@
   >
     <!-- native modifier has been removed, please confirm whether the function has been affected  -->
     <el-form
-      ref="dataForm"
+      ref="dataFormRef"
       :model="dataForm"
       :rules="dataRule"
       label-width="100px"
-      @keyup.enter="dataFormSubmit()"
+      @keyup.enter="onSubmit()"
     >
       <el-form-item
         label="地区名称"
@@ -49,103 +49,99 @@
         <el-button
           type="primary"
           size="mini"
-          @click="dataFormSubmit()"
+          @click="onSubmit()"
         >确定</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
 
-<script>
+<script setup>
 import { treeDataTranslate } from '@/utils'
 import { Debounce } from '@/utils/debounce'
-export default {
+
   emits: ['refreshDataList'],
 
-  data () {
-    return {
-      visible: false,
-      roleList: [],
-      dataForm: {
-        areaId: '',
-        areaName: null,
-        parentId: null,
-        level: null
-      },
-      page: {
-        total: 0, // 总页数
-        currentPage: 1, // 当前页数
-        pageSize: 20 // 每页显示多少条
-      },
-      dataRule: {
-        areaName: [
-          { required: true, message: '区域名称不能为空', trigger: 'blur' },
-          { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的区域名称', trigger: 'blur' }
-        ]
-      },
-      areaList: [],
-      categoryTreeProps: {
-        value: 'areaId',
-        label: 'areaName'
-      },
-      selectedOptions: []
+
+var visible = ref(false)
+var roleList = ref([])
+var dataForm = reactive({
+  areaId: '',
+  areaName: null,
+  parentId: null,
+  level: null
+})
+var page = reactive({
+  total: 0, // 总页数
+  currentPage: 1, // 当前页数
+  pageSize: 20 // 每页显示多少条
+})
+var dataRule = reactive({
+  areaName: [
+    { required: true, message: '区域名称不能为空', trigger: 'blur' },
+    { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的区域名称', trigger: 'blur' }
+  ]
+})
+var areaList = ref([])
+var categoryTreeProps = reactive({
+  value: 'areaId',
+  label: 'areaName'
+})
+var selectedOptions = ref([])
+
+
+const init  = (areaId) => {
+  dataForm.areaId = areaId || 0
+  visible = true
+  selectedOptions = []
+  nextTick(() => {
+    dataFormRef.value?.resetFields()
+    if (dataForm.areaId) {
+      http({
+        url: http.adornUrl('/admin/area/info/' + dataForm.areaId),
+        method: 'get',
+        params: http.adornParams()
+      }).then(({ data }) => {
+        dataForm = data
+        selectedOptions.push(dataForm.parentId)
+        categoryTreeProps.areaId = dataForm.areaId
+        categoryTreeProps.areaName = dataForm.areaName
+      })
     }
-  },
 
-  methods: {
-    init (areaId) {
-      this.dataForm.areaId = areaId || 0
-      this.visible = true
-      this.selectedOptions = []
-      this.$nextTick(() => {
-        this.$refs.dataForm.resetFields()
-        if (this.dataForm.areaId) {
-          this.$http({
-            url: this.$http.adornUrl('/admin/area/info/' + this.dataForm.areaId),
-            method: 'get',
-            params: this.$http.adornParams()
-          }).then(({ data }) => {
-            this.dataForm = data
-            this.selectedOptions.push(this.dataForm.parentId)
-            this.categoryTreeProps.areaId = this.dataForm.areaId
-            this.categoryTreeProps.areaName = this.dataForm.areaName
-          })
-        }
-
-        this.$http({
-          url: this.$http.adornUrl('/admin/area/list'),
-          method: 'get',
-          params: this.$http.adornParams()
-        }).then(({ data }) => {
-          this.areaList = treeDataTranslate(data, 'areaId', 'parentId')
+    http({
+      url: http.adornUrl('/admin/area/list'),
+      method: 'get',
+      params: http.adornParams()
+    }).then(({ data }) => {
+      areaList = treeDataTranslate(data, 'areaId', 'parentId')
+    })
+  })
+}
+// 表单提交
+const onSubmit: Debounce(function  = () => {
+  dataFormRef.value?.validate((valid) => {
+    if (valid) {
+      http({
+        url: http.adornUrl('/admin/area'),
+        method: dataForm.areaId ? 'put' : 'post',
+        data: http.adornData(dataForm)
+      }).then(({ data }) => {
+        ElMessage({
+          message: '操作成功',
+          type: 'success',
+          duration: 1500,
+          onClose: () => {
+            visible = false
+            emit('refreshDataList', page)
+          }
         })
       })
-    },
-    // 表单提交
-    dataFormSubmit: Debounce(function () {
-      this.$refs.dataForm.validate((valid) => {
-        if (valid) {
-          this.$http({
-            url: this.$http.adornUrl('/admin/area'),
-            method: this.dataForm.areaId ? 'put' : 'post',
-            data: this.$http.adornData(this.dataForm)
-          }).then(({ data }) => {
-            this.$message({
-              message: '操作成功',
-              type: 'success',
-              duration: 1500,
-              onClose: () => {
-                this.visible = false
-                this.$emit('refreshDataList', this.page)
-              }
-            })
-          })
-        }
-      })
-    }),
-    handleChange (val) {
-      this.dataForm.parentId = val[val.length - 1]
     }
-  }
+  })
+}),
+const handleChange  = (val) => {
+  dataForm.parentId = val[val.length - 1]
 }
+
 </script>

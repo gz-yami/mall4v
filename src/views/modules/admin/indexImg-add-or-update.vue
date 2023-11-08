@@ -6,7 +6,7 @@
       :close-on-click-modal="false"
     >
       <el-form
-        ref="dataForm"
+        ref="dataFormRef"
         :model="dataForm"
         :rules="dataRule"
         label-width="100px"
@@ -77,23 +77,23 @@
           <div v-if="dataForm.relation==null">
             <el-button
               v-if=" dataForm.type == 0"
-              size="small"
+              
               @click="addProd"
             >
               选择商品
             </el-button>
             <!-- <el-button @click="addShop"
                        v-if=" dataForm.type == 1"
-                       size="small">选择店铺</el-button>
+                       >选择店铺</el-button>
             <el-button @click="addActivity"
                        v-if="dataForm.type == 2"
-                       size="small">选择活动</el-button> -->
+                       >选择活动</el-button> -->
           </div>
         </el-form-item>
         <el-form-item>
           <el-button
             type="primary"
-            @click="dataFormSubmit()"
+            @click="onSubmit()"
           >
             确定
           </el-button>
@@ -103,146 +103,138 @@
     <!-- 商品选择弹窗-->
     <prods-select
       v-if="prodsSelectVisible"
-      ref="prodsSelect"
+      ref="prodsSelectRef"
       :is-single="true"
       @refresh-select-prods="selectCouponProds"
     />
   </div>
 </template>
 
-<script>
+<script setup>
 import PicUpload from '@/components/pic-upload'
 import ProdsSelect from '@/components/prods-select'
 import { Debounce } from '@/utils/debounce'
-export default {
 
-  components: {
-    PicUpload,
-    ProdsSelect
-  },
+
   emits: ['refreshDataList'],
 
-  data () {
-    return {
-      dataForm: {
-        status: 1,
-        des: '',
-        imgUrl: '',
-        seq: 0,
-        imgId: 0,
-        type: -1,
-        relation: null
-      },
-      dataRule: {
-        imgUrl: [
-          { required: true, message: '轮播图片不能为空', trigger: 'blur' }
-        ]
-      },
-      // 关联数据
-      card: {
-        id: 0,
-        pic: '',
-        name: '',
-        realData: {
-          prod: [],
-          shop: [],
-          activity: []
-        }
-      },
-      page: {
-        total: 0, // 总页数
-        currentPage: 1, // 当前页数
-        pageSize: 10 // 每页显示多少条
-      },
-      prodsSelectVisible: false,
-      visible: false
-    }
-  },
 
-  methods: {
-    // 获取分类数据
-    init (id) {
-      this.visible = true
-      this.dataForm.imgId = id || 0
-      if (this.dataForm.imgId) {
-        // 获取产品数据
-        this.$http({
-          url: this.$http.adornUrl(`/admin/indexImg/info/${this.dataForm.imgId}`),
-          method: 'get',
-          params: this.$http.adornParams()
-        }).then(({ data }) => {
-          this.dataForm = data
-          if (data.relation) {
-            this.card.pic = data.pic
-            this.card.name = data.prodName
-            this.card.id = data.relation
-          }
-        })
-      } else {
-        this.$nextTick(() => {
-          this.$refs.dataForm.resetFields()
-          this.dataForm.imgUrl = ''
-          this.relation = null
-        })
+var dataForm = reactive({
+  status: 1,
+  des: '',
+  imgUrl: '',
+  seq: 0,
+  imgId: 0,
+  type: -1,
+  relation: null
+})
+var dataRule = reactive({
+  imgUrl: [
+    { required: true, message: '轮播图片不能为空', trigger: 'blur' }
+  ]
+})
+// 关联数据
+var card = reactive({
+  id: 0,
+  pic: '',
+  name: '',
+  realData: {
+    prod: [],
+    shop: [],
+    activity: []
+  }
+})
+var page = reactive({
+  total: 0, // 总页数
+  currentPage: 1, // 当前页数
+  pageSize: 10 // 每页显示多少条
+})
+var prodsSelectVisible = ref(false)
+var visible = ref(false)
+
+
+// 获取分类数据
+const init  = (id) => {
+  visible = true
+  dataForm.imgId = id || 0
+  if (dataForm.imgId) {
+    // 获取产品数据
+    http({
+      url: http.adornUrl(`/admin/indexImg/info/${dataForm.imgId}`),
+      method: 'get',
+      params: http.adornParams()
+    }).then(({ data }) => {
+      dataForm = data
+      if (data.relation) {
+        card.pic = data.pic
+        card.name = data.prodName
+        card.id = data.relation
       }
-    },
-    // 表单提交
-    dataFormSubmit: Debounce(function () {
-      this.$refs.dataForm.validate((valid) => {
-        if (!valid) {
-          return
-        }
-        const param = this.dataForm
-        this.$http({
-          url: this.$http.adornUrl('/admin/indexImg'),
-          method: param.imgId ? 'put' : 'post',
-          data: this.$http.adornData(param)
-        }).then(({ data }) => {
-          this.$message({
-            message: '操作成功',
-            type: 'success',
-            duration: 1500,
-            onClose: () => {
-              this.visible = false
-              this.$emit('refreshDataList', this.page)
-            }
-          })
-        })
-      })
-    }),
-    // 删除关联数据
-    deleteRelation () {
-      this.dataForm.relation = null
-    },
-    // 打开选择商品
-    addProd () {
-      this.prodsSelectVisible = true
-      this.$nextTick(() => {
-        this.$refs.prodsSelect.init(this.card.realData.prod)
-      })
-    },
-    // 添加指定商品
-    selectCouponProds (prods) {
-      this.card.realData.prods = prods
-      if (prods.length) {
-        const selectProd = prods[0]
-        this.dataForm.relation = selectProd.prodId
-        this.card.pic = selectProd.pic
-        this.card.name = selectProd.prodName
-        this.card.id = selectProd.prodId
-      } else {
-        this.card = {}
-        this.relation = null
-      }
-    },
-    addShop () {
-      alert('选择店铺')
-    },
-    addActivity () {
-      alert('选择活动')
-    }
+    })
+  } else {
+    nextTick(() => {
+      dataFormRef.value?.resetFields()
+      dataForm.imgUrl = ''
+      relation = null
+    })
   }
 }
+// 表单提交
+const onSubmit: Debounce(function  = () => {
+  dataFormRef.value?.validate((valid) => {
+    if (!valid) {
+      return
+    }
+    const param = dataForm
+    http({
+      url: http.adornUrl('/admin/indexImg'),
+      method: param.imgId ? 'put' : 'post',
+      data: http.adornData(param)
+    }).then(({ data }) => {
+      ElMessage({
+        message: '操作成功',
+        type: 'success',
+        duration: 1500,
+        onClose: () => {
+          visible = false
+          emit('refreshDataList', page)
+        }
+      })
+    })
+  })
+}),
+// 删除关联数据
+const deleteRelation  = () => {
+  dataForm.relation = null
+}
+// 打开选择商品
+const addProd  = () => {
+  prodsSelectVisible = true
+  nextTick(() => {
+    prodsSelect.init(card.realDataRef.value?.prod)
+  })
+}
+// 添加指定商品
+const selectCouponProds  = (prods) => {
+  card.realData.prods = prods
+  if (prods.length) {
+    const selectProd = prods[0]
+    dataForm.relation = selectProd.prodId
+    card.pic = selectProd.pic
+    card.name = selectProd.prodName
+    card.id = selectProd.prodId
+  } else {
+    card = {}
+    relation = null
+  }
+}
+const addShop  = () => {
+  alert('选择店铺')
+}
+const addActivity  = () => {
+  alert('选择活动')
+}
+
 </script>
 <style lang="scss">
 //card样式

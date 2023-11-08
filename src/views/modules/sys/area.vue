@@ -9,13 +9,13 @@
       type="primary"
       size="mini"
       class="area-add-btn"
-      @click="addOrUpdateHandle()"
+      @click="onAddOrUpdate()"
     >
       新增
     </el-button>
 
     <el-tree
-      ref="tree2"
+      ref="tree2Ref"
       :data="data"
       node-key="areaId"
       :filter-node-method="filterNode"
@@ -31,7 +31,7 @@
           <el-button
             type="text"
             icon="el-icon-edit"
-            size="small"
+            
             @click="() => update(node, data)"
           >
             修改
@@ -39,7 +39,7 @@
           <el-button
             type="text"
             icon="el-icon-delete"
-            size="small"
+            
             @click="() => remove(node, data)"
           >
             删除
@@ -50,114 +50,103 @@
 
     <add-or-update
       v-if="addOrUpdateVisible"
-      ref="addOrUpdate"
+      ref="addOrUpdateRef"
       @refresh-data-list="getDataList"
     />
   </div>
 </template>
 
-<script>
+<script setup>
 import { tableOption } from '@/crud/sys/area'
 import AddOrUpdate from './area-add-or-update'
 import { treeDataTranslate } from '@/utils'
-export default {
-  components: {
-    AddOrUpdate
-  },
-  data () {
-    return {
-      dataList: [],
-      page: {
-        total: 0, // 总页数
-        currentPage: 1, // 当前页数
-        pageSize: 10 // 每页显示多少条
-      },
-      dataListLoading: false,
-      tableOption,
-      addOrUpdateVisible: false,
-      areaName: '',
-      dataForm: {},
-      data: [],
-      params: {
-        areaName: null
-      },
-      props: {
-        id: 'areaId',
-        label: 'areaName',
-        children: 'children'
-      }
-    }
-  },
+
+
+var dataList = ref([])
+var page = reactive({
+  total: 0, // 总页数
+  currentPage: 1, // 当前页数
+  pageSize: 10 // 每页显示多少条
+})
+var dataListLoading = ref(false)
+tableOption
+var addOrUpdateVisible = ref(false)
+var areaName = ref('')
+var dataForm = reactive({})
+var data = ref([])
+var params = reactive({
+  areaName: null
+})
+var props = {
+  id: 'areaId',
+  label: 'areaName',
+  children: 'children'
+}
   watch: {
     areaName (val) {
-      this.$refs.tree2.filter(val)
+      tree2Ref.value?.filter(val)
     }
   },
-  created () {
-    this.getDataList(this.page)
-  },
-  mounted () {
-  },
-  methods: {
-    getDataList (page, params, done) {
-      this.$http({
-        url: this.$http.adornUrl('/admin/area/list'),
-        method: 'get',
-        params: this.$http.adornParams(Object.assign({
-          current: page == null ? this.page.currentPage : page.currentPage,
-          size: page == null ? this.page.pageSize : page.pageSize
-        }, params))
-      }).then(({ data }) => {
-        const treeData = treeDataTranslate(data, 'areaId', 'parentId')
-        this.data = treeData
-      })
-    },
-    // 新增 / 修改
-    addOrUpdateHandle (id) {
-      this.addOrUpdateVisible = true
-      this.$nextTick(() => {
-        this.$refs.addOrUpdate.init(id)
-      })
-    },
 
-    // 删除
-    deleteHandle (areaId) {
-      this.$confirm('确定进行删除操作?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.$http({
-          url: this.$http.adornUrl('/admin/area/' + areaId),
-          method: 'delete',
-          data: this.$http.adornData({})
-        }).then(({ data }) => {
-          this.$message({
-            message: '操作成功',
-            type: 'success',
-            duration: 1500,
-            onClose: () => {
-              this.getDataList(this.page)
-            }
-          })
-        })
-      }).catch(() => { })
-    },
-    update (node, data) {
-      this.addOrUpdateHandle(data.areaId)
-    },
 
-    remove (node, data) {
-      this.deleteHandle(data.areaId)
-    },
-
-    filterNode (value, data) {
-      if (!value) return true
-      return data.areaName.indexOf(value) !== -1
-    }
-  }
-
+const getDataList  = (pageParam, params, done) => {
+  http({
+    url: http.adornUrl('/admin/area/list'),
+    method: 'get',
+    params: http.adornParams(Object.assign({
+      current: pageParam == null ? page.currentPage : pageParam.currentPage,
+      size: pageParam == null ? page.pageSize : pageParam.pageSize
+    }, params))
+  }).then(({ data }) => {
+    const treeData = treeDataTranslate(data, 'areaId', 'parentId')
+    data = treeData
+  })
 }
+// 新增 / 修改
+const onAddOrUpdate  = (id) => {
+  addOrUpdateVisible = true
+  nextTick(() => {
+    addOrUpdate.value?.init(id)
+  })
+}
+
+// 删除
+const onDelete  = (areaId) => {
+  ElMessageBox.confirm('确定进行删除操作?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    http({
+      url: http.adornUrl('/admin/area/' + areaId),
+      method: 'delete',
+      data: http.adornData({})
+    }).then(({ data }) => {
+      ElMessage({
+        message: '操作成功',
+        type: 'success',
+        duration: 1500,
+        onClose: () => {
+          getDataList(page)
+        }
+      })
+    })
+  }).catch(() => { })
+}
+const update  = (node, data) => {
+  onAddOrUpdate(data.areaId)
+}
+
+const remove  = (node, data) => {
+  onDelete(data.areaId)
+}
+
+const filterNode  = (value, data) => {
+  if (!value) return true
+  return data.areaName.indexOf(value) !== -1
+}
+
+
 </script>
 
 <style lang="scss" scoped>

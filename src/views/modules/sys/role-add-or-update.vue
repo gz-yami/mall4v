@@ -6,11 +6,11 @@
   >
     <!-- native modifier has been removed, please confirm whether the function has been affected  -->
     <el-form
-      ref="dataForm"
+      ref="dataFormRef"
       :model="dataForm"
       :rules="dataRule"
       label-width="80px"
-      @keyup.enter="dataFormSubmit()"
+      @keyup.enter="onSubmit()"
     >
       <el-form-item
         label="角色名称"
@@ -35,7 +35,7 @@
         label="授权"
       >
         <el-tree
-          ref="menuListTree"
+          ref="menuListTreeRef"
           :data="menuList"
           :props="menuListTreeProps"
           node-key="menuId"
@@ -48,106 +48,102 @@
         <el-button @click="visible = false">取消</el-button>
         <el-button
           type="primary"
-          @click="dataFormSubmit()"
+          @click="onSubmit()"
         >确定</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
 
-<script>
+<script setup>
 import { treeDataTranslate } from '@/utils'
 import { Debounce } from '@/utils/debounce'
-export default {
+
   emits: ['refreshDataList'],
 
-  data () {
-    return {
-      visible: false,
-      menuList: [],
-      menuListTreeProps: {
-        label: 'name',
-        children: 'children'
-      },
-      dataForm: {
-        id: 0,
-        roleName: '',
-        remark: ''
-      },
-      dataRule: {
-        roleName: [
-          { required: true, message: '角色名称不能为空', trigger: 'blur' },
-          { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的角色名称', trigger: 'blur' }
-        ],
-        remark: [
-          { required: false, pattern: /\s\S+|S+\s|\S/, message: '输入格式有误', trigger: 'blur' }
-        ]
-      },
-      tempKey: -666666 // 临时key, 用于解决tree半选中状态项不能传给后台接口问题. # 待优化
-    }
-  },
 
-  methods: {
-    init (id) {
-      this.dataForm.id = id || 0
-      this.$http({
-        url: this.$http.adornUrl('/sys/menu/table'),
-        method: 'get',
-        params: this.$http.adornParams()
-      }).then(({ data }) => {
-        this.menuList = treeDataTranslate(data, 'menuId', 'parentId')
-      }).then(() => {
-        this.visible = true
-        this.$nextTick(() => {
-          this.$refs.dataForm.resetFields()
-          this.$refs.menuListTree.setCheckedKeys([])
-        })
-      }).then(() => {
-        if (this.dataForm.id) {
-          this.$http({
-            url: this.$http.adornUrl(`/sys/role/info/${this.dataForm.id}`),
-            method: 'get',
-            params: this.$http.adornParams()
-          }).then(({ data }) => {
-            this.dataForm.roleName = data.roleName
-            this.dataForm.remark = data.remark
-            const idx = data.menuIdList.indexOf(this.tempKey)
-            if (idx !== -1) {
-              data.menuIdList.splice(idx, data.menuIdList.length - idx)
-            }
-            console.log(data.menuIdList)
-            this.$refs.menuListTree.setCheckedKeys(data.menuIdList)
-          })
-        }
-      })
-    },
-    // 表单提交
-    dataFormSubmit: Debounce(function () {
-      this.$refs.dataForm.validate((valid) => {
-        if (valid) {
-          this.$http({
-            url: this.$http.adornUrl('/sys/role'),
-            method: this.dataForm.id ? 'put' : 'post',
-            data: this.$http.adornData({
-              roleId: this.dataForm.id || undefined,
-              roleName: this.dataForm.roleName,
-              remark: this.dataForm.remark,
-              menuIdList: [].concat(this.$refs.menuListTree.getCheckedKeys(), [this.tempKey], this.$refs.menuListTree.getHalfCheckedKeys())
-            })
-          }).then(({ data }) => {
-            this.$message({
-              message: '操作成功',
-              type: 'success',
-              duration: 1500,
-              onClose: () => {
-                this.visible = false
-                this.$emit('refreshDataList')
-              }
-            })
-          })
-        }
-      })
+var visible = ref(false)
+var menuList = ref([])
+var menuListTreeProps = reactive({
+  label: 'name',
+  children: 'children'
+})
+var dataForm = reactive({
+  id: 0,
+  roleName: '',
+  remark: ''
+})
+var dataRule = reactive({
+  roleName: [
+    { required: true, message: '角色名称不能为空', trigger: 'blur' },
+    { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的角色名称', trigger: 'blur' }
+  ],
+  remark: [
+    { required: false, pattern: /\s\S+|S+\s|\S/, message: '输入格式有误', trigger: 'blur' }
+  ]
+})
+var tempKey = reactive(-666666 // 临时key) 用于解决tree半选中状态项不能传给后台接口问题. # 待优化
+
+
+const init  = (id) => {
+  dataForm.id = id || 0
+  http({
+    url: http.adornUrl('/sys/menu/table'),
+    method: 'get',
+    params: http.adornParams()
+  }).then(({ data }) => {
+    menuList = treeDataTranslate(data, 'menuId', 'parentId')
+  }).then(() => {
+    visible = true
+    nextTick(() => {
+      dataFormRef.value?.resetFields()
+      menuListTreeRef.value?.setCheckedKeys([])
     })
-  }
+  }).then(() => {
+    if (dataForm.id) {
+      http({
+        url: http.adornUrl(`/sys/role/info/${dataForm.id}`),
+        method: 'get',
+        params: http.adornParams()
+      }).then(({ data }) => {
+        dataForm.roleName = data.roleName
+        dataForm.remark = data.remark
+        const idx = data.menuIdList.indexOf(tempKey)
+        if (idx !== -1) {
+          data.menuIdList.splice(idx, data.menuIdList.length - idx)
+        }
+        console.log(data.menuIdList)
+        menuListTree.setCheckedKeys(dataRef.value?.menuIdList)
+      })
+    }
+  })
 }
+// 表单提交
+const onSubmit: Debounce(function  = () => {
+  dataFormRef.value?.validate((valid) => {
+    if (valid) {
+      http({
+        url: http.adornUrl('/sys/role'),
+        method: dataForm.id ? 'put' : 'post',
+        data: http.adornData({
+          roleId: dataForm.id || undefined,
+          roleName: dataForm.roleName,
+          remark: dataForm.remark,
+          menuIdList: [].concat(menuListTree.getCheckedKeys(), [tempKey], $refs.menuListTreeRef.value?.getHalfCheckedKeys())
+        })
+      }).then(({ data }) => {
+        ElMessage({
+          message: '操作成功',
+          type: 'success',
+          duration: 1500,
+          onClose: () => {
+            visible = false
+            emit('refreshDataList')
+          }
+        })
+      })
+    }
+  })
+})
+
 </script>

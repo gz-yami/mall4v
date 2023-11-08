@@ -7,10 +7,10 @@
   >
     <!-- native modifier has been removed, please confirm whether the function has been affected  -->
     <el-form
-      ref="dataForm"
+      ref="dataFormRef"
       :model="dataForm"
       label-width="80px"
-      @keyup.enter="dataFormSubmit()"
+      @keyup.enter="onSubmit()"
     >
       <div class="main">
         <div class="content">
@@ -54,42 +54,42 @@
                   <template #default="scope">
                     <el-tag
                       v-if="dataForm.status === 1"
-                      size="small"
+                      
                       type="warning"
                     >
                       待付款
                     </el-tag>
                     <el-tag
                       v-if="dataForm.status === 2 && dataForm.orderType !== 1"
-                      size="small"
+                      
                       type="warning"
                     >
                       待发货
                     </el-tag>
                     <el-tag
                       v-if="dataForm.status === 3 && dataForm.orderType !== 1"
-                      size="small"
+                      
                       type="warning"
                     >
                       待收货
                     </el-tag>
                     <el-tag
                       v-if="dataForm.status === 4 && dataForm.orderType !== 1"
-                      size="small"
+                      
                       type="warning"
                     >
                       待评价
                     </el-tag>
                     <el-tag
                       v-if="dataForm.status === 5"
-                      size="small"
+                      
                       type="success"
                     >
                       成功
                     </el-tag>
                     <el-tag
                       v-if="dataForm.status === 6"
-                      size="small"
+                      
                       type="danger"
                     >
                       失败
@@ -309,123 +309,115 @@
       </div>
     </el-form>
     <!-- 弹窗, 新增 / 修改 -->
-    <!-- <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update> -->
+    <!-- <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdateRef" @refreshDataList="getDataList"></add-or-update> -->
     <devy-add
       v-if="devyVisible"
-      ref="devyAdd"
+      ref="devyAddRef"
       @refresh-data-list="getDataList"
     />
   </el-dialog>
 </template>
 
-<script>
+<script setup>
 // import AddOrUpdate from './order-addr'
 import DevyAdd from './order-devy'
-export default {
-  components: {
-    // AddOrUpdate,
-    DevyAdd
-  },
-  data () {
-    return {
-      visible: false,
-      dataForm: {
-        orderId: 0,
-        orderNumber: '',
-        remarks: '',
-        total: 0,
-        actualTotal: 0,
-        dvyType: '',
-        status: 1,
-        addrOrderId: 0,
-        nickName: '',
-        orderItems: [],
-        orderTime: '',
-        updateTime: '',
-        payTime: '',
-        dvyTime: '',
-        finallyTime: '',
-        cancelTime: '',
-        userAddrOrder: {}
-      },
-      resourcesUrl: process.env.VUE_APP_RESOURCES_URL,
-      addOrUpdateVisible: false,
-      devyVisible: false
-    }
-  },
+
+
+var visible = ref(false)
+var dataForm = reactive({
+  orderId: 0,
+  orderNumber: '',
+  remarks: '',
+  total: 0,
+  actualTotal: 0,
+  dvyType: '',
+  status: 1,
+  addrOrderId: 0,
+  nickName: '',
+  orderItems: [],
+  orderTime: '',
+  updateTime: '',
+  payTime: '',
+  dvyTime: '',
+  finallyTime: '',
+  cancelTime: '',
+  userAddrOrder: {}
+})
+const resourcesUrl = import.meta.env.VITE_APP_RESOURCES_URL
+var addOrUpdateVisible = ref(false)
+var devyVisible = ref(false)
   computed: {
     stepsStatus: function () {
-      if (this.dataForm.finallyTime) {
+      if (dataForm.finallyTime) {
         return 4
       }
-      if (this.dataForm.dvyTime) {
+      if (dataForm.dvyTime) {
         return 3
       }
-      if (this.dataForm.payTime) {
+      if (dataForm.payTime) {
         return 2
       }
-      if (this.dataForm.orderTime) {
+      if (dataForm.orderTime) {
         return 1
       }
     }
   },
   watch: {
     visible: function () {
-      if (!this.visible) {
-        this.devyVisible = false
-        this.addOrUpdateVisible = false
+      if (!visible) {
+        devyVisible = false
+        addOrUpdateVisible = false
       }
     }
   },
-  methods: {
-    init (orderNumber) {
-      this.dataForm.orderNumber = orderNumber || 0
-      this.visible = true
-      this.$nextTick(() => {
-        this.$refs.dataForm.resetFields()
-      })
-      if (this.dataForm.orderNumber) {
-        // 修改
-        this.$http({
-          url: this.$http.adornUrl(`/order/order/orderInfo/${this.dataForm.orderNumber}`),
-          method: 'get',
-          params: this.$http.adornParams()
-        }).then(({ data }) => {
-          this.dataForm = data
-        })
-      }
-    },
-    getDataList () {
-      this.$http({
-        url: this.$http.adornUrl(`/order/order/orderInfo/${this.dataForm.orderNumber}`),
-        method: 'get',
-        params: this.$http.adornParams()
-      }).then(({ data }) => {
-        this.dataForm = data
-      })
-    },
-    // 表单提交
-    dataFormSubmit () {
-    },
-    // 发货
-    changeOrder (orderNumber) {
-      this.devyVisible = true
-      this.$nextTick(() => {
-        this.$refs.devyAdd.init(orderNumber, this.dataForm.dvyId, this.dataForm.dvyFlowId)
-      })
-    },
-    // 修改备注
-    changeRemarks () {
-    },
-    // 修改地址
-    changeAddr (val) {
-      this.addOrUpdateVisible = true
-      this.$nextTick(() => {
-        this.$refs.addOrUpdate.init(val)
-      })
-    }
+
+const init  = (orderNumber) => {
+  dataForm.orderNumber = orderNumber || 0
+  visible = true
+  nextTick(() => {
+    dataFormRef.value?.resetFields()
+  })
+  if (dataForm.orderNumber) {
+    // 修改
+    http({
+      url: http.adornUrl(`/order/order/orderInfo/${dataForm.orderNumber}`),
+      method: 'get',
+      params: http.adornParams()
+    }).then(({ data }) => {
+      dataForm = data
+    })
   }
 }
+const getDataList  = () => {
+  http({
+    url: http.adornUrl(`/order/order/orderInfo/${dataForm.orderNumber}`),
+    method: 'get',
+    params: http.adornParams()
+  }).then(({ data }) => {
+    dataForm = data
+  })
+}
+// 表单提交
+const onSubmit  = () => {
+}
+// 发货
+const changeOrder  = (orderNumber) => {
+  devyVisible = true
+  nextTick(() => {
+    devyAdd.init(orderNumber, dataForm.dvyId, dataFormRef.value?.dvyFlowId)
+  })
+}
+// 修改备注
+const changeRemarks  = () => {
+}
+// 修改地址
+const changeAddr  = (val) => {
+  addOrUpdateVisible = true
+  nextTick(() => {
+    addOrUpdate.value?.init(val)
+  })
+}
+
 </script>
 
 <style>

@@ -12,11 +12,11 @@
       <div class="mid">
         <!-- native modifier has been removed, please confirm whether the function has been affected  -->
         <el-form
-          ref="dataForm"
+          ref="dataFormRef"
           :model="dataForm"
           :rules="dataRule"
           status-icon
-          @keyup.enter="dataFormSubmit()"
+          @keyup.enter="onSubmit()"
         >
           <el-form-item prop="userName">
             <el-input
@@ -53,7 +53,7 @@
               <input
                 type="button"
                 value="登录"
-                @click="dataFormSubmit()"
+                @click="onSubmit()"
               >
             </div>
           </el-form-item>
@@ -65,7 +65,7 @@
       </div>
     </div>
     <Verify
-      ref="verify"
+      ref="verifyRef"
       :captcha-type="'blockPuzzle'"
       :img-size="{width:'400px',height:'200px'}"
       @success="login"
@@ -73,107 +73,100 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { getUUID } from '@/utils'
 import Verify from '@/components/verifition/Verify'
 import { encrypt } from '@/utils/crypto'
-export default {
-  components: {
-    Verify
-  },
-  data () {
-    return {
-      dataForm: {
-        userName: '',
-        password: '',
-        uuid: '',
-        captcha: ''
-      },
-      dataRule: {
-        userName: [
-          { required: true, message: '帐号不能为空', trigger: 'blur' }
-        ],
-        password: [
-          { required: true, message: '密码不能为空', trigger: 'blur' }
-        ],
-        captcha: [
-          { required: true, message: '验证码不能为空', trigger: 'blur' }
-        ]
-      },
-      captchaPath: ''
-    }
-  },
-  beforeUnmount () {
-    document.removeEventListener('keyup', this.handerKeyup)
-  },
-  created () {
-    this.getCaptcha()
 
-    document.addEventListener('keyup', this.handerKeyup)
+
+var dataForm = reactive({
+  userName: '',
+  password: '',
+  uuid: '',
+  captcha: ''
+})
+var dataRule = reactive({
+  userName: [
+    { required: true, message: '帐号不能为空', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: '密码不能为空', trigger: 'blur' }
+  ],
+  captcha: [
+    { required: true, message: '验证码不能为空', trigger: 'blur' }
+  ]
+})
+var captchaPath = ref('')
+  beforeUnmount () {
+    document.removeEventListener('keyup', handerKeyup)
   },
-  methods: {
-    handerKeyup (e) {
-      const keycode = document.all ? event.keyCode : e.which
-      if (keycode === 13) {
-        this.dataFormSubmit()
-      }
-    },
-    // 提交表单
-    dataFormSubmit () {
-      this.$refs.dataForm.validate((valid) => {
-        if (valid) {
-          this.$refs.verify.show()
-        }
-      })
-    },
-    login (verifyResult) {
-      if (this.isSubmit) {
-        return
-      }
-      this.isSubmit = true
-      this.$http({
-        url: this.$http.adornUrl('/adminLogin'),
-        method: 'post',
-        data: this.$http.adornData({
-          userName: this.dataForm.userName,
-          passWord: encrypt(this.dataForm.password),
-          captchaVerification: verifyResult.captchaVerification
-        })
-      }).then(({ data }) => {
-        this.$cookie.set('Authorization', data.accessToken)
-        this.$router.replace({ name: 'home' })
-      }).catch(() => {
-        this.isSubmit = false
-      })
-    },
-    // dataFormSubmit () {
-    //   this.$refs['dataForm'].validate((valid) => {
-    //     if (valid) {
-    //       this.$http({
-    //         url: this.$http.adornUrl('/login?grant_type=admin'),
-    //         method: 'post',
-    //         data: this.$http.adornData({
-    //           'principal': this.dataForm.userName,
-    //           'credentials': this.dataForm.password,
-    //           'sessionUUID': this.dataForm.uuid,
-    //           'imageCode': this.dataForm.captcha
-    //         })
-    //       }).then(({ data }) => {
-    //         this.$cookie.set('Authorization', 'bearer' + data.access_token)
-    //         this.$router.replace({ name: 'home' })
-    //       }).catch(() => {
-    //         this.getCaptcha()
-    //       })
-    //     }
-    //   })
-    // },
-    // 获取验证码
-    getCaptcha () {
-      this.dataForm.uuid = getUUID()
-      this.captchaPath = this.$http.adornUrl(`/captcha.jpg?uuid=${this.dataForm.uuid}`)
-    }
+onMounted(() => {
+  getCaptcha()
+
+  document.addEventListener('keyup', handerKeyup)
+})
+
+const handerKeyup  = (e) => {
+  const keycode = document.all ? event.keyCode : e.which
+  if (keycode === 13) {
+    onSubmit()
   }
 }
+// 提交表单
+const onSubmit  = () => {
+  dataFormRef.value?.validate((valid) => {
+    if (valid) {
+      verifyRef.value?.show()
+    }
+  })
+}
+const login  = (verifyResult) => {
+  if (isSubmit) {
+    return
+  }
+  isSubmit = true
+  http({
+    url: http.adornUrl('/adminLogin'),
+    method: 'post',
+    data: http.adornData({
+      userName: dataForm.userName,
+      passWord: encrypt(dataForm.password),
+      captchaVerification: verifyResult.captchaVerification
+    })
+  }).then(({ data }) => {
+    $cookie.set('Authorization', data.accessToken)
+    useRouter().replace({ name: 'home' })
+  }).catch(() => {
+    isSubmit = false
+  })
+}
+// onSubmit () {
+//   $refs['dataForm'].validate((valid) => {
+//     if (valid) {
+//       http({
+//         url: http.adornUrl('/login?grant_type=admin'),
+//         method: 'post',
+//         data: http.adornData({
+//           'principal': dataForm.userName,
+//           'credentials': dataForm.password,
+//           'sessionUUID': dataForm.uuid,
+//           'imageCode': dataForm.captcha
+//         })
+//       }).then(({ data }) => {
+//         $cookie.set('Authorization', 'bearer' + data.access_token)
+//         useRouter().replace({ name: 'home' })
+//       }).catch(() => {
+//         getCaptcha()
+//       })
+//     }
+//   })
+// },
+// 获取验证码
+const getCaptcha  = () => {
+  dataForm.uuid = getUUID()
+  captchaPath = http.adornUrl(`/captcha.jpg?uuid=${dataForm.uuid}`)
+}
+
 </script>
 
 <style lang="scss">

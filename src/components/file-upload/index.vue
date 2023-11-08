@@ -10,7 +10,7 @@
       multiple
     >
       <el-button
-        size="small"
+        
         type="primary"
       >
         点击上传
@@ -19,64 +19,59 @@
   </div>
 </template>
 
-<script>
-export default {
+<script setup>
 
-  props: {
-    value: {
-      default: '',
-      type: String
-    }
-  },
+const props = defineProps({
+  value: {
+    default: '',
+    type: String
+  }
+})
   emits: ['input', 'change', 'change'],
 
-  data () {
-    return {
-      resourcesUrl: process.env.VUE_APP_RESOURCES_URL
-    }
-  },
+
+var resourcesUrl = import.meta.env.VITE_APP_RESOURCES_URL
 
   computed: {
     fileList () {
       const res = []
-      if (this.value) {
-        const fileArray = this.value.split(',')
+      if (value) {
+        const fileArray = value.split(',')
         for (let i = 0; i < fileArray.length; i++) {
-          res.push({ name: fileArray[i], url: this.resourcesUrl + fileArray[i], response: fileArray[i] })
+          res.push({ name: fileArray[i], url: resourcesUrl + fileArray[i], response: fileArray[i] })
         }
       }
-      this.$emit('input', this.value)
+      emit('update:modelValue', value)
       return res
     }
   },
 
-  methods: {
-    // 图片上传
-    handleUploadSuccess (response, file, fileList) {
-      const files = fileList.map(file => {
-        return file.response
-      }).join(',')
-      this.$emit('change', files)
-    },
-    // 限制图片上传大小
-    beforeAvatarUpload (file) {
-      const isLt2M = file.size / 1024 / 1024 < 2
-      if (!isLt2M) {
-        this.$message.error('上传图片大小不能超过 2MB!')
-      }
-      return isLt2M
-    },
-    handleRemove (file, fileList) {
-      const files = fileList.map(file => {
-        return file.response
-      }).join(',')
-      this.$emit('change', files)
-    },
-    beforeRemove (file, fileList) {
-      return this.$confirm(`确定移除 ${file.name}？`)
-    }
-  }
+
+// 图片上传
+const handleUploadSuccess  = (response, file, fileList) => {
+  const files = fileList.map(file => {
+    return file.response
+  }).join(',')
+  emit('change', files)
 }
+// 限制图片上传大小
+const beforeAvatarUpload  = (file) => {
+  const isLt2M = file.size / 1024 / 1024 < 2
+  if (!isLt2M) {
+    ElMessage.error('上传图片大小不能超过 2MB!')
+  }
+  return isLt2M
+}
+const handleRemove  = (file, fileList) => {
+  const files = fileList.map(file => {
+    return file.response
+  }).join(',')
+  emit('change', files)
+}
+const beforeRemove  = (file, fileList) => {
+  return ElMessageBox.confirm(`确定移除 ${file.name}？`)
+}
+
 </script>
 
 <style lang="scss">

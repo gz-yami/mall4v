@@ -65,64 +65,57 @@
     <!-- 弹窗, 修改密码 -->
     <update-password
       v-if="updatePassowrdVisible"
-      ref="updatePassowrd"
+      ref="updatePassowrdRef"
     />
   </nav>
 </template>
 
-<script>
+<script setup>
 import UpdatePassword from './main-navbar-update-password'
 import { clearLoginInfo } from '@/utils'
-export default {
-  components: {
-    UpdatePassword
-  },
-  data () {
-    return {
-      updatePassowrdVisible: false
-    }
-  },
+
+
+var updatePassowrdVisible = ref(false)
   computed: {
     navbarLayoutType: {
-      get () { return this.$store.state.common.navbarLayoutType }
+      get () { return $store.state.common.navbarLayoutType }
     },
     sidebarFold: {
-      get () { return this.$store.state.common.sidebarFold },
-      set (val) { this.$store.commit('common/updateSidebarFold', val) }
+      get () { return $store.state.common.sidebarFold },
+      set (val) { $store.commit('common/updateSidebarFold', val) }
     },
     mainTabs: {
-      get () { return this.$store.state.common.mainTabs },
-      set (val) { this.$store.commit('common/updateMainTabs', val) }
+      get () { return $store.state.common.mainTabs },
+      set (val) { $store.commit('common/updateMainTabs', val) }
     },
     userName: {
-      get () { return this.$store.state.user.name }
+      get () { return $store.state.user.name }
     }
   },
-  methods: {
-    // 修改密码
-    updatePasswordHandle () {
-      this.updatePassowrdVisible = true
-      this.$nextTick(() => {
-        this.$refs.updatePassowrd.init()
-      })
-    },
-    // 退出
-    logoutHandle () {
-      this.$confirm('确定进行[退出]操作?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.$http({
-          url: this.$http.adornUrl('/logOut'),
-          method: 'post',
-          data: this.$http.adornData()
-        }).then(({ data }) => {
-          clearLoginInfo()
-          this.$router.push({ name: 'login' })
-        })
-      }).catch(() => {})
-    }
-  }
+
+// 修改密码
+const updatePasswordHandle  = () => {
+  updatePassowrdVisible = true
+  nextTick(() => {
+    updatePassowrdRef.value?.init()
+  })
 }
+// 退出
+const logoutHandle  = () => {
+  ElMessageBox.confirm('确定进行[退出]操作?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    http({
+      url: http.adornUrl('/logOut'),
+      method: 'post',
+      data: http.adornData()
+    }).then(({ data }) => {
+      clearLoginInfo()
+      useRouter().push({ name: 'login' })
+    })
+  }).catch(() => {})
+}
+
 </script>

@@ -6,11 +6,11 @@
   >
     <!-- native modifier has been removed, please confirm whether the function has been affected  -->
     <el-form
-      ref="dataForm"
+      ref="dataFormRef"
       :model="dataForm"
       :rules="dataRule"
       label-width="80px"
-      @keyup.enter="dataFormSubmit()"
+      @keyup.enter="onSubmit()"
     >
       <el-form-item label="账号">
         <span>{{ userName }}</span>
@@ -48,93 +48,82 @@
         <el-button @click="visible = false">取消</el-button>
         <el-button
           type="primary"
-          @click="dataFormSubmit()"
+          @click="onSubmit()"
         >确定</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
 
-<script>
+<script setup>
 import { clearLoginInfo } from '@/utils'
 import { Debounce } from '@/utils/debounce'
 import { encrypt } from '@/utils/crypto'
-export default {
-  data () {
-    const validateConfirmPassword = (rule, value, callback) => {
-      if (this.dataForm.newPassword !== value) {
-        callback(new Error('确认密码与新密码不一致'))
-      } else {
-        callback()
-      }
-    }
-    return {
-      visible: false,
-      dataForm: {
-        password: '',
-        newPassword: '',
-        confirmPassword: ''
-      },
-      dataRule: {
-        password: [
-          { required: true, message: '原密码不能为空', trigger: 'blur' }
-        ],
-        newPassword: [
-          { required: true, message: '新密码不能为空', trigger: 'blur' }
-        ],
-        confirmPassword: [
-          { required: true, message: '确认密码不能为空', trigger: 'blur' },
-          { validator: validateConfirmPassword, trigger: 'blur' }
-        ]
-      }
-    }
-  },
+
+
+var visible = ref(false)
+var dataForm = reactive({
+  password: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+var dataRule = {
+  password: [
+    { required: true, message: '原密码不能为空', trigger: 'blur' }
+  ],
+  newPassword: [
+    { required: true, message: '新密码不能为空', trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { required: true, message: '确认密码不能为空', trigger: 'blur' },
+    { validator: validateConfirmPassword, trigger: 'blur' }
+  ]
+}
   computed: {
     userName: {
-      get () { return this.$store.state.user.name }
+      get () { return $store.state.user.name }
     },
     mainTabs: {
-      get () { return this.$store.state.common.mainTabs },
-      set (val) { this.$store.commit('common/updateMainTabs', val) }
+      get () { return $store.state.common.mainTabs },
+      set (val) { $store.commit('common/updateMainTabs', val) }
     }
   },
-  methods: {
-    // 初始化
-    init () {
-      this.visible = true
-      this.$nextTick(() => {
-        this.$refs.dataForm.resetFields()
-      })
-    },
-    // 表单提交
-    dataFormSubmit: Debounce(function () {
-      this.$refs.dataForm.validate((valid) => {
-        if (valid) {
-          this.$http({
-            url: this.$http.adornUrl('/sys/user/password'),
-            method: 'post',
-            data: this.$http.adornData({
-              password: encrypt(this.dataForm.password),
-              newPassword: encrypt(this.dataForm.newPassword)
-            })
-          }).then(({ data }) => {
-            this.$message({
-              message: '操作成功',
-              type: 'success',
-              duration: 1500,
-              onClose: () => {
-                this.visible = false
-                this.$nextTick(() => {
-                  this.mainTabs = []
-                  clearLoginInfo()
-                  this.$router.replace({ name: 'login' })
-                })
-              }
-            })
-          })
-        }
-      })
-    })
-  }
+
+// 初始化
+const init  = () => {
+  visible = true
+  nextTick(() => {
+    dataFormRef.value?.resetFields()
+  })
 }
+// 表单提交
+const onSubmit: Debounce(function  = () => {
+  dataFormRef.value?.validate((valid) => {
+    if (valid) {
+      http({
+        url: http.adornUrl('/sys/user/password'),
+        method: 'post',
+        data: http.adornData({
+          password: encrypt(dataForm.password),
+          newPassword: encrypt(dataForm.newPassword)
+        })
+      }).then(({ data }) => {
+        ElMessage({
+          message: '操作成功',
+          type: 'success',
+          duration: 1500,
+          onClose: () => {
+            visible = false
+            nextTick(() => {
+              mainTabs = []
+              clearLoginInfo()
+              useRouter().replace({ name: 'login' })
+            })
+          }
+        })
+      })
+    }
+  })
+})
+
 </script>

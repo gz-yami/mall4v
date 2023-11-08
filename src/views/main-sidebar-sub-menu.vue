@@ -31,36 +31,31 @@
   </el-menu-item>
 </template>
 
-<script>
+<script setup>
 import SubMenu from './main-sidebar-sub-menu'
-export default {
-  name: 'SubMenu',
-  components: {
-    SubMenu
+
+const props = defineProps({
+  menu: {
+    type: Object,
+    required: true
   },
-  props: {
-    menu: {
-      type: Object,
-      required: true
-    },
-    dynamicMenuRoutes: {
-      type: Array,
-      required: true
-    }
-  },
+  dynamicMenuRoutes: {
+    type: Array,
+    required: true
+  }
+})
   computed: {
     sidebarLayoutSkin: {
-      get () { return this.$store.state.common.sidebarLayoutSkin }
+      get () { return $store.state.common.sidebarLayoutSkin }
     }
   },
-  methods: {
-    // 通过menuId与动态(菜单)路由进行匹配跳转至指定路由
-    gotoRouteHandle (menu) {
-      const route = this.dynamicMenuRoutes.filter(item => item.meta.menuId === menu.menuId)
-      if (route.length >= 1) {
-        this.$router.push({ name: route[0].name })
-      }
-    }
+
+// 通过menuId与动态(菜单)路由进行匹配跳转至指定路由
+const gotoRouteHandle  = (menu) => {
+  const route = dynamicMenuRoutes.filter(item => item.meta.menuId === menu.menuId)
+  if (route.length >= 1) {
+    useRouter().push({ name: route[0].name })
   }
 }
+
 </script>

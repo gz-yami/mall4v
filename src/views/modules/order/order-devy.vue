@@ -7,11 +7,11 @@
   >
     <!-- native modifier has been removed, please confirm whether the function has been affected  -->
     <el-form
-      ref="dataForm"
+      ref="dataFormRef"
       :model="dataForm"
       :rules="dataRule"
       label-width="80px"
-      @keyup.enter="dataFormSubmit()"
+      @keyup.enter="onSubmit()"
     >
       <el-form-item label="快递公司">
         <el-select
@@ -43,81 +43,70 @@
         <el-button @click="visible = false">取消</el-button>
         <el-button
           type="primary"
-          @click="dataFormSubmit()"
+          @click="onSubmit()"
         >确定</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
-<script>
-export default {
+<script setup>
+
   emits: ['refreshDataList'],
 
-  data () {
-    const validDvyFlowId = (rule, value, callback) => {
-      if (!value.trim()) {
-        callback(new Error('不能为空'))
-      } else {
-        callback()
-      }
-    }
-    return {
-      visible: false,
-      dataForm: {
-        dvyId: '',
-        dvyFlowId: 0,
-        dvyNames: [],
-        orderNumber: 0
-      },
-      dataRule: {
-        dvyFlowId: [
-          { required: true, message: '不能为空', trigger: 'blur' },
-          { validator: validDvyFlowId, trigger: 'blur' }
-        ]
-      }
-    }
-  },
 
-  methods: {
-    init (orderNumber, dvyId, dvyFlowId) {
-      this.visible = true
-      this.dataForm.orderNumber = orderNumber || ''
-      this.dataForm.dvyId = dvyId || ''
-      this.dataForm.dvyFlowId = dvyFlowId || ''
-      this.$http({
-        url: this.$http.adornUrl('/admin/delivery/list'),
-        method: 'get',
-        params: this.$http.adornParams()
+var visible = ref(false)
+var dataForm = reactive({
+  dvyId: '',
+  dvyFlowId: 0,
+  dvyNames: [],
+  orderNumber: 0
+})
+var dataRule = {
+  dvyFlowId: [
+    { required: true, message: '不能为空', trigger: 'blur' },
+    { validator: validDvyFlowId, trigger: 'blur' }
+  ]
+}
+
+
+const init  = (orderNumber, dvyId, dvyFlowId) => {
+  visible = true
+  dataForm.orderNumber = orderNumber || ''
+  dataForm.dvyId = dvyId || ''
+  dataForm.dvyFlowId = dvyFlowId || ''
+  http({
+    url: http.adornUrl('/admin/delivery/list'),
+    method: 'get',
+    params: http.adornParams()
+  }).then(({ data }) => {
+    dataForm.dvyNames = data
+  })
+}
+// 表单提交
+const onSubmit  = () => {
+  dataFormRef.value?.validate((valid) => {
+    if (valid) {
+      http({
+        url: http.adornUrl('/order/order/delivery'),
+        method: 'put',
+        data: http.adornData({
+          orderNumber: dataForm.orderNumber,
+          dvyId: dataForm.dvyId,
+          dvyFlowId: dataForm.dvyFlowId
+        })
       }).then(({ data }) => {
-        this.dataForm.dvyNames = data
-      })
-    },
-    // 表单提交
-    dataFormSubmit () {
-      this.$refs.dataForm.validate((valid) => {
-        if (valid) {
-          this.$http({
-            url: this.$http.adornUrl('/order/order/delivery'),
-            method: 'put',
-            data: this.$http.adornData({
-              orderNumber: this.dataForm.orderNumber,
-              dvyId: this.dataForm.dvyId,
-              dvyFlowId: this.dataForm.dvyFlowId
-            })
-          }).then(({ data }) => {
-            this.$message({
-              message: '操作成功',
-              type: 'success',
-              duration: 1500,
-              onClose: () => {
-                this.visible = false
-                this.$emit('refreshDataList')
-              }
-            })
-          })
-        }
+        ElMessage({
+          message: '操作成功',
+          type: 'success',
+          duration: 1500,
+          onClose: () => {
+            visible = false
+            emit('refreshDataList')
+          }
+        })
       })
     }
-  }
+  })
 }
+
 </script>

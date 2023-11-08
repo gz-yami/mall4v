@@ -6,11 +6,11 @@
   >
     <!-- native modifier has been removed, please confirm whether the function has been affected  -->
     <el-form
-      ref="dataForm"
+      ref="dataFormRef"
       :model="dataForm"
       :rules="dataRule"
       label-width="80px"
-      @keyup.enter="dataFormSubmit()"
+      @keyup.enter="onSubmit()"
     >
       <div v-if="!isEdit">
         <el-form-item
@@ -138,85 +138,81 @@
         <el-button
           v-if="isEdit"
           type="primary"
-          @click="dataFormSubmit()"
+          @click="onSubmit()"
         >确定</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
 
-<script>
-export default {
+<script setup>
+
   emits: ['refreshDataList'],
 
-  data () {
-    return {
-      isEdit: false,
-      visible: false,
-      roleList: [],
-      dataForm: {
-        prodCommId: null,
-        prodId: null,
-        orderItemId: null,
-        userId: null,
-        content: null,
-        replyContent: null,
-        recTime: null,
-        replyTime: null,
-        replySts: null,
-        postip: null,
-        score: null,
-        usefulCounts: null,
-        photoJson: null,
-        isAnonymous: null,
-        status: null
-      },
-      dataRule: {
-      },
-      resourcesUrl: process.env.VUE_APP_RESOURCES_URL
-    }
-  },
 
-  methods: {
-    init (prodCommId, isEdit) {
-      this.isEdit = isEdit
-      this.dataForm.prodCommId = prodCommId || 0
-      this.visible = true
-      this.$nextTick(() => {
-        this.$refs.dataForm.resetFields()
-        if (this.dataForm.prodCommId) {
-          this.$http({
-            url: this.$http.adornUrl('/prod/prodComm/info/' + this.dataForm.prodCommId),
-            method: 'get',
-            params: this.$http.adornParams()
-          }).then(({ data }) => {
-            this.dataForm = data
-          })
-        }
-      })
-    },
-    // 表单提交
-    dataFormSubmit () {
-      this.$refs.dataForm.validate((valid) => {
-        if (valid) {
-          this.$http({
-            url: this.$http.adornUrl('/prod/prodComm'),
-            method: this.dataForm.prodCommId ? 'put' : 'post',
-            data: this.$http.adornData(this.dataForm)
-          }).then(({ data }) => {
-            this.$message({
-              message: '操作成功',
-              type: 'success',
-              duration: 1500,
-              onClose: () => {
-                this.visible = false
-                this.$emit('refreshDataList')
-              }
-            })
-          })
-        }
+var isEdit = ref(false)
+var visible = ref(false)
+var roleList = ref([])
+var dataForm = reactive({
+  prodCommId: null,
+  prodId: null,
+  orderItemId: null,
+  userId: null,
+  content: null,
+  replyContent: null,
+  recTime: null,
+  replyTime: null,
+  replySts: null,
+  postip: null,
+  score: null,
+  usefulCounts: null,
+  photoJson: null,
+  isAnonymous: null,
+  status: null
+})
+var dataRule = {
+}
+var resourcesUrl = import.meta.env.VITE_APP_RESOURCES_URL
+
+
+const init  = (prodCommId, isEdit) => {
+  isEdit = isEdit
+  dataForm.prodCommId = prodCommId || 0
+  visible = true
+  nextTick(() => {
+    dataFormRef.value?.resetFields()
+    if (dataForm.prodCommId) {
+      http({
+        url: http.adornUrl('/prod/prodComm/info/' + dataForm.prodCommId),
+        method: 'get',
+        params: http.adornParams()
+      }).then(({ data }) => {
+        dataForm = data
       })
     }
-  }
+  })
 }
+// 表单提交
+const onSubmit  = () => {
+  dataFormRef.value?.validate((valid) => {
+    if (valid) {
+      http({
+        url: http.adornUrl('/prod/prodComm'),
+        method: dataForm.prodCommId ? 'put' : 'post',
+        data: http.adornData(dataForm)
+      }).then(({ data }) => {
+        ElMessage({
+          message: '操作成功',
+          type: 'success',
+          duration: 1500,
+          onClose: () => {
+            visible = false
+            emit('refreshDataList')
+          }
+        })
+      })
+    }
+  })
+}
+
 </script>

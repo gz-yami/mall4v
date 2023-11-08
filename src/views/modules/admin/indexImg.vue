@@ -1,12 +1,12 @@
 <template>
   <div class="mod-prod">
     <avue-crud
-      ref="crud"
+      ref="crudRef"
       :page="page"
       :data="dataList"
       :table-loading="dataListLoading"
       :option="tableOption"
-      @search-change="searchChange"
+      @search-change="onSearch"
       @selection-change="selectionChange"
       @on-load="getDataList"
     >
@@ -15,8 +15,8 @@
           v-if="isAuth('admin:indexImg:save')"
           type="primary"
           icon="el-icon-plus"
-          size="small"
-          @click.stop="addOrUpdateHandle()"
+          
+          @click.stop="onAddOrUpdate()"
         >
           新增
         </el-button>
@@ -24,9 +24,9 @@
         <el-button
           v-if="isAuth('admin:indexImg:delete')"
           type="danger"
-          size="small"
+          
           :disabled="dataListSelections.length <= 0"
-          @click="deleteHandle()"
+          @click="onDelete()"
         >
           批量删除
         </el-button>
@@ -57,8 +57,8 @@
           v-if="isAuth('admin:indexImg:update')"
           type="primary"
           icon="el-icon-edit"
-          size="small"
-          @click="addOrUpdateHandle(scope.row.imgId)"
+          
+          @click="onAddOrUpdate(scope.row.imgId)"
         >
           修改
         </el-button>
@@ -66,8 +66,8 @@
           v-if="isAuth('admin:indexImg:delete')"
           type="danger"
           icon="el-icon-delete"
-          size="small"
-          @click="deleteHandle(scope.row.imgId)"
+          
+          @click="onDelete(scope.row.imgId)"
         >
           删除
         </el-button>
@@ -77,108 +77,101 @@
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update
       v-if="addOrUpdateVisible"
-      ref="addOrUpdate"
+      ref="addOrUpdateRef"
       @refresh-data-list="getDataList"
     />
   </div>
 </template>
 
-<script>
+<script setup>
 import AddOrUpdate from './indexImg-add-or-update'
 import { tableOption } from '@/crud/admin/indexImg'
-export default {
-  components: {
-    AddOrUpdate
-  },
-  data () {
-    return {
-      dataForm: {
-        indexImg: ''
-      },
-      dataList: [],
-      dataListLoading: false,
-      dataListSelections: [],
-      addOrUpdateVisible: false,
-      resourcesUrl: process.env.VUE_APP_RESOURCES_URL,
-      // 修改
-      tableOption,
-      page: {
-        total: 0, // 总页数
-        currentPage: 1, // 当前页数
-        pageSize: 10 // 每页显示多少条
-      }
+
+
+var dataForm = reactive({
+  indexImg: ''
+})
+var dataList = ref([])
+var dataListLoading = ref(false)
+var dataListSelections = ref([])
+var addOrUpdateVisible = ref(false)
+const resourcesUrl = import.meta.env.VITE_APP_RESOURCES_URL
+// 修改
+tableOption
+var page = {
+  total: 0, // 总页数
+  currentPage: 1, // 当前页数
+  pageSize: 10 // 每页显示多少条
+}
+
+// 获取数据列表
+const getDataList  = (pageParam, params, done) => {
+  dataListLoading = true
+  http({
+    url: http.adornUrl('/admin/indexImg/page'),
+    method: 'get',
+    params: http.adornParams(
+      Object.assign(
+        {
+          current: pageParam == null ? page.currentPage : pageParam.currentPage,
+          size: pageParam == null ? page.pageSize : pageParam.pageSize
+        },
+        params
+      )
+    )
+  }).then(({ data }) => {
+    data.records.forEach(item => {
+      item.imgUrl = item.imgUrl ? resourcesUrl + item.imgUrl : ''
+    })
+    dataList = data.records
+    page.total = data.total
+    dataListLoading = false
+    if (done) {
+      done()
     }
-  },
-  methods: {
-    // 获取数据列表
-    getDataList (page, params, done) {
-      this.dataListLoading = true
-      this.$http({
-        url: this.$http.adornUrl('/admin/indexImg/page'),
-        method: 'get',
-        params: this.$http.adornParams(
-          Object.assign(
-            {
-              current: page == null ? this.page.currentPage : page.currentPage,
-              size: page == null ? this.page.pageSize : page.pageSize
-            },
-            params
-          )
-        )
-      }).then(({ data }) => {
-        data.records.forEach(item => {
-          item.imgUrl = item.imgUrl ? this.resourcesUrl + item.imgUrl : ''
-        })
-        this.dataList = data.records
-        this.page.total = data.total
-        this.dataListLoading = false
-        if (done) {
-          done()
+  })
+}
+
+// 新增 / 修改
+const onAddOrUpdate  = (id) => {
+  addOrUpdateVisible = true
+  nextTick(() => {
+    addOrUpdate.value?.init(id)
+  })
+}
+// 删除
+const onDelete  = (id) => {
+  const ids = id ? [id] : dataListSelections.map(item => {
+    return item.imgId
+  })
+  ElMessageBox.confirm(`确定进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    http({
+      url: http.adornUrl('/admin/indexImg'),
+      method: 'delete',
+      data: http.adornData(ids, false)
+    }).then(({ data }) => {
+      ElMessage({
+        message: '操作成功',
+        type: 'success',
+        duration: 1500,
+        onClose: () => {
+          getDataList()
         }
       })
-    },
-
-    // 新增 / 修改
-    addOrUpdateHandle (id) {
-      this.addOrUpdateVisible = true
-      this.$nextTick(() => {
-        this.$refs.addOrUpdate.init(id)
-      })
-    },
-    // 删除
-    deleteHandle (id) {
-      const ids = id ? [id] : this.dataListSelections.map(item => {
-        return item.imgId
-      })
-      this.$confirm(`确定进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.$http({
-          url: this.$http.adornUrl('/admin/indexImg'),
-          method: 'delete',
-          data: this.$http.adornData(ids, false)
-        }).then(({ data }) => {
-          this.$message({
-            message: '操作成功',
-            type: 'success',
-            duration: 1500,
-            onClose: () => {
-              this.getDataList()
-            }
-          })
-        })
-      })
-    },
-    // 条件查询
-    searchChange (params, done) {
-      this.getDataList(this.page, params, done)
-    },
-    // 多选变化
-    selectionChange (val) {
-      this.dataListSelections = val
-    }
-  }
+    })
+  })
 }
+// 条件查询
+const onSearch  = (params, done) => {
+  getDataList(page, params, done)
+}
+// 多选变化
+const selectionChange  = (val) => {
+  dataListSelections = val
+}
+
 </script>

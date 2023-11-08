@@ -1,12 +1,12 @@
 <template>
   <div class="mod-prod-prodTag">
     <avue-crud
-      ref="crud"
+      ref="crudRef"
       :page="page"
       :data="dataList"
       :table-loading="dataListLoading"
       :option="tableOption"
-      @search-change="searchChange"
+      @search-change="onSearch"
       @on-load="getDataList"
       @refresh-change="refreshChange"
     >
@@ -14,9 +14,9 @@
         <el-button
           v-if="isAuth('prod:prodTag:save')"
           type="primary"
-          size="small"
+          
           icon="el-icon-plus"
-          @click="addOrUpdateHandle()"
+          @click="onAddOrUpdate()"
         >
           新增
         </el-button>
@@ -33,14 +33,14 @@
       >
         <el-tag
           v-if="scope.row.status === 0"
-          size="small"
+          
           type="danger"
         >
           禁用
         </el-tag>
         <el-tag
           v-else
-          size="small"
+          
         >
           正常
         </el-tag>
@@ -52,13 +52,13 @@
       >
         <el-tag
           v-if="scope.row.isDefault === 0"
-          size="small"
+          
         >
           自定义类型
         </el-tag>
         <el-tag
           v-else
-          size="small"
+          
         >
           默认类型
         </el-tag>
@@ -71,9 +71,9 @@
         <el-button
           v-if="isAuth('prod:prodTag:update')"
           type="primary"
-          size="small"
+          
           icon="el-icon-edit"
-          @click="addOrUpdateHandle(scope.row.id)"
+          @click="onAddOrUpdate(scope.row.id)"
         >
           修改
         </el-button>
@@ -81,8 +81,8 @@
           v-if="isAuth('prod:prodTag:delete')"
           type="danger"
           icon="el-icon-delete"
-          size="small"
-          @click.stop="deleteHandle(scope.row.id)"
+          
+          @click.stop="onDelete(scope.row.id)"
         >
           删除
         </el-button>
@@ -90,98 +90,88 @@
     </avue-crud>
     <add-or-update
       v-if="addOrUpdateVisible"
-      ref="addOrUpdate"
+      ref="addOrUpdateRef"
       @refresh-data-list="refreshChange"
     />
   </div>
 </template>
 
-<script>
+<script setup>
 import { tableOption } from '@/crud/prod/prodTag'
 import AddOrUpdate from './prodTag-add-or-update'
-export default {
-  components: {
-    AddOrUpdate
-  },
-  data () {
-    return {
-      dataList: [],
-      page: {
-        total: 0, // 总页数
-        currentPage: 1, // 当前页数
-        pageSize: 10 // 每页显示多少条
-      },
-      dataListLoading: false,
-      tableOption,
-      permission: {
-        delBtn: this.isAuth('prod:prodTag:delete')
-      },
-      addOrUpdateVisible: false
+
+
+var dataList = ref([])
+var page = reactive({
+  total: 0, // 总页数
+  currentPage: 1, // 当前页数
+  pageSize: 10 // 每页显示多少条
+})
+var dataListLoading = ref(false)
+tableOption
+var permission = reactive({
+  delBtn: isAuth('prod:prodTag:delete')
+})
+var addOrUpdateVisible = ref(false)
+
+
+const getDataList  = (pageParam, params, done) => {
+  dataListLoading = true
+  http({
+    url: http.adornUrl('/prod/prodTag/page'),
+    method: 'get',
+    params: http.adornParams(Object.assign({
+      current: pageParam == null ? page.currentPage : pageParam.currentPage,
+      size: pageParam == null ? page.pageSize : pageParam.pageSize
+    }, params))
+  }).then(({ data }) => {
+    dataList = data.records
+    page.total = data.total
+    dataListLoading = false
+    if (done) {
+      done()
     }
-  },
-  created () {
-  },
-  mounted () {
-  },
-  methods: {
-    getDataList (page, params, done) {
-      this.dataListLoading = true
-      this.$http({
-        url: this.$http.adornUrl('/prod/prodTag/page'),
-        method: 'get',
-        params: this.$http.adornParams(Object.assign({
-          current: page == null ? this.page.currentPage : page.currentPage,
-          size: page == null ? this.page.pageSize : page.pageSize
-        }, params))
-      }).then(({ data }) => {
-        this.dataList = data.records
-        this.page.total = data.total
-        this.dataListLoading = false
-        if (done) {
-          done()
+  })
+}
+// 新增 / 修改
+const onAddOrUpdate  = (id) => {
+  addOrUpdateVisible = true
+  nextTick(() => {
+    addOrUpdate.value?.init(id)
+  })
+}
+const onDelete  = (id) => {
+  ElMessageBox.confirm('确定进行删除操作?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    http({
+      url: http.adornUrl('/prod/prodTag/' + id),
+      method: 'delete',
+      data: http.adornData({})
+    }).then(({ data }) => {
+      ElMessage({
+        message: '操作成功',
+        type: 'success',
+        duration: 1500,
+        onClose: () => {
+          getDataList(page)
         }
       })
-    },
-    // 新增 / 修改
-    addOrUpdateHandle (id) {
-      this.addOrUpdateVisible = true
-      this.$nextTick(() => {
-        this.$refs.addOrUpdate.init(id)
-      })
-    },
-    deleteHandle (id) {
-      this.$confirm('确定进行删除操作?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.$http({
-          url: this.$http.adornUrl('/prod/prodTag/' + id),
-          method: 'delete',
-          data: this.$http.adornData({})
-        }).then(({ data }) => {
-          this.$message({
-            message: '操作成功',
-            type: 'success',
-            duration: 1500,
-            onClose: () => {
-              this.getDataList(this.page)
-            }
-          })
-        })
-      }).catch(() => { })
-    },
-    /**
-     * 刷新回调
-     */
-    refreshChange () {
-      this.getDataList(this.page)
-    },
-    searchChange (params, done) {
-      this.getDataList(this.page, params, done)
-    }
-  }
+    })
+  }).catch(() => { })
 }
+/**
+ * 刷新回调
+ */
+const refreshChange  = () => {
+  getDataList(page)
+}
+const onSearch  = (params, done) => {
+  getDataList(page, params, done)
+}
+
 </script>
 
 <style lang="scss" scoped>

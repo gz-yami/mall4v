@@ -1,11 +1,11 @@
 <template>
   <div class="mod-config">
     <avue-crud
-      ref="crud"
+      ref="crudRef"
       :page="page"
       :data="dataList"
       :option="tableOption"
-      @search-change="searchChange"
+      @search-change="onSearch"
       @selection-change="selectionChange"
       @on-load="getDataList"
     >
@@ -13,17 +13,17 @@
         <el-button
           type="primary"
           icon="el-icon-plus"
-          size="small"
-          @click.stop="addOrUpdateHandle()"
+          
+          @click.stop="onAddOrUpdate()"
         >
           新增
         </el-button>
 
         <el-button
           type="danger"
-          size="small"
+          
           :disabled="dataListSelections.length <= 0"
-          @click="deleteHandle()"
+          @click="onDelete()"
         >
           批量删除
         </el-button>
@@ -35,8 +35,8 @@
         <el-button
           type="primary"
           icon="el-icon-edit"
-          size="small"
-          @click.stop="addOrUpdateHandle(scope.row.id)"
+          
+          @click.stop="onAddOrUpdate(scope.row.id)"
         >
           编辑
         </el-button>
@@ -44,8 +44,8 @@
         <el-button
           type="danger"
           icon="el-icon-delete"
-          size="small"
-          @click.stop="deleteHandle(scope.row.id)"
+          
+          @click.stop="onDelete(scope.row.id)"
         >
           删除
         </el-button>
@@ -54,99 +54,92 @@
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update
       v-if="addOrUpdateVisible"
-      ref="addOrUpdate"
+      ref="addOrUpdateRef"
       @refresh-data-list="getDataList"
     />
   </div>
 </template>
 
-<script>
+<script setup>
 import { tableOption } from '@/crud/sys/config'
 import AddOrUpdate from './config-add-or-update'
-export default {
-  components: {
-    AddOrUpdate
-  },
-  data () {
-    return {
-      dataList: [],
-      dataListLoading: false,
-      dataListSelections: [],
-      addOrUpdateVisible: false,
-      tableOption,
-      page: {
-        total: 0, // 总页数
-        currentPage: 1, // 当前页数
-        pageSize: 10 // 每页显示多少条
-      }
+
+
+var dataList = ref([])
+var dataListLoading = ref(false)
+var dataListSelections = ref([])
+var addOrUpdateVisible = ref(false)
+tableOption
+var page = {
+  total: 0, // 总页数
+  currentPage: 1, // 当前页数
+  pageSize: 10 // 每页显示多少条
+}
+
+// 获取数据列表
+const getDataList  = (pageParam, params, done) => {
+  dataListLoading = true
+  http({
+    url: http.adornUrl('/sys/config/page'),
+    method: 'get',
+    params: http.adornParams(
+      Object.assign(
+        {
+          current: pageParam == null ? page.currentPage : pageParam.currentPage,
+          size: pageParam == null ? page.pageSize : pageParam.pageSize
+        },
+        params
+      )
+    )
+  }).then(({ data }) => {
+    dataList = data.records
+    page.total = data.total
+    dataListLoading = false
+    if (done) {
+      done()
     }
-  },
-  methods: {
-    // 获取数据列表
-    getDataList (page, params, done) {
-      this.dataListLoading = true
-      this.$http({
-        url: this.$http.adornUrl('/sys/config/page'),
-        method: 'get',
-        params: this.$http.adornParams(
-          Object.assign(
-            {
-              current: page == null ? this.page.currentPage : page.currentPage,
-              size: page == null ? this.page.pageSize : page.pageSize
-            },
-            params
-          )
-        )
-      }).then(({ data }) => {
-        this.dataList = data.records
-        this.page.total = data.total
-        this.dataListLoading = false
-        if (done) {
-          done()
+  })
+}
+// 条件查询
+const onSearch  = (params, done) => {
+  getDataList(page, params, done)
+}
+// 多选变化
+const selectionChange  = (val) => {
+  dataListSelections = val
+}
+// 新增 / 修改
+const onAddOrUpdate  = (id) => {
+  addOrUpdateVisible = true
+  nextTick(() => {
+    addOrUpdate.value?.init(id)
+  })
+}
+// 删除
+const onDelete  = (id) => {
+  const ids = id ? [id] : dataListSelections.map(item => {
+    return item.id
+  })
+  ElMessageBox.confirm(`确定对[id=${ids.join(',')}]进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    http({
+      url: http.adornUrl('/sys/config'),
+      method: 'delete',
+      data: http.adornData(ids, false)
+    }).then(({ data }) => {
+      ElMessage({
+        message: '操作成功',
+        type: 'success',
+        duration: 1500,
+        onClose: () => {
+          getDataList()
         }
       })
-    },
-    // 条件查询
-    searchChange (params, done) {
-      this.getDataList(this.page, params, done)
-    },
-    // 多选变化
-    selectionChange (val) {
-      this.dataListSelections = val
-    },
-    // 新增 / 修改
-    addOrUpdateHandle (id) {
-      this.addOrUpdateVisible = true
-      this.$nextTick(() => {
-        this.$refs.addOrUpdate.init(id)
-      })
-    },
-    // 删除
-    deleteHandle (id) {
-      const ids = id ? [id] : this.dataListSelections.map(item => {
-        return item.id
-      })
-      this.$confirm(`确定对[id=${ids.join(',')}]进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.$http({
-          url: this.$http.adornUrl('/sys/config'),
-          method: 'delete',
-          data: this.$http.adornData(ids, false)
-        }).then(({ data }) => {
-          this.$message({
-            message: '操作成功',
-            type: 'success',
-            duration: 1500,
-            onClose: () => {
-              this.getDataList()
-            }
-          })
-        })
-      }).catch(() => { })
-    }
-  }
+    })
+  }).catch(() => { })
 }
+
 </script>

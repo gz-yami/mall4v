@@ -6,11 +6,11 @@
   >
     <!-- native modifier has been removed, please confirm whether the function has been affected  -->
     <el-form
-      ref="dataForm"
+      ref="dataFormRef"
       :model="dataForm"
       :rules="dataRule"
       label-width="80px"
-      @keyup.enter="dataFormSubmit()"
+      @keyup.enter="onSubmit()"
     >
       <el-form-item
         label="参数名"
@@ -45,87 +45,83 @@
         <el-button @click="visible = false">取消</el-button>
         <el-button
           type="primary"
-          @click="dataFormSubmit()"
+          @click="onSubmit()"
         >确定</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
 
-<script>
+<script setup>
 import { Debounce } from '@/utils/debounce'
 
-export default {
+
   emits: ['refreshDataList'],
 
-  data () {
-    return {
-      visible: false,
-      dataForm: {
-        id: 0,
-        paramKey: '',
-        paramValue: '',
-        remark: ''
-      },
-      dataRule: {
-        paramKey: [
-          { required: true, message: '参数名不能为空', trigger: 'blur' },
-          { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的参数名', trigger: 'blur' }
-        ],
-        paramValue: [
-          { required: true, message: '参数值不能为空', trigger: 'blur' },
-          { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的参数值', trigger: 'blur' }
-        ]
-      }
-    }
-  },
 
-  methods: {
-    init (id) {
-      this.dataForm.id = id || 0
-      this.visible = true
-      this.$nextTick(() => {
-        this.$refs.dataForm.resetFields()
-        if (this.dataForm.id) {
-          this.$http({
-            url: this.$http.adornUrl(`/sys/config/info/${this.dataForm.id}`),
-            method: 'get',
-            params: this.$http.adornParams()
-          }).then(({ data }) => {
-            this.dataForm.paramKey = data.paramKey
-            this.dataForm.paramValue = data.paramValue
-            this.dataForm.remark = data.remark
-          })
-        }
-      })
-    },
-    // 表单提交
-    dataFormSubmit: Debounce(function () {
-      this.$refs.dataForm.validate((valid) => {
-        if (valid) {
-          this.$http({
-            url: this.$http.adornUrl('/sys/config'),
-            method: this.dataForm.id ? 'put' : 'post',
-            data: this.$http.adornData({
-              id: this.dataForm.id || undefined,
-              paramKey: this.dataForm.paramKey,
-              paramValue: this.dataForm.paramValue,
-              remark: this.dataForm.remark
-            })
-          }).then(({ data }) => {
-            this.$message({
-              message: '操作成功',
-              type: 'success',
-              duration: 1500,
-              onClose: () => {
-                this.visible = false
-                this.$emit('refreshDataList')
-              }
-            })
-          })
-        }
-      })
-    })
-  }
+var visible = ref(false)
+var dataForm = reactive({
+  id: 0,
+  paramKey: '',
+  paramValue: '',
+  remark: ''
+})
+var dataRule = {
+  paramKey: [
+    { required: true, message: '参数名不能为空', trigger: 'blur' },
+    { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的参数名', trigger: 'blur' }
+  ],
+  paramValue: [
+    { required: true, message: '参数值不能为空', trigger: 'blur' },
+    { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的参数值', trigger: 'blur' }
+  ]
 }
+
+
+const init  = (id) => {
+  dataForm.id = id || 0
+  visible = true
+  nextTick(() => {
+    dataFormRef.value?.resetFields()
+    if (dataForm.id) {
+      http({
+        url: http.adornUrl(`/sys/config/info/${dataForm.id}`),
+        method: 'get',
+        params: http.adornParams()
+      }).then(({ data }) => {
+        dataForm.paramKey = data.paramKey
+        dataForm.paramValue = data.paramValue
+        dataForm.remark = data.remark
+      })
+    }
+  })
+}
+// 表单提交
+const onSubmit: Debounce(function  = () => {
+  dataFormRef.value?.validate((valid) => {
+    if (valid) {
+      http({
+        url: http.adornUrl('/sys/config'),
+        method: dataForm.id ? 'put' : 'post',
+        data: http.adornData({
+          id: dataForm.id || undefined,
+          paramKey: dataForm.paramKey,
+          paramValue: dataForm.paramValue,
+          remark: dataForm.remark
+        })
+      }).then(({ data }) => {
+        ElMessage({
+          message: '操作成功',
+          type: 'success',
+          duration: 1500,
+          onClose: () => {
+            visible = false
+            emit('refreshDataList')
+          }
+        })
+      })
+    }
+  })
+})
+
 </script>

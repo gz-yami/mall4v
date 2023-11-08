@@ -230,65 +230,54 @@
   </el-dialog>
 </template>
 
-<script>
-export default {
-  data () {
-    const validateUrl = (rule, value, callback) => {
-      if (this.dataForm.type === 1 && !/\S/.test(value)) {
-        callback(new Error('菜单URL不能为空'))
-      } else {
-        callback()
-      }
-    }
-    return {
-      visible: false,
-      dataForm: {
-        orderId: 0,
-        remarks: '',
-        prodName: '',
-        total: 0,
-        actualTotal: 0,
-        dvyType: '',
-        orderNumber: '',
-        status: 1,
-        userAddrOrder: []
-      },
-      dataRule: {
-        name: [
-          {
-            required: true,
-            message: '菜单名称不能为空',
-            trigger: 'blur'
-          }
-        ],
-        url: [
-          {
-            validator: validateUrl,
-            trigger: 'blur'
-          }
-        ]
-      },
-      tableData: [
-        {
-          name: 'iphone xs max',
-          price: '8699',
-          count: '2',
-          totalPrice: '12000'
-        }
-      ]
-    }
-  },
-  methods: {
-    init (orderNumber) {
-      this.dataForm.orderNumber = orderNumber || 0
-      this.visible = true
-    },
-    // 表单提交
-    dataFormSubmit () {
+<script setup>
 
+
+var visible = ref(false)
+var dataForm = reactive({
+  orderId: 0,
+  remarks: '',
+  prodName: '',
+  total: 0,
+  actualTotal: 0,
+  dvyType: '',
+  orderNumber: '',
+  status: 1,
+  userAddrOrder: []
+})
+var dataRule = reactive({
+  name: [
+    {
+      required: true,
+      message: '菜单名称不能为空',
+      trigger: 'blur'
     }
+  ],
+  url: [
+    {
+      validator: validateUrl,
+      trigger: 'blur'
+    }
+  ]
+})
+var tableData = [
+  {
+  
+    price: '8699',
+    count: '2',
+    totalPrice: '12000'
   }
+]
+
+const init  = (orderNumber) => {
+  dataForm.orderNumber = orderNumber || 0
+  visible = true
 }
+// 表单提交
+const onSubmit  = () => {
+
+}
+
 </script>
 
 <style>

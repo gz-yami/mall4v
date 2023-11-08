@@ -1,13 +1,13 @@
 <template>
   <div class="mod-prod">
     <avue-crud
-      ref="crud"
+      ref="crudRef"
       :page="page"
       :data="dataList"
       :table-loading="dataListLoading"
       :permission="permission"
       :option="tableOption"
-      @search-change="searchChange"
+      @search-change="onSearch"
       @selection-change="selectionChange"
       @on-load="getDataList"
     >
@@ -16,8 +16,8 @@
           v-if="isAuth('shop:pickAddr:save')"
           type="primary"
           icon="el-icon-plus"
-          size="small"
-          @click.stop="addOrUpdateHandle()"
+          
+          @click.stop="onAddOrUpdate()"
         >
           新增
         </el-button>
@@ -25,9 +25,9 @@
         <el-button
           v-if="isAuth('shop:pickAddr:delete')"
           type="danger"
-          size="small"
+          
           :disabled="dataListSelections.length <= 0"
-          @click="deleteHandle()"
+          @click="onDelete()"
         >
           批量删除
         </el-button>
@@ -39,13 +39,13 @@
       >
         <el-tag
           v-if="scope.row.status === 1"
-          size="small"
+          
         >
           上架
         </el-tag>
         <el-tag
           v-else
-          size="small"
+          
         >
           未上架
         </el-tag>
@@ -59,8 +59,8 @@
           v-if="isAuth('prod:prod:update')"
           type="primary"
           icon="el-icon-edit"
-          size="small"
-          @click="addOrUpdateHandle(scope.row.prodId)"
+          
+          @click="onAddOrUpdate(scope.row.prodId)"
         >
           修改
         </el-button>
@@ -68,8 +68,8 @@
           v-if="isAuth('prod:prod:delete')"
           type="danger"
           icon="el-icon-delete"
-          size="small"
-          @click="deleteHandle(scope.row.prodId)"
+          
+          @click="onDelete(scope.row.prodId)"
         >
           删除
         </el-button>
@@ -78,110 +78,106 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { tableOption } from '@/crud/prod/prodList'
-export default {
-  data () {
-    return {
-      dataForm: {
-        prodName: ''
-      },
-      permission: {
-        delBtn: this.isAuth('prod:prod:delete')
-      },
-      dataList: [],
-      page: {
-        total: 0, // 总页数
-        currentPage: 1, // 当前页数
-        pageSize: 10 // 每页显示多少条
-      },
-      dataListSelections: [],
-      dataListLoading: false,
-      tableOption,
-      resourcesUrl: process.env.VUE_APP_RESOURCES_URL
-    }
-  },
-  methods: {
-    // 获取数据列表
-    getDataList (page, params, done) {
-      this.dataListLoading = true
-      this.$http({
-        url: this.$http.adornUrl('/prod/prod/page'),
-        method: 'get',
-        params: this.$http.adornParams(
-          Object.assign(
-            {
-              current: page == null ? this.page.currentPage : page.currentPage,
-              size: page == null ? this.page.pageSize : page.pageSize
-            },
-            params
-          )
-        )
-      }).then(({ data }) => {
-        this.dataList = data.records
-        for (const key in this.dataList) {
-          if (this.dataList.hasOwnProperty(key)) {
-            const element = this.dataList[key]
-            element.imgs = element.imgs.split(',')[0]
-          }
-        }
-        this.page.total = data.total
-        this.dataListLoading = false
-        if (done) {
-          done()
-        }
-      })
-    },
-    // 新增 / 修改
-    addOrUpdateHandle (id) {
-      this.$router.push({
-        path: '/prodInfo',
-        query: { prodId: id }
-      })
-    },
-    // 删除和批量删除
-    deleteHandle (id) {
-      const prodIds = this.getSeleProdIds()
-      if (id) {
-        prodIds.push(id)
+
+
+var dataForm = reactive({
+  prodName: ''
+})
+var permission = reactive({
+  delBtn: isAuth('prod:prod:delete')
+})
+var dataList = ref([])
+var page = reactive({
+  total: 0, // 总页数
+  currentPage: 1, // 当前页数
+  pageSize: 10 // 每页显示多少条
+})
+var dataListSelections = ref([])
+var dataListLoading = ref(false)
+tableOption
+var resourcesUrl = import.meta.env.VITE_APP_RESOURCES_URL
+
+// 获取数据列表
+const getDataList  = (pageParam, params, done) => {
+  dataListLoading = true
+  http({
+    url: http.adornUrl('/prod/prod/page'),
+    method: 'get',
+    params: http.adornParams(
+      Object.assign(
+        {
+          current: pageParam == null ? page.currentPage : pageParam.currentPage,
+          size: pageParam == null ? page.pageSize : pageParam.pageSize
+        },
+        params
+      )
+    )
+  }).then(({ data }) => {
+    dataList = data.records
+    for (const key in dataList) {
+      if (dataList.hasOwnProperty(key)) {
+        const element = dataList[key]
+        element.imgs = element.imgs.split(',')[0]
       }
-      this.$confirm(`确定进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          this.$http({
-            url: this.$http.adornUrl('/prod/prod'),
-            method: 'delete',
-            data: this.$http.adornData(prodIds, false)
-          }).then(({ data }) => {
-            this.$message({
-              message: '操作成功',
-              type: 'success',
-              duration: 1500,
-              onClose: () => {
-                this.getDataList(this.page)
-              }
-            })
-          })
-        })
-        .catch(() => { })
-    },
-    // 条件查询
-    searchChange (params, done) {
-      this.getDataList(this.page, params, done)
-    },
-    // 多选变化
-    selectionChange (val) {
-      this.dataListSelections = val
-    },
-    // 获取选中的商品Id列表
-    getSeleProdIds () {
-      return this.dataListSelections.map(item => {
-        return item.prodId
-      })
     }
-  }
+    page.total = data.total
+    dataListLoading = false
+    if (done) {
+      done()
+    }
+  })
 }
+// 新增 / 修改
+const onAddOrUpdate  = (id) => {
+  useRouter().push({
+    path: '/prodInfo',
+    query: { prodId: id }
+  })
+}
+// 删除和批量删除
+const onDelete  = (id) => {
+  const prodIds = getSeleProdIds()
+  if (id) {
+    prodIds.push(id)
+  }
+  ElMessageBox.confirm(`确定进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(() => {
+      http({
+        url: http.adornUrl('/prod/prod'),
+        method: 'delete',
+        data: http.adornData(prodIds, false)
+      }).then(({ data }) => {
+        ElMessage({
+          message: '操作成功',
+          type: 'success',
+          duration: 1500,
+          onClose: () => {
+            getDataList(page)
+          }
+        })
+      })
+    })
+    .catch(() => { })
+}
+// 条件查询
+const onSearch  = (params, done) => {
+  getDataList(page, params, done)
+}
+// 多选变化
+const selectionChange  = (val) => {
+  dataListSelections = val
+}
+// 获取选中的商品Id列表
+const getSeleProdIds  = () => {
+  return dataListSelections.map(item => {
+    return item.prodId
+  })
+}
+
 </script>

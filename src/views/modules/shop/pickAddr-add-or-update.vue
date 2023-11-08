@@ -6,11 +6,11 @@
   >
     <!-- native modifier has been removed, please confirm whether the function has been affected  -->
     <el-form
-      ref="dataForm"
+      ref="dataFormRef"
       :model="dataForm"
       :rules="dataRule"
       label-width="80px"
-      @keyup.enter="dataFormSubmit()"
+      @keyup.enter="onSubmit()"
     >
       <el-form-item
         label="名称"
@@ -97,187 +97,176 @@
         <el-button @click="visible = false">取消</el-button>
         <el-button
           type="primary"
-          @click="dataFormSubmit()"
+          @click="onSubmit()"
         >确定</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
 
-<script>
+<script setup>
 import { isMobile } from '@/utils/validate'
 import { Debounce } from '@/utils/debounce'
 
-export default {
+
   emits: ['refreshDataList'],
 
-  data () {
-    const validateMobile = (rule, value, callback) => {
-      if (!isMobile(value)) {
-        callback(new Error('手机号格式错误'))
-      } else {
-        callback()
-      }
-    }
-    return {
-      visible: false,
-      provinceList: [],
-      cityList: [],
-      areaList: [],
-      dataForm: {
-        addrId: 0,
-        addr: '',
-        addrName: '',
-        mobile: '',
-        area: '',
-        city: '',
-        province: '',
-        areaId: null,
-        cityId: null,
-        provinceId: null
-      },
-      page: {
-        total: 0, // 总页数
-        currentPage: 1, // 当前页数
-        pageSize: 10 // 每页显示多少条
-      },
-      dataRule: {
-        addrName: [
-          { required: true, message: '自提点名称不能为空', trigger: 'blur' },
-          { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的自提点名称', trigger: 'blur' }
-        ],
-        addr: [
-          { required: true, message: '地址不能为空', trigger: 'blur' },
-          { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的地址', trigger: 'blur' }
-        ],
-        city: [{ required: true, message: '城市不能为空', trigger: 'blur' }],
-        province: [
-          { required: true, message: '省份不能为空', trigger: 'blur' }
-        ],
-        area: [{ required: true, message: '区/县不能为空', trigger: 'blur' }],
-        mobile: [
-          { required: true, message: '手机号不能为空', trigger: 'blur' },
-          { validator: validateMobile, trigger: 'blur' }
-        ]
-      }
-    }
-  },
 
-  methods: {
-    init (id) {
-      this.dataForm.addrId = id || 0
-      this.visible = true
-      this.$nextTick(() => {
-        this.$refs.dataForm.resetFields()
-        this.cityList = []
-        this.areaList = []
-        this.dataForm.provinceId = null
-        this.dataForm.cityId = null
-        this.dataForm.areaId = null
+var visible = ref(false)
+var provinceList = ref([])
+var cityList = ref([])
+var areaList = ref([])
+var dataForm = reactive({
+  addrId: 0,
+  addr: '',
+  addrName: '',
+  mobile: '',
+  area: '',
+  city: '',
+  province: '',
+  areaId: null,
+  cityId: null,
+  provinceId: null
+})
+var page = reactive({
+  total: 0, // 总页数
+  currentPage: 1, // 当前页数
+  pageSize: 10 // 每页显示多少条
+})
+var dataRule = {
+  addrName: [
+    { required: true, message: '自提点名称不能为空', trigger: 'blur' },
+    { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的自提点名称', trigger: 'blur' }
+  ],
+  addr: [
+    { required: true, message: '地址不能为空', trigger: 'blur' },
+    { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的地址', trigger: 'blur' }
+  ],
+  city: [{ required: true, message: '城市不能为空', trigger: 'blur' }],
+  province: [
+    { required: true, message: '省份不能为空', trigger: 'blur' }
+  ],
+  area: [{ required: true, message: '区/县不能为空', trigger: 'blur' }],
+  mobile: [
+    { required: true, message: '手机号不能为空', trigger: 'blur' },
+    { validator: validateMobile, trigger: 'blur' }
+  ]
+}
+
+
+const init  = (id) => {
+  dataForm.addrId = id || 0
+  visible = true
+  nextTick(() => {
+    dataFormRef.value?.resetFields()
+    cityList = []
+    areaList = []
+    dataForm.provinceId = null
+    dataForm.cityId = null
+    dataForm.areaId = null
+  })
+  listAreaByParentId().then(({ data }) => {
+    provinceList = data
+  })
+  if (dataForm.addrId) {
+    http({
+      url: http.adornUrl(
+        `/shop/pickAddr/info/${dataForm.addrId}`
+      ),
+      method: 'get',
+      params: http.adornParams()
+    }).then(({ data }) => {
+      dataForm.addr = data.addr
+      dataForm.mobile = data.mobile
+      dataForm.addrName = data.addrName
+      dataForm.areaId = data.areaId
+      dataForm.cityId = data.cityId
+      dataForm.provinceId = data.provinceId
+      listAreaByParentId(data.provinceId).then(({ data }) => {
+        cityList = data
       })
-      this.listAreaByParentId().then(({ data }) => {
-        this.provinceList = data
-      })
-      if (this.dataForm.addrId) {
-        this.$http({
-          url: this.$http.adornUrl(
-            `/shop/pickAddr/info/${this.dataForm.addrId}`
-          ),
-          method: 'get',
-          params: this.$http.adornParams()
-        }).then(({ data }) => {
-          this.dataForm.addr = data.addr
-          this.dataForm.mobile = data.mobile
-          this.dataForm.addrName = data.addrName
-          this.dataForm.areaId = data.areaId
-          this.dataForm.cityId = data.cityId
-          this.dataForm.provinceId = data.provinceId
-          this.listAreaByParentId(data.provinceId).then(({ data }) => {
-            this.cityList = data
-          })
-          this.listAreaByParentId(data.cityId).then(({ data }) => {
-            this.areaList = data
-          })
-        })
-      }
-    },
-    listAreaByParentId (pid) {
-      if (!pid) pid = 0
-      return this.$http({
-        url: this.$http.adornUrl('/admin/area/listByPid'),
-        method: 'get',
-        params: this.$http.adornParams({ pid })
-      })
-    },
-    // 选择省
-    selectProvince (val) {
-      this.dataForm.cityId = null
-      this.dataForm.city = ''
-      // 获取城市的select
-      this.listAreaByParentId(val).then(({ data }) => {
-        this.cityList = data
-      })
-    },
-    // 选择市
-    selectCity (val) {
-      this.dataForm.areaId = null
-      this.dataForm.area = ''
-      // 获取区的select
-      this.listAreaByParentId(val).then(({ data }) => {
-        this.areaList = data
-      })
-    },
-    // 表单提交
-    dataFormSubmit: Debounce(function () {
-      for (let i = 0; i < this.provinceList.length; i++) {
-        if (this.provinceList[i].areaId === this.dataForm.provinceId) {
-          // 将省名字保存起来
-          this.dataForm.province = this.provinceList[i].areaName
-        }
-      }
-      for (let i = 0; i < this.cityList.length; i++) {
-        if (this.cityList[i].areaId === this.dataForm.cityId) {
-          // 将市名字保存起来
-          this.dataForm.city = this.cityList[i].areaName
-        }
-      }
-      for (let i = 0; i < this.areaList.length; i++) {
-        if (this.areaList[i].areaId === this.dataForm.areaId) {
-          // 将市名字保存起来
-          this.dataForm.area = this.areaList[i].areaName
-        }
-      }
-      this.$refs.dataForm.validate(valid => {
-        if (valid) {
-          this.$http({
-            url: this.$http.adornUrl('/shop/pickAddr'),
-            method: this.dataForm.addrId ? 'put' : 'post',
-            data: this.$http.adornData({
-              addrId: this.dataForm.addrId || undefined,
-              addr: this.dataForm.addr,
-              addrName: this.dataForm.addrName,
-              mobile: this.dataForm.mobile,
-              area: this.dataForm.area,
-              city: this.dataForm.city,
-              province: this.dataForm.province,
-              areaId: this.dataForm.areaId,
-              cityId: this.dataForm.cityId,
-              provinceId: this.dataForm.provinceId
-            })
-          }).then(({ data }) => {
-            this.$message({
-              message: '操作成功',
-              type: 'success',
-              duration: 1500,
-              onClose: () => {
-                this.visible = false
-                this.$emit('refreshDataList', this.page)
-              }
-            })
-          })
-        }
+      listAreaByParentId(data.cityId).then(({ data }) => {
+        areaList = data
       })
     })
   }
 }
+const listAreaByParentId  = (pid) => {
+  if (!pid) pid = 0
+  return http({
+    url: http.adornUrl('/admin/area/listByPid'),
+    method: 'get',
+    params: http.adornParams({ pid })
+  })
+}
+// 选择省
+const selectProvince  = (val) => {
+  dataForm.cityId = null
+  dataForm.city = ''
+  // 获取城市的select
+  listAreaByParentId(val).then(({ data }) => {
+    cityList = data
+  })
+}
+// 选择市
+const selectCity  = (val) => {
+  dataForm.areaId = null
+  dataForm.area = ''
+  // 获取区的select
+  listAreaByParentId(val).then(({ data }) => {
+    areaList = data
+  })
+}
+// 表单提交
+const onSubmit: Debounce(function  = () => {
+  for (let i = 0; i < provinceList.length; i++) {
+    if (provinceList[i].areaId === dataForm.provinceId) {
+      // 将省名字保存起来
+      dataForm.province = provinceList[i].areaName
+    }
+  }
+  for (let i = 0; i < cityList.length; i++) {
+    if (cityList[i].areaId === dataForm.cityId) {
+      // 将市名字保存起来
+      dataForm.city = cityList[i].areaName
+    }
+  }
+  for (let i = 0; i < areaList.length; i++) {
+    if (areaList[i].areaId === dataForm.areaId) {
+      // 将市名字保存起来
+      dataForm.area = areaList[i].areaName
+    }
+  }
+  dataFormRef.value?.validate(valid => {
+    if (valid) {
+      http({
+        url: http.adornUrl('/shop/pickAddr'),
+        method: dataForm.addrId ? 'put' : 'post',
+        data: http.adornData({
+          addrId: dataForm.addrId || undefined,
+          addr: dataForm.addr,
+          addrName: dataForm.addrName,
+          mobile: dataForm.mobile,
+          area: dataForm.area,
+          city: dataForm.city,
+          province: dataForm.province,
+          areaId: dataForm.areaId,
+          cityId: dataForm.cityId,
+          provinceId: dataForm.provinceId
+        })
+      }).then(({ data }) => {
+        ElMessage({
+          message: '操作成功',
+          type: 'success',
+          duration: 1500,
+          onClose: () => {
+            visible = false
+            emit('refreshDataList', page)
+          }
+        })
+      })
+    }
+  })
+})
+
 </script>

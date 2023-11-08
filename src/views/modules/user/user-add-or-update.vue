@@ -6,11 +6,11 @@
   >
     <!-- native modifier has been removed, please confirm whether the function has been affected  -->
     <el-form
-      ref="dataForm"
+      ref="dataFormRef"
       :model="dataForm"
       :rules="dataRule"
       label-width="80px"
-      @keyup.enter="dataFormSubmit()"
+      @keyup.enter="onSubmit()"
     >
       <el-form-item
         label="用户头像"
@@ -53,84 +53,80 @@
         <el-button @click="visible = false">取消</el-button>
         <el-button
           type="primary"
-          @click="dataFormSubmit()"
+          @click="onSubmit()"
         >确定</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
 
-<script>
+<script setup>
 import { Debounce } from '@/utils/debounce'
-export default {
+
   emits: ['refreshDataList'],
 
-  data () {
-    return {
-      visible: false,
-      dataForm: {
-        userId: 0,
-        nickName: '',
-        pic: '',
-        status: 1
-      },
-      page: {
-        total: 0, // 总页数
-        currentPage: 1, // 当前页数
-        pageSize: 10 // 每页显示多少条
-      },
-      resourcesUrl: process.env.VUE_APP_RESOURCES_URL,
-      dataRule: {
-        nickName: [
-          { required: true, message: '用户名不能为空', trigger: 'blur' }
-        ]
-      }
-    }
-  },
 
-  methods: {
-    init (id) {
-      this.dataForm.userId = id || 0
-      this.visible = true
-      this.$nextTick(() => {
-        this.$refs.dataForm.resetFields()
-      })
-      if (this.dataForm.userId) {
-        this.$http({
-          url: this.$http.adornUrl(`/admin/user/info/${this.dataForm.userId}`),
-          method: 'get',
-          params: this.$http.adornParams()
-        }).then(({ data }) => {
-          this.dataForm = data
-        })
-      }
-    },
-    // 表单提交
-    dataFormSubmit: Debounce(function () {
-      this.$refs.dataForm.validate(valid => {
-        if (valid) {
-          this.$http({
-            url: this.$http.adornUrl('/admin/user'),
-            method: this.dataForm.userId ? 'put' : 'post',
-            data: this.$http.adornData({
-              userId: this.dataForm.userId || undefined,
-              nickName: this.dataForm.nickName,
-              status: this.dataForm.status
-            })
-          }).then(({ data }) => {
-            this.$message({
-              message: '操作成功',
-              type: 'success',
-              duration: 1500,
-              onClose: () => {
-                this.visible = false
-                this.$emit('refreshDataList', this.page)
-              }
-            })
-          })
-        }
-      })
+var visible = ref(false)
+var dataForm = reactive({
+  userId: 0,
+  nickName: '',
+  pic: '',
+  status: 1
+})
+var page = reactive({
+  total: 0, // 总页数
+  currentPage: 1, // 当前页数
+  pageSize: 10 // 每页显示多少条
+})
+const resourcesUrl = import.meta.env.VITE_APP_RESOURCES_URL
+var dataRule = {
+  nickName: [
+    { required: true, message: '用户名不能为空', trigger: 'blur' }
+  ]
+}
+
+
+const init  = (id) => {
+  dataForm.userId = id || 0
+  visible = true
+  nextTick(() => {
+    dataFormRef.value?.resetFields()
+  })
+  if (dataForm.userId) {
+    http({
+      url: http.adornUrl(`/admin/user/info/${dataForm.userId}`),
+      method: 'get',
+      params: http.adornParams()
+    }).then(({ data }) => {
+      dataForm = data
     })
   }
 }
+// 表单提交
+const onSubmit: Debounce(function  = () => {
+  dataFormRef.value?.validate(valid => {
+    if (valid) {
+      http({
+        url: http.adornUrl('/admin/user'),
+        method: dataForm.userId ? 'put' : 'post',
+        data: http.adornData({
+          userId: dataForm.userId || undefined,
+          nickName: dataForm.nickName,
+          status: dataForm.status
+        })
+      }).then(({ data }) => {
+        ElMessage({
+          message: '操作成功',
+          type: 'success',
+          duration: 1500,
+          onClose: () => {
+            visible = false
+            emit('refreshDataList', page)
+          }
+        })
+      })
+    }
+  })
+})
+
 </script>

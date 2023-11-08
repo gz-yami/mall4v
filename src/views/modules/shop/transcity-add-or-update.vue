@@ -8,11 +8,11 @@
     >
       <!-- native modifier has been removed, please confirm whether the function has been affected  -->
       <el-form
-        ref="dataForm"
+        ref="dataFormRef"
         :model="dataForm"
         label-width="80px"
         style="height:400px"
-        @keyup.enter="dataFormSubmit()"
+        @keyup.enter="onSubmit()"
       >
         <el-scrollbar style="height:100%">
           <el-form-item
@@ -21,7 +21,7 @@
           >
             <el-tree
               v-if="visible"
-              ref="menuListTree"
+              ref="menuListTreeRef"
               :data="menuList"
               :props="menuListTreeProps"
               node-key="areaId"
@@ -35,7 +35,7 @@
           <el-button @click="visible = false">取消</el-button>
           <el-button
             type="primary"
-            @click="dataFormSubmit()"
+            @click="onSubmit()"
           >确定</el-button>
         </span>
       </template>
@@ -43,83 +43,79 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { treeDataTranslate } from '@/utils'
-export default {
+
   emits: ['refreshDataList'],
 
-  data () {
-    return {
-      type: 0,
-      visible: false,
-      menuList: [],
-      rowIndex: 0,
-      menuListTreeProps: {
-        label: 'areaName',
-        children: 'children'
-      },
-      dataForm: {
-        transfeeId: 0
+
+var type = ref(0)
+var visible = ref(false)
+var menuList = ref([])
+var rowIndex = ref(0)
+var menuListTreeProps = reactive({
+  label: 'areaName',
+  children: 'children'
+})
+var dataForm = {
+  transfeeId: 0
+}
+
+
+const init  = (rowIndex, cityList, allSelectCityList, type) => {
+  type = type
+  rowIndex = rowIndex
+  if (menuList.length === 0) {
+    // 获取所有省和市
+    http({
+      url: http.adornUrl('/admin/area/list'),
+      method: 'get',
+      params: http.adornParams()
+    }).then(({ data }) => {
+      menuList = treeDataTranslate(data, 'areaId', 'parentId')
+    }).then(() => {
+      visible = true
+      disabledNodes(cityList, allSelectCityList)
+      nextTick(() => {
+        dataFormRef.value?.resetFields()
+        menuListTreeRef.value?.setCheckedNodes(cityList)
+      })
+    })
+  } else {
+    visible = true
+    disabledNodes(cityList, allSelectCityList)
+    nextTick(() => {
+      dataFormRef.value?.resetFields()
+      menuListTreeRef.value?.setCheckedNodes(cityList)
+    })
+  }
+}
+const disabledNodes  = (cityList, allSelectCityList) => {
+  for (let i = 0; i < menuList.length; i++) {
+    const childrens = menuList[i].children
+    menuList[i].disabled = false
+    let disabledNum = 0
+    for (let j = 0; j < childrens.length; j++) {
+      const city = childrens[j]
+      menuList[i].children[j].disabled = false
+      const allHasCity = allSelectCityList.findIndex((item) => city.areaId === item.areaId) > -1
+      const listHasCity = cityList.findIndex((item) => city.areaId === item.areaId) > -1
+      if (allHasCity && !listHasCity) {
+        menuList[i].children[j].disabled = true
+        disabledNum++
       }
     }
-  },
-
-  methods: {
-    init (rowIndex, cityList, allSelectCityList, type) {
-      this.type = type
-      this.rowIndex = rowIndex
-      if (this.menuList.length === 0) {
-        // 获取所有省和市
-        this.$http({
-          url: this.$http.adornUrl('/admin/area/list'),
-          method: 'get',
-          params: this.$http.adornParams()
-        }).then(({ data }) => {
-          this.menuList = treeDataTranslate(data, 'areaId', 'parentId')
-        }).then(() => {
-          this.visible = true
-          this.disabledNodes(cityList, allSelectCityList)
-          this.$nextTick(() => {
-            this.$refs.dataForm.resetFields()
-            this.$refs.menuListTree.setCheckedNodes(cityList)
-          })
-        })
-      } else {
-        this.visible = true
-        this.disabledNodes(cityList, allSelectCityList)
-        this.$nextTick(() => {
-          this.$refs.dataForm.resetFields()
-          this.$refs.menuListTree.setCheckedNodes(cityList)
-        })
-      }
-    },
-    disabledNodes (cityList, allSelectCityList) {
-      for (let i = 0; i < this.menuList.length; i++) {
-        const childrens = this.menuList[i].children
-        this.menuList[i].disabled = false
-        let disabledNum = 0
-        for (let j = 0; j < childrens.length; j++) {
-          const city = childrens[j]
-          this.menuList[i].children[j].disabled = false
-          const allHasCity = allSelectCityList.findIndex((item) => city.areaId === item.areaId) > -1
-          const listHasCity = cityList.findIndex((item) => city.areaId === item.areaId) > -1
-          if (allHasCity && !listHasCity) {
-            this.menuList[i].children[j].disabled = true
-            disabledNum++
-          }
-        }
-        if (disabledNum === this.menuList[i].children.length) {
-          this.menuList[i].disabled = true
-        }
-      }
-    },
-    // 表单提交
-    dataFormSubmit () {
-      this.$emit('refreshDataList', this.rowIndex, this.$refs.menuListTree.getCheckedNodes(true), this.type)
-      this.visible = false
+    if (disabledNum === menuList[i].children.length) {
+      menuList[i].disabled = true
     }
   }
 }
+// 表单提交
+const onSubmit  = () => {
+  emit('refreshDataList', rowIndex, menuListTree.getCheckedNodes(true), thisRef.value?.type)
+  visible = false
+}
+
 </script>
 
 <style lang="scss">

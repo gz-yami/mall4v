@@ -7,10 +7,10 @@
   >
     <!-- native modifier has been removed, please confirm whether the function has been affected  -->
     <el-form
-      ref="dataForm"
+      ref="dataFormRef"
       :model="dataForm"
       label-width="80px"
-      @keyup.enter="dataFormSubmit()"
+      @keyup.enter="onSubmit()"
     >
       <el-form-item
         v-if="dataForm.type !== 2"
@@ -44,69 +44,65 @@
         <el-button @click="visible = false">取消</el-button>
         <el-button
           type="primary"
-          @click="dataFormSubmit()"
+          @click="onSubmit()"
         >确定</el-button>
       </span>
     </template>
   </el-dialog>
 </template>
-<script>
+<script setup>
 import { Debounce } from '@/utils/debounce'
-export default {
+
   emits: ['refreshDataList'],
 
-  data () {
-    return {
-      visible: false,
-      dataForm: {
-        addrOrderId: 0,
-        receiver: '',
-        province: '',
-        mobile: ''
-      }
-    }
-  },
 
-  methods: {
-    init (addrOrderId) {
-      this.dataForm.addrOrderId = addrOrderId
-      this.$http({
-        url: this.$http.adornUrl(`/prod/category/listCategory/${this.dataForm.addrOrderId}`),
-        method: 'get',
-        params: this.$http.adornParams()
+var visible = ref(false)
+var dataForm = {
+  addrOrderId: 0,
+  receiver: '',
+  province: '',
+  mobile: ''
+}
+
+
+const init  = (addrOrderId) => {
+  dataForm.addrOrderId = addrOrderId
+  http({
+    url: http.adornUrl(`/prod/category/listCategory/${dataForm.addrOrderId}`),
+    method: 'get',
+    params: http.adornParams()
+  }).then(({ data }) => {
+    dataForm = data
+  }).then(() => {
+    visible = true
+    nextTick(() => {
+      dataFormRef.value?.resetFields()
+    })
+  })
+}
+// 表单提交
+const onSubmit: Debounce(function  = () => {
+  dataFormRef.value?.validate((valid) => {
+    if (valid) {
+      http({
+        url: http.adornUrl('/prod/category'),
+        method: dataForm.currentId ? 'put' : 'post',
+        data: http.adornData({
+          categoryId: dataForm.currentId || undefined
+        })
       }).then(({ data }) => {
-        this.dataForm = data
-      }).then(() => {
-        this.visible = true
-        this.$nextTick(() => {
-          this.$refs.dataForm.resetFields()
+        ElMessage({
+          message: '操作成功',
+          type: 'success',
+          duration: 1500,
+          onClose: () => {
+            visible = false
+            emit('refreshDataList')
+          }
         })
       })
-    },
-    // 表单提交
-    dataFormSubmit: Debounce(function () {
-      this.$refs.dataForm.validate((valid) => {
-        if (valid) {
-          this.$http({
-            url: this.$http.adornUrl('/prod/category'),
-            method: this.dataForm.currentId ? 'put' : 'post',
-            data: this.$http.adornData({
-              categoryId: this.dataForm.currentId || undefined
-            })
-          }).then(({ data }) => {
-            this.$message({
-              message: '操作成功',
-              type: 'success',
-              duration: 1500,
-              onClose: () => {
-                this.visible = false
-                this.$emit('refreshDataList')
-              }
-            })
-          })
-        }
-      })
-    })
-  }
-}
+    }
+  })
+})
+
 </script>

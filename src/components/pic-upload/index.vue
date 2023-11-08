@@ -21,42 +21,37 @@
   </div>
 </template>
 
-<script>
-export default {
+<script setup>
 
-  props: {
-    value: {
-      default: '',
-      type: String
-    }
-  },
+const props = defineProps({
+  value: {
+    default: '',
+    type: String
+  }
+})
   emits: ['input'],
 
-  data () {
-    return {
-      resourcesUrl: process.env.VUE_APP_RESOURCES_URL
-    }
-  },
 
-  methods: {
-    // 图片上传
-    handleUploadSuccess (response, file, fileList) {
-      this.$emit('input', file.response.data)
-    },
-    // 限制图片上传大小
-    beforeAvatarUpload (file) {
-      const isLt2M = file.size / 1024 / 1024 < 2
-      const isJPG = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/gif' || file.type === 'image/jpg'
-      if (!isJPG) {
-        this.$message.error('上传图片只能是jpeg/jpg/png/gif 格式!')
-      }
-      if (!isLt2M) {
-        this.$message.error('上传图片大小不能超过 2MB!')
-      }
-      return isLt2M && isJPG
-    }
-  }
+var resourcesUrl = import.meta.env.VITE_APP_RESOURCES_URL
+
+
+// 图片上传
+const handleUploadSuccess  = (response, file, fileList) => {
+  emit('update:modelValue', file.response.data)
 }
+// 限制图片上传大小
+const beforeAvatarUpload  = (file) => {
+  const isLt2M = file.size / 1024 / 1024 < 2
+  const isJPG = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/gif' || file.type === 'image/jpg'
+  if (!isJPG) {
+    ElMessage.error('上传图片只能是jpeg/jpg/png/gif 格式!')
+  }
+  if (!isLt2M) {
+    ElMessage.error('上传图片大小不能超过 2MB!')
+  }
+  return isLt2M && isJPG
+}
+
 </script>
 
 <style lang="scss">

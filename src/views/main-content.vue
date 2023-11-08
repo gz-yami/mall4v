@@ -70,83 +70,79 @@
   </main>
 </template>
 
-<script>
+<script setup>
 import { isURL } from '@/utils/validate'
-export default {
-  data () {
-    return {
-    }
-  },
+
+
   computed: {
     documentClientHeight: {
-      get () { return this.$store.state.common.documentClientHeight }
+      get () { return $store.state.common.documentClientHeight }
     },
     menuActiveName: {
-      get () { return this.$store.state.common.menuActiveName },
-      set (val) { this.$store.commit('common/updateMenuActiveName', val) }
+      get () { return $store.state.common.menuActiveName },
+      set (val) { $store.commit('common/updateMenuActiveName', val) }
     },
     mainTabs: {
-      get () { return this.$store.state.common.mainTabs },
-      set (val) { this.$store.commit('common/updateMainTabs', val) }
+      get () { return $store.state.common.mainTabs },
+      set (val) { $store.commit('common/updateMainTabs', val) }
     },
     mainTabsActiveName: {
-      get () { return this.$store.state.common.mainTabsActiveName },
-      set (val) { this.$store.commit('common/updateMainTabsActiveName', val) }
+      get () { return $store.state.common.mainTabsActiveName },
+      set (val) { $store.commit('common/updateMainTabsActiveName', val) }
     },
     siteContentViewHeight () {
-      let height = this.documentClientHeight - 50 - 30 - 2
-      if (this.$route.meta.isTab) {
+      let height = documentClientHeight - 50 - 30 - 2
+      if (useRoute().meta.isTab) {
         height -= 40
-        return isURL(this.$route.meta.iframeUrl) ? { height: height + 'px' } : { minHeight: height + 'px' }
+        return isURL(useRoute().meta.iframeUrl) ? { height: height + 'px' } : { minHeight: height + 'px' }
       }
       return { minHeight: height + 'px' }
     }
   },
-  methods: {
-    // tabs, 选中tab
-    selectedTabHandle (tab) {
-      tab = this.mainTabs.filter(item => item.name === tab.name)
-      if (tab.length >= 1) {
-        this.$router.push({ name: tab[0].name })
-      }
-    },
-    // tabs, 删除tab
-    removeTabHandle (tabName) {
-      this.mainTabs = this.mainTabs.filter(item => item.name !== tabName)
-      if (this.mainTabs.length >= 1) {
-        // 当前选中tab被删除
-        if (tabName === this.mainTabsActiveName) {
-          this.$router.push({ name: this.mainTabs[this.mainTabs.length - 1].name }, () => {
-            this.mainTabsActiveName = this.$route.name
-          })
-        }
-      } else {
-        this.menuActiveName = ''
-        this.$router.push({ name: 'home' })
-      }
-    },
-    // tabs, 关闭当前
-    tabsCloseCurrentHandle () {
-      this.removeTabHandle(this.mainTabsActiveName)
-    },
-    // tabs, 关闭其它
-    tabsCloseOtherHandle () {
-      this.mainTabs = this.mainTabs.filter(item => item.name === this.mainTabsActiveName)
-    },
-    // tabs, 关闭全部
-    tabsCloseAllHandle () {
-      this.mainTabs = []
-      this.menuActiveName = ''
-      this.$router.push({ name: 'home' })
-    },
-    // tabs, 刷新当前
-    tabsRefreshCurrentHandle () {
-      const tempTabName = this.mainTabsActiveName
-      this.removeTabHandle(tempTabName)
-      this.$nextTick(() => {
-        this.$router.push({ name: tempTabName })
-      })
-    }
+
+// tabs, 选中tab
+const selectedTabHandle  = (tab) => {
+  tab = mainTabs.filter(item => item.name === tab.name)
+  if (tab.length >= 1) {
+    useRouter().push({ name: tab[0].name })
   }
 }
+// tabs, 删除tab
+const removeTabHandle  = (tabName) => {
+  mainTabs = mainTabs.filter(item => item.name !== tabName)
+  if (mainTabs.length >= 1) {
+    // 当前选中tab被删除
+    if (tabName === mainTabsActiveName) {
+      useRouter().push({ name: mainTabs[mainTabs.length - 1].name }, () => {
+        mainTabsActiveName = useRoute().name
+      })
+    }
+  } else {
+    menuActiveName = ''
+    useRouter().push({ name: 'home' })
+  }
+}
+// tabs, 关闭当前
+const tabsCloseCurrentHandle  = () => {
+  removeTabHandle(mainTabsActiveName)
+}
+// tabs, 关闭其它
+const tabsCloseOtherHandle  = () => {
+  mainTabs = mainTabs.filter(item => item.name === mainTabsActiveName)
+}
+// tabs, 关闭全部
+const tabsCloseAllHandle  = () => {
+  mainTabs = []
+  menuActiveName = ''
+  useRouter().push({ name: 'home' })
+}
+// tabs, 刷新当前
+const tabsRefreshCurrentHandle  = () => {
+  const tempTabName = mainTabsActiveName
+  removeTabHandle(tempTabName)
+  nextTick(() => {
+    useRouter().push({ name: tempTabName })
+  })
+}
+
 </script>

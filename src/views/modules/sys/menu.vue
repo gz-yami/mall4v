@@ -8,7 +8,7 @@
         <el-button
           v-if="isAuth('sys:menu:save')"
           type="primary"
-          @click="addOrUpdateHandle()"
+          @click="onAddOrUpdate()"
         >
           新增
         </el-button>
@@ -45,20 +45,20 @@
         <template #default="scope">
           <el-tag
             v-if="scope.row.type === 0"
-            size="small"
+            
           >
             目录
           </el-tag>
           <el-tag
             v-else-if="scope.row.type === 1"
-            size="small"
+            
             type="success"
           >
             菜单
           </el-tag>
           <el-tag
             v-else-if="scope.row.type === 2"
-            size="small"
+            
             type="info"
           >
             按钮
@@ -106,16 +106,16 @@
           <el-button
             v-if="isAuth('sys:menu:update')"
             type="text"
-            size="small"
-            @click="addOrUpdateHandle(scope.row.menuId)"
+            
+            @click="onAddOrUpdate(scope.row.menuId)"
           >
             修改
           </el-button>
           <el-button
             v-if="isAuth('sys:menu:delete')"
             type="text"
-            size="small"
-            @click="deleteHandle(scope.row.menuId)"
+            
+            @click="onDelete(scope.row.menuId)"
           >
             删除
           </el-button>
@@ -125,73 +125,66 @@
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update
       v-if="addOrUpdateVisible"
-      ref="addOrUpdate"
+      ref="addOrUpdateRef"
       @refresh-data-list="getDataList"
     />
   </div>
 </template>
 
-<script>
+<script setup>
 import AddOrUpdate from './menu-add-or-update'
 import { treeDataTranslate } from '@/utils'
-export default {
-  components: {
-    AddOrUpdate
-  },
-  data () {
-    return {
-      dataForm: {},
-      dataList: [],
-      dataListLoading: false,
-      addOrUpdateVisible: false
-    }
-  },
-  activated () {
-    this.getDataList()
-  },
-  methods: {
-    // 获取数据列表
-    getDataList () {
-      this.dataListLoading = true
-      this.$http({
-        url: this.$http.adornUrl('/sys/menu/table'),
-        method: 'get',
-        params: this.$http.adornParams()
-      }).then(({ data }) => {
-        this.dataList = treeDataTranslate(data, 'menuId')
-        this.dataListLoading = false
-      })
-    },
-    // 新增 / 修改
-    addOrUpdateHandle (id) {
-      this.addOrUpdateVisible = true
-      this.$nextTick(() => {
-        this.$refs.addOrUpdate.init(id)
-      })
-    },
-    // 删除
-    deleteHandle (id) {
-      this.$confirm(`确定对[id=${id}]进行[删除]操作?`, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.$http({
-          url: this.$http.adornUrl(`/sys/menu/${id}`),
-          method: 'delete',
-          data: this.$http.adornData()
-        }).then(({ data }) => {
-          this.$message({
-            message: '操作成功',
-            type: 'success',
-            duration: 1500,
-            onClose: () => {
-              this.getDataList()
-            }
-          })
-        })
-      })
-    }
-  }
+
+
+var dataForm = reactive({})
+var dataList = ref([])
+var dataListLoading = ref(false)
+var addOrUpdateVisible = ref(false)
+onActivated(() => {
+  getDataList()
+})
+
+// 获取数据列表
+const getDataList  = () => {
+  dataListLoading = true
+  http({
+    url: http.adornUrl('/sys/menu/table'),
+    method: 'get',
+    params: http.adornParams()
+  }).then(({ data }) => {
+    dataList = treeDataTranslate(data, 'menuId')
+    dataListLoading = false
+  })
 }
+// 新增 / 修改
+const onAddOrUpdate  = (id) => {
+  addOrUpdateVisible = true
+  nextTick(() => {
+    addOrUpdate.value?.init(id)
+  })
+}
+// 删除
+const onDelete  = (id) => {
+  ElMessageBox.confirm(`确定对[id=${id}]进行[删除]操作?`, '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    http({
+      url: http.adornUrl(`/sys/menu/${id}`),
+      method: 'delete',
+      data: http.adornData()
+    }).then(({ data }) => {
+      ElMessage({
+        message: '操作成功',
+        type: 'success',
+        duration: 1500,
+        onClose: () => {
+          getDataList()
+        }
+      })
+    })
+  })
+}
+
 </script>

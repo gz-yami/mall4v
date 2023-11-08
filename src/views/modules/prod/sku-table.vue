@@ -48,7 +48,7 @@
           <template #default="scope">
             <el-input-number
               v-model="scope.row.price"
-              size="small"
+              
               controls-position="right"
               :precision="2"
               :max="1000000000"
@@ -65,7 +65,7 @@
           <template #default="scope">
             <el-input-number
               v-model="scope.row.oriPrice"
-              size="small"
+              
               controls-position="right"
               :precision="2"
               :max="1000000000"
@@ -82,7 +82,7 @@
           <template #default="scope">
             <el-input-number
               v-model="scope.row.stocks"
-              size="small"
+              
               :min="0"
               controls-position="right"
               type="number"
@@ -127,7 +127,7 @@
             <el-button
               v-if="scope.row.status"
               type="text"
-              size="small"
+              
               @click="changeSkuStatus(`${scope.$index}`)"
             >
               禁用
@@ -135,7 +135,7 @@
             <el-button
               v-else
               type="text"
-              size="small"
+              
               @click="changeSkuStatus(`${scope.$index}`)"
             >
               启用
@@ -147,107 +147,99 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import PicUpload from '@/components/pic-upload'
-export default {
 
-  components: {
-    PicUpload
-  },
 
-  props: {
-    value: {
-      default: [],
-      type: Array
-    },
-    prodName: {
-      default: ''
-    }
+const props = defineProps({
+  value: {
+    default: [],
+    type: Array
   },
+  prodName: {
+    default: ''
+  }
+})
   emits: ['input'],
 
-  data () {
-    return {
-      // 数据库中的规格
-      dbSpecs: [],
-      // 根据选定的规格所查询出来的规格值
-      dbSpecValues: [],
-      specs: [], // 使用的规格
-      initing: false
-    }
-  },
+
+// 数据库中的规格
+var dbSpecs = ref([])
+// 根据选定的规格所查询出来的规格值
+var dbSpecValues = ref([])
+var specs = ref([]) // 使用的规格
+var initing = ref(false)
 
   computed: {
     tableLeftTitles () {
       const res = []
-      for (let i = 0; i < this.skuTags.length; i++) {
-        const skuTag = this.skuTags[i]
+      for (let i = 0; i < skuTags.length; i++) {
+        const skuTag = skuTags[i]
         res.push(skuTag.tagName)
       }
       return res
     },
     skuTags: {
-      get () { return this.$store.state.prod.skuTags }
+      get () { return $store.state.prod.skuTags }
     },
     defalutSku () {
-      return this.$store.state.prod.defalutSku
+      return $store.state.prod.defalutSku
     }
   },
 
   watch: {
     prodName: function () {
-      this.skuAddProdName()
+      skuAddProdName()
     }
   },
 
   // activated: function () {
-  //   this.$emit('input', [Object.assign({}, this.defalutSku)])
+  //   emit('update:modelValue', [Object.assign({}, defalutSku)])
   // },
   created: function () {
-    this.$http({
-      url: this.$http.adornUrl('/prod/spec/list'),
+    http({
+      url: http.adornUrl('/prod/spec/list'),
       method: 'get',
-      params: this.$http.adornParams()
+      params: http.adornParams()
     }).then(({ data }) => {
-      this.dbSpecs = data
+      dbSpecs = data
     })
   },
 
-  methods: {
-    init () {
-      this.initing = true
-    },
-    getTableSpecData () {
-      return this.value
-    },
-    tableSpanMethod ({ row, column, rowIndex, columnIndex }) {
 
-    },
-    changeSkuStatus (tagIndex) {
-      this.value[tagIndex].status = this.value[tagIndex].status ? 0 : 1
-    },
-    skuAddProdName () {
-      if (this.initing) {
-        return
-      }
-      const skuList = []
-      for (let i = 0; i < this.value.length; i++) {
-        const sku = Object.assign({}, this.value[i])
-        if (!sku.properties) {
-          return
-        }
-        sku.skuName = ''
-        const properties = sku.properties.split(';')
-        for (const propertiesKey in properties) {
-          sku.skuName += properties[propertiesKey].split(':')[1] + ' '
-        }
-        sku.prodName = this.prodName + ' ' + sku.skuName
-        skuList.push(sku)
-      }
-      this.$emit('input', skuList)
-    }
-  }
+const init  = () => {
+  initing = true
 }
+const getTableSpecData  = () => {
+  return value
+}
+const tableSpanMethod  = ({ row, column, rowIndex, columnIndex }) => {
+
+}
+const changeSkuStatus  = (tagIndex) => {
+  value[tagIndex].status = value[tagIndex].status ? 0 : 1
+}
+const skuAddProdName  = () => {
+  if (initing) {
+    return
+  }
+  const skuList = []
+  for (let i = 0; i < value.length; i++) {
+    const sku = Object.assign({}, value[i])
+    if (!sku.properties) {
+      return
+    }
+    sku.skuName = ''
+    const properties = sku.properties.split(';')
+    for (const propertiesKey in properties) {
+      sku.skuName += properties[propertiesKey].split(':')[1] + ' '
+    }
+    sku.prodName = prodName + ' ' + sku.skuName
+    skuList.push(sku)
+  }
+  emit('update:modelValue', skuList)
+}
+
 </script>
 
 <style lang="scss">

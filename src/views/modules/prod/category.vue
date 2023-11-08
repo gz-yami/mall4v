@@ -9,8 +9,8 @@
           v-if="isAuth('prod:category:save')"
           type="primary"
           icon="el-icon-plus"
-          size="small"
-          @click="addOrUpdateHandle()"
+          
+          @click="onAddOrUpdate()"
         >
           新增
         </el-button>
@@ -48,14 +48,14 @@
         <template #default="scope">
           <el-tag
             v-if="scope.row.status === 0"
-            size="small"
+            
             type="danger"
           >
             下线
           </el-tag>
           <el-tag
             v-else
-            size="small"
+            
           >
             正常
           </el-tag>
@@ -76,16 +76,16 @@
           <el-button
             v-if="isAuth('prod:category:update')"
             type="primary"
-            size="small"
-            @click="addOrUpdateHandle(scope.row.categoryId)"
+            
+            @click="onAddOrUpdate(scope.row.categoryId)"
           >
             修改
           </el-button>
           <el-button
             v-if="isAuth('prod:category:delete')"
             type="danger"
-            size="small"
-            @click="deleteHandle(scope.row.categoryId)"
+            
+            @click="onDelete(scope.row.categoryId)"
           >
             删除
           </el-button>
@@ -95,77 +95,70 @@
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update
       v-if="addOrUpdateVisible"
-      ref="addOrUpdate"
+      ref="addOrUpdateRef"
       @refresh-data-list="getDataList"
     />
   </div>
 </template>
 
-<script>
+<script setup>
 import AddOrUpdate from './category-add-or-update'
 import { treeDataTranslate } from '@/utils'
 
-export default {
-  components: {
-    AddOrUpdate
-  },
-  data () {
-    return {
-      dataForm: {},
-      dataList: [],
-      dataListLoading: false,
-      addOrUpdateVisible: false,
-      resourcesUrl: process.env.VUE_APP_RESOURCES_URL
-    }
-  },
-  activated () {
-    this.getDataList()
-  },
-  methods: {
-    // 获取数据列表
-    getDataList () {
-      this.dataListLoading = true
-      this.$http({
-        url: this.$http.adornUrl('/prod/category/table'),
-        method: 'get',
-        params: this.$http.adornParams()
-      }).then(({ data }) => {
-        this.dataList = treeDataTranslate(data, 'categoryId', 'parentId')
-        this.dataListLoading = false
-      })
-    },
-    // 新增 / 修改
-    addOrUpdateHandle (id) {
-      this.addOrUpdateVisible = true
-      this.$nextTick(() => {
-        this.$refs.addOrUpdate.init(id)
-      })
-    },
-    // 删除
-    deleteHandle (id) {
-      this.$confirm('确定进行删除操作?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.$http({
-          url: this.$http.adornUrl(`/prod/category/${id}`),
-          method: 'delete',
-          data: this.$http.adornData()
-        }).then(({ data }) => {
-          this.$message({
-            message: '操作成功',
-            type: 'success',
-            duration: 1500,
-            onClose: () => {
-              this.getDataList()
-            }
-          })
-        })
-      })
-    }
-  }
+
+
+var dataForm = reactive({})
+var dataList = ref([])
+var dataListLoading = ref(false)
+var addOrUpdateVisible = ref(false)
+var resourcesUrl = import.meta.env.VITE_APP_RESOURCES_URL
+onActivated(() => {
+  getDataList()
+})
+
+// 获取数据列表
+const getDataList  = () => {
+  dataListLoading = true
+  http({
+    url: http.adornUrl('/prod/category/table'),
+    method: 'get',
+    params: http.adornParams()
+  }).then(({ data }) => {
+    dataList = treeDataTranslate(data, 'categoryId', 'parentId')
+    dataListLoading = false
+  })
 }
+// 新增 / 修改
+const onAddOrUpdate  = (id) => {
+  addOrUpdateVisible = true
+  nextTick(() => {
+    addOrUpdate.value?.init(id)
+  })
+}
+// 删除
+const onDelete  = (id) => {
+  ElMessageBox.confirm('确定进行删除操作?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    http({
+      url: http.adornUrl(`/prod/category/${id}`),
+      method: 'delete',
+      data: http.adornData()
+    }).then(({ data }) => {
+      ElMessage({
+        message: '操作成功',
+        type: 'success',
+        duration: 1500,
+        onClose: () => {
+          getDataList()
+        }
+      })
+    })
+  })
+}
+
 </script>
 <style lang="scss">
 .mod-category {

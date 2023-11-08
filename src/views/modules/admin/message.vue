@@ -1,12 +1,12 @@
 <template>
   <div class="mod-user">
     <avue-crud
-      ref="crud"
+      ref="crudRef"
       :page="page"
       :data="dataList"
       :option="tableOption"
       :permission="permission"
-      @search-change="searchChange"
+      @search-change="onSearch"
       @selection-change="selectionChange"
       @on-load="getDataList"
     >
@@ -15,8 +15,8 @@
           v-if="isAuth('admin:message:save')"
           type="primary"
           icon="el-icon-plus"
-          size="small"
-          @click.stop="addOrUpdateHandle()"
+          
+          @click.stop="onAddOrUpdate()"
         >
           新增
         </el-button>
@@ -25,7 +25,7 @@
           v-if="isAuth('admin:message:delete')"
           type="danger"
           :disabled="dataListSelections.length <= 0"
-          @click="deleteHandle()"
+          @click="onDelete()"
         >
           批量删除
         </el-button>
@@ -37,14 +37,14 @@
       >
         <el-tag
           v-if="scope.row.status === 0"
-          size="small"
+          
           type="danger"
         >
           未审核
         </el-tag>
         <el-tag
           v-else
-          size="small"
+          
         >
           审核通过
         </el-tag>
@@ -57,7 +57,7 @@
         <el-button
           v-if="isAuth('admin:message:release')"
           type="text"
-          size="small"
+          
           @click="setMessageRelease(scope.row.id)"
         >
           公开留言
@@ -65,7 +65,7 @@
         <el-button
           v-if="isAuth('admin:message:cancel')"
           type="text"
-          size="small"
+          
           @click="setMessageCancel(scope.row.id)"
         >
           取消公开
@@ -73,16 +73,16 @@
         <el-button
           v-if="isAuth('admin:message:update')"
           type="text"
-          size="small"
-          @click="addOrUpdateHandle(scope.row.id)"
+          
+          @click="onAddOrUpdate(scope.row.id)"
         >
           修改
         </el-button>
         <el-button
           v-if="isAuth('admin:message:delete')"
           type="text"
-          size="small"
-          @click="deleteHandle(scope.row.id)"
+          
+          @click="onDelete(scope.row.id)"
         >
           删除
         </el-button>
@@ -92,155 +92,148 @@
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update
       v-if="addOrUpdateVisible"
-      ref="addOrUpdate"
+      ref="addOrUpdateRef"
       @refresh-data-list="getDataList"
     />
   </div>
 </template>
 
-<script>
+<script setup>
 import AddOrUpdate from './message-add-or-update'
 import { tableOption } from '@/crud/admin/message'
-export default {
-  components: {
-    AddOrUpdate
-  },
-  data () {
-    return {
-      dataForm: {
-        message: ''
-      },
-      dataList: [],
-      pageIndex: 1,
-      pageSize: 10,
-      totalPage: 0,
-      dataListLoading: false,
-      dataListSelections: [],
-      addOrUpdateVisible: false,
-      tableOption,
-      page: {
-        total: 0, // 总页数
-        currentPage: 1, // 当前页数
-        pageSize: 10 // 每页显示多少条
-      },
-      permission: {
-        delBtn: this.isAuth('prod:prod:delete')
-      }
+
+
+var dataForm = reactive({
+  message: ''
+})
+var dataList = ref([])
+var pageIndex = ref(1)
+var pageSize = ref(10)
+var totalPage = ref(0)
+var dataListLoading = ref(false)
+var dataListSelections = ref([])
+var addOrUpdateVisible = ref(false)
+tableOption
+var page = reactive({
+  total: 0, // 总页数
+  currentPage: 1, // 当前页数
+  pageSize: 10 // 每页显示多少条
+})
+var permission = {
+  delBtn: isAuth('prod:prod:delete')
+}
+
+// 获取数据列表
+const getDataList  = (pageParam, params, done) => {
+  dataListLoading = true
+  http({
+    url: http.adornUrl('/admin/message/page'),
+    method: 'get',
+    params: http.adornParams(
+      Object.assign(
+        {
+          current: pageParam == null ? page.currentPage : pageParam.currentPage,
+          size: pageParam == null ? page.pageSize : pageParam.pageSize
+        },
+        params
+      )
+    )
+  }).then(({ data }) => {
+    dataList = data.records
+    page.total = data.total
+    dataListLoading = false
+    if (done) {
+      done()
     }
-  },
-  methods: {
-    // 获取数据列表
-    getDataList (page, params, done) {
-      this.dataListLoading = true
-      this.$http({
-        url: this.$http.adornUrl('/admin/message/page'),
-        method: 'get',
-        params: this.$http.adornParams(
-          Object.assign(
-            {
-              current: page == null ? this.page.currentPage : page.currentPage,
-              size: page == null ? this.page.pageSize : page.pageSize
-            },
-            params
-          )
-        )
-      }).then(({ data }) => {
-        this.dataList = data.records
-        this.page.total = data.total
-        this.dataListLoading = false
-        if (done) {
-          done()
+  })
+}
+
+// 新增 / 修改
+const onAddOrUpdate  = (id) => {
+  addOrUpdateVisible = true
+  nextTick(() => {
+    addOrUpdate.value?.init(id)
+  })
+}
+// 公开留言
+const setMessageRelease  = (id) => {
+  if (id) {
+    http({
+      url: http.adornUrl(`/admin/message/release/${id}`),
+      method: 'put',
+      data: http.adornData({
+        id
+      })
+    }).then(({ data }) => {
+      ElMessage({
+        message: '操作成功',
+        type: 'success',
+        duration: 1000,
+        onClose: () => {
+          visible = false
+          getDataList(page)
         }
       })
-    },
-
-    // 新增 / 修改
-    addOrUpdateHandle (id) {
-      this.addOrUpdateVisible = true
-      this.$nextTick(() => {
-        this.$refs.addOrUpdate.init(id)
-      })
-    },
-    // 公开留言
-    setMessageRelease (id) {
-      if (id) {
-        this.$http({
-          url: this.$http.adornUrl(`/admin/message/release/${id}`),
-          method: 'put',
-          data: this.$http.adornData({
-            id
-          })
-        }).then(({ data }) => {
-          this.$message({
-            message: '操作成功',
-            type: 'success',
-            duration: 1000,
-            onClose: () => {
-              this.visible = false
-              this.getDataList(this.page)
-            }
-          })
-        })
-      }
-    },
-    // 取消公开留言
-    setMessageCancel (id) {
-      if (id) {
-        this.$http({
-          url: this.$http.adornUrl(`/admin/message/cancel/${id}`),
-          method: 'put',
-          data: this.$http.adornData({
-            id
-          })
-        }).then(({ data }) => {
-          this.$message({
-            message: '操作成功',
-            type: 'success',
-            duration: 1000,
-            onClose: () => {
-              this.visible = false
-              this.getDataList(this.page)
-            }
-          })
-        })
-      }
-    },
-    // 删除
-    deleteHandle (id) {
-      const ids = id ? [id] : this.dataListSelections.map(item => {
-        return item.id
-      })
-      this.$confirm(`确定进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          this.$http({
-            url: this.$http.adornUrl(`/admin/message/${ids}`),
-            method: 'delete',
-            data: this.$http.adornData(ids, false)
-          }).then(({ data }) => {
-            this.$message({
-              message: '操作成功',
-              type: 'success',
-              duration: 1500,
-              onClose: () => {
-                this.getDataList(this.page)
-              }
-            })
-          })
-        })
-        .catch(() => { })
-    },
-    // 条件查询
-    searchChange (params, done) {
-      this.getDataList(this.page, params, done)
-    },
-    // 多选变化
-    selectionChange (val) {
-      this.dataListSelections = val
-    }
+    })
   }
 }
+// 取消公开留言
+const setMessageCancel  = (id) => {
+  if (id) {
+    http({
+      url: http.adornUrl(`/admin/message/cancel/${id}`),
+      method: 'put',
+      data: http.adornData({
+        id
+      })
+    }).then(({ data }) => {
+      ElMessage({
+        message: '操作成功',
+        type: 'success',
+        duration: 1000,
+        onClose: () => {
+          visible = false
+          getDataList(page)
+        }
+      })
+    })
+  }
+}
+// 删除
+const onDelete  = (id) => {
+  const ids = id ? [id] : dataListSelections.map(item => {
+    return item.id
+  })
+  ElMessageBox.confirm(`确定进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(() => {
+      http({
+        url: http.adornUrl(`/admin/message/${ids}`),
+        method: 'delete',
+        data: http.adornData(ids, false)
+      }).then(({ data }) => {
+        ElMessage({
+          message: '操作成功',
+          type: 'success',
+          duration: 1500,
+          onClose: () => {
+            getDataList(page)
+          }
+        })
+      })
+    })
+    .catch(() => { })
+}
+// 条件查询
+const onSearch  = (params, done) => {
+  getDataList(page, params, done)
+}
+// 多选变化
+const selectionChange  = (val) => {
+  dataListSelections = val
+}
+
 </script>
