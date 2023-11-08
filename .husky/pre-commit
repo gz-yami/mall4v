@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+# 提交前使用执行此命令，格式化暂存区
+npm run lint:staged

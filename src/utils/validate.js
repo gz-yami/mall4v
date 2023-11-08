@@ -29,3 +29,21 @@ export function isPhone (s) {
 export function isURL (s) {
   return /^http[s]?:\/\/.*/.test(s)
 }
+
+/**
+ * qq
+ * @param {*} s
+ */
+export function isQq (s) {
+  return /[1-9][0-9]{4,14}/.test(s)
+}
+
+/**
+ * 判断是否全为空格 只要有一个其他字符返回false
+ * @param {String} str
+ * @returns {Boolean}
+ */
+export function validNoEmptySpace (str) {
+  const reg = /^\s+$/g
+  return reg.test(str)
+}

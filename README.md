@@ -24,18 +24,6 @@ vue中后台：https://gitee.com/gz-yami/mall4v
 
 
 
-## 演示地址
-
- **由于我们并不希望小程序的数据被弄混乱，我们弄了两个数据库。因此，您修改了后台的商品信息，小程序并不能看到！** 
-
-后台：<http://mall4j-admin.mall4j.com>  账号：admin/123456
-
-小程序：扫描二维码
-
-![小程序](https://gitee.com/gz-yami/mall4j/raw/master/screenshot/miniQrcode.jpg)
-
-
-
 
 ## 部署教程
 
@@ -75,4 +63,14 @@ npm run build
 
 
 
-更多内容请查看 主项目 https://gitee.com/gz-yami/mall4j
+## 提交反馈
+
+提问之前，请先阅读[提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)：
+
+- QQ群：722835385
+
+  ![QQ群](https://gitee.com/gz-yami/mall4j/raw/master/screenshot/qqGroup.png)
+
+- 论坛：<http://bbs.mall4j.com>
+
+- 商务邮箱：yamitech@163.com
