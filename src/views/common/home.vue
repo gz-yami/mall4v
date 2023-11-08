@@ -11,9 +11,11 @@
     <p>&nbsp;</p>
     <h2>技术选型</h2>
     <figure>
-      <table border="1"
-             cellspacing="0"
-             cellpadding="5px">
+      <table
+        border="1"
+        cellspacing="0"
+        cellpadding="5px"
+      >
         <thead>
           <tr>
             <th>技术</th>
@@ -100,9 +102,11 @@
     <p>&nbsp;</p>
     <h3>1.开发环境</h3>
     <figure>
-      <table border="1"
-             cellspacing="0"
-             cellpadding="5px">
+      <table
+        border="1"
+        cellspacing="0"
+        cellpadding="5px"
+      >
         <thead>
           <tr>
             <th>工具</th>
@@ -152,4 +156,3 @@ export default {}
   line-height: 1.5;
 }
 </style>
-

@@ -1,59 +1,99 @@
 <template>
-  <el-dialog :title="!dataForm.id ? '新增' : '修改'"
-             :close-on-click-modal="false"
-             :visible.sync="visible">
-    <el-form :model="dataForm"
-             :rules="dataRule"
-             ref="dataForm"
-             @keyup.enter.native="dataFormSubmit()"
-             label-width="80px">
-      <el-form-item label="创建时间"
-                    prop="createTime">
-        <el-date-picker v-model="dataForm.createTime"
-                        type="datetime"
-                        placeholder="选择日期"
-                        value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
+  <el-dialog
+    v-model:visible="visible"
+    :title="!dataForm.id ? '新增' : '修改'"
+    :close-on-click-modal="false"
+  >
+    <!-- native modifier has been removed, please confirm whether the function has been affected  -->
+    <el-form
+      ref="dataForm"
+      :model="dataForm"
+      :rules="dataRule"
+      label-width="80px"
+      @keyup.enter="dataFormSubmit()"
+    >
+      <el-form-item
+        label="创建时间"
+        prop="createTime"
+      >
+        <el-date-picker
+          v-model="dataForm.createTime"
+          type="datetime"
+          placeholder="选择日期"
+          value-format="yyyy-MM-dd HH:mm:ss"
+        />
       </el-form-item>
-      <el-form-item label="姓名"
-                    prop="userName">
-        <el-input v-model="dataForm.userName"
-                  placeholder="姓名"></el-input>
+      <el-form-item
+        label="姓名"
+        prop="userName"
+      >
+        <el-input
+          v-model="dataForm.userName"
+          placeholder="姓名"
+        />
       </el-form-item>
-      <el-form-item label="邮箱"
-                    prop="email">
-        <el-input v-model="dataForm.email"
-                  placeholder="邮箱"></el-input>
+      <el-form-item
+        label="邮箱"
+        prop="email"
+      >
+        <el-input
+          v-model="dataForm.email"
+          placeholder="邮箱"
+        />
       </el-form-item>
-      <el-form-item label="联系方式"
-                    prop="contact">
-        <el-input v-model="dataForm.contact"
-                  placeholder="联系方式"></el-input>
+      <el-form-item
+        label="联系方式"
+        prop="contact"
+      >
+        <el-input
+          v-model="dataForm.contact"
+          placeholder="联系方式"
+        />
       </el-form-item>
-      <el-form-item label="留言内容"
-                    prop="content">
-        <tiny-mce v-model="dataForm.content"
-                  ref="content"></tiny-mce>
+      <el-form-item
+        label="留言内容"
+        prop="content"
+      >
+        <tiny-mce
+          ref="content"
+          v-model="dataForm.content"
+        />
       </el-form-item>
-      <el-form-item label="留言回复"
-                    prop="reply">
-        <tiny-mce v-model="dataForm.reply"
-                  ref="reply"></tiny-mce>
+      <el-form-item
+        label="留言回复"
+        prop="reply"
+      >
+        <tiny-mce
+          ref="reply"
+          v-model="dataForm.reply"
+        />
       </el-form-item>
-      <el-form-item label="状态"
-                    size="mini"
-                    prop="status">
+      <el-form-item
+        label="状态"
+        size="mini"
+        prop="status"
+      >
         <el-radio-group v-model="dataForm.status">
-          <el-radio :label="0">未审核</el-radio>
-          <el-radio :label="1">审核通过</el-radio>
+          <el-radio :label="0">
+            未审核
+          </el-radio>
+          <el-radio :label="1">
+            审核通过
+          </el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>
-    <span slot="footer"
-          class="dialog-footer">
-      <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary"
-                 @click="dataFormSubmit()">确定</el-button>
-    </span>
+    <template #footer>
+      <span
+        class="dialog-footer"
+      >
+        <el-button @click="visible = false">取消</el-button>
+        <el-button
+          type="primary"
+          @click="dataFormSubmit()"
+        >确定</el-button>
+      </span>
+    </template>
   </el-dialog>
 </template>
 
@@ -61,8 +101,14 @@
 import { isEmail } from '@/utils/validate'
 import TinyMce from '@/components/tiny-mce'
 export default {
+
+  components: {
+    TinyMce
+  },
+  emits: ['refreshDataList'],
+
   data () {
-    var validateEmail = (rule, value, callback) => {
+    const validateEmail = (rule, value, callback) => {
       if (!isEmail(value)) {
         callback(new Error('邮箱格式错误'))
       } else {
@@ -94,9 +140,7 @@ export default {
       }
     }
   },
-  components: {
-    TinyMce
-  },
+
   methods: {
     init (id) {
       this.dataForm.id = id || 0
@@ -120,10 +164,10 @@ export default {
     },
     // 表单提交
     dataFormSubmit () {
-      this.$refs['dataForm'].validate(valid => {
+      this.$refs.dataForm.validate(valid => {
         if (valid) {
           this.$http({
-            url: this.$http.adornUrl(`/admin/message`),
+            url: this.$http.adornUrl('/admin/message'),
             method: this.dataForm.id ? 'put' : 'post',
             data: this.$http.adornData({
               id: this.dataForm.id || undefined,

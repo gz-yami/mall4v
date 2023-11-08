@@ -1,49 +1,78 @@
 <template>
   <div class="mod-prod">
-    <avue-crud ref="crud"
-               :page="page"
-               :data="dataList"
-               :table-loading="dataListLoading"
-               :permission="permission"
-               :option="tableOption"
-               @search-change="searchChange"
-               @selection-change="selectionChange"
-               @on-load="getDataList">
-      <template slot="menuLeft">
-        <el-button type="primary"
-                   icon="el-icon-plus"
-                   size="small"
-                   v-if="isAuth('shop:pickAddr:save')"
-                   @click.stop="addOrUpdateHandle()">新增</el-button>
+    <avue-crud
+      ref="crud"
+      :page="page"
+      :data="dataList"
+      :table-loading="dataListLoading"
+      :permission="permission"
+      :option="tableOption"
+      @search-change="searchChange"
+      @selection-change="selectionChange"
+      @on-load="getDataList"
+    >
+      <template #menuLeft>
+        <el-button
+          v-if="isAuth('shop:pickAddr:save')"
+          type="primary"
+          icon="el-icon-plus"
+          size="small"
+          @click.stop="addOrUpdateHandle()"
+        >
+          新增
+        </el-button>
 
-        <el-button type="danger"
-                   @click="deleteHandle()"
-                   size="small"
-                   v-if="isAuth('shop:pickAddr:delete')"
-                   :disabled="dataListSelections.length <= 0">批量删除</el-button>
+        <el-button
+          v-if="isAuth('shop:pickAddr:delete')"
+          type="danger"
+          size="small"
+          :disabled="dataListSelections.length <= 0"
+          @click="deleteHandle()"
+        >
+          批量删除
+        </el-button>
       </template>
 
-      <template slot-scope="scope"
-                slot="status">
-        <el-tag v-if="scope.row.status === 1"
-                size="small">上架</el-tag>
-        <el-tag v-else
-                size="small">未上架</el-tag>
+      <template
+        #default="scope"
+        #status
+      >
+        <el-tag
+          v-if="scope.row.status === 1"
+          size="small"
+        >
+          上架
+        </el-tag>
+        <el-tag
+          v-else
+          size="small"
+        >
+          未上架
+        </el-tag>
       </template>
 
-      <template slot-scope="scope"
-                slot="menu">
-        <el-button type="primary"
-                   icon="el-icon-edit"
-                   size="small"
-                   v-if="isAuth('prod:prod:update')"
-                   @click="addOrUpdateHandle(scope.row.prodId)">修改</el-button>
-        <el-button type="danger"
-                   icon="el-icon-delete"
-                   size="small"
-                   v-if="isAuth('prod:prod:delete')"
-                   @click="deleteHandle(scope.row.prodId)">删除</el-button>
-
+      <template
+        #default="scope"
+        #menu
+      >
+        <el-button
+          v-if="isAuth('prod:prod:update')"
+          type="primary"
+          icon="el-icon-edit"
+          size="small"
+          @click="addOrUpdateHandle(scope.row.prodId)"
+        >
+          修改
+        </el-button>
+        <el-button
+          v-if="isAuth('prod:prod:delete')"
+          type="danger"
+          icon="el-icon-delete"
+          size="small"
+          @click="deleteHandle(scope.row.prodId)"
+        >
+          删除
+        </el-button>
       </template>
     </avue-crud>
   </div>
@@ -68,7 +97,7 @@ export default {
       },
       dataListSelections: [],
       dataListLoading: false,
-      tableOption: tableOption,
+      tableOption,
       resourcesUrl: process.env.VUE_APP_RESOURCES_URL
     }
   },
@@ -112,7 +141,7 @@ export default {
     },
     // 删除和批量删除
     deleteHandle (id) {
-      let prodIds = this.getSeleProdIds()
+      const prodIds = this.getSeleProdIds()
       if (id) {
         prodIds.push(id)
       }
@@ -123,7 +152,7 @@ export default {
       })
         .then(() => {
           this.$http({
-            url: this.$http.adornUrl(`/prod/prod`),
+            url: this.$http.adornUrl('/prod/prod'),
             method: 'delete',
             data: this.$http.adornData(prodIds, false)
           }).then(({ data }) => {

@@ -1,44 +1,58 @@
 <template>
   <div class="mod-sys-area">
-    <el-input v-model="areaName"
-              class="area-search-input"
-              placeholder="地区关键词">
-    </el-input>
-    <el-button type="primary"
-               size="mini"
-               class="area-add-btn"
-               @click="addOrUpdateHandle()">新增</el-button>
+    <el-input
+      v-model="areaName"
+      class="area-search-input"
+      placeholder="地区关键词"
+    />
+    <el-button
+      type="primary"
+      size="mini"
+      class="area-add-btn"
+      @click="addOrUpdateHandle()"
+    >
+      新增
+    </el-button>
 
-    <el-tree :data="data"
-             node-key="areaId"
-             :filter-node-method="filterNode"
-             ref="tree2"
-             :props="props"
-             :expand-on-click-node="false">
-
-      <span class="custom-tree-node"
-            slot-scope="{ node, data }">
+    <el-tree
+      ref="tree2"
+      :data="data"
+      node-key="areaId"
+      :filter-node-method="filterNode"
+      :props="props"
+      :expand-on-click-node="false"
+    >
+      <span
+        slot-scope="{ node, data }"
+        class="custom-tree-node"
+      >
         <span>{{ node.label }}</span>
         <span>
-          <el-button type="text"
-                     icon="el-icon-edit"
-                     size="small"
-                     @click="() => update(node, data)">
+          <el-button
+            type="text"
+            icon="el-icon-edit"
+            size="small"
+            @click="() => update(node, data)"
+          >
             修改
           </el-button>
-          <el-button type="text"
-                     icon="el-icon-delete"
-                     size="small"
-                     @click="() => remove(node, data)">
+          <el-button
+            type="text"
+            icon="el-icon-delete"
+            size="small"
+            @click="() => remove(node, data)"
+          >
             删除
           </el-button>
         </span>
       </span>
     </el-tree>
 
-    <add-or-update v-if="addOrUpdateVisible"
-                   ref="addOrUpdate"
-                   @refreshDataList="getDataList"></add-or-update>
+    <add-or-update
+      v-if="addOrUpdateVisible"
+      ref="addOrUpdate"
+      @refresh-data-list="getDataList"
+    />
   </div>
 </template>
 
@@ -47,6 +61,9 @@ import { tableOption } from '@/crud/sys/area'
 import AddOrUpdate from './area-add-or-update'
 import { treeDataTranslate } from '@/utils'
 export default {
+  components: {
+    AddOrUpdate
+  },
   data () {
     return {
       dataList: [],
@@ -56,7 +73,7 @@ export default {
         pageSize: 10 // 每页显示多少条
       },
       dataListLoading: false,
-      tableOption: tableOption,
+      tableOption,
       addOrUpdateVisible: false,
       areaName: '',
       dataForm: {},
@@ -71,18 +88,15 @@ export default {
       }
     }
   },
-  created () {
-    this.getDataList(this.page)
-  },
-  mounted () {
-  },
-  components: {
-    AddOrUpdate
-  },
   watch: {
     areaName (val) {
       this.$refs.tree2.filter(val)
     }
+  },
+  created () {
+    this.getDataList(this.page)
+  },
+  mounted () {
   },
   methods: {
     getDataList (page, params, done) {
@@ -94,7 +108,7 @@ export default {
           size: page == null ? this.page.pageSize : page.pageSize
         }, params))
       }).then(({ data }) => {
-        let treeData = treeDataTranslate(data, 'areaId', 'parentId')
+        const treeData = treeDataTranslate(data, 'areaId', 'parentId')
         this.data = treeData
       })
     },

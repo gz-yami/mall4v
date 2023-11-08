@@ -1,56 +1,85 @@
 <template>
   <div class="mod-prod">
-    <avue-crud ref="crud"
-               :page="page"
-               :data="dataList"
-               :table-loading="dataListLoading"
-               :option="tableOption"
-               @search-change="searchChange"
-               @selection-change="selectionChange"
-               @on-load="getDataList">
-      <template slot="menuLeft">
-        <el-button type="primary"
-                   icon="el-icon-plus"
-                   size="small"
-                   v-if="isAuth('admin:indexImg:save')"
-                   @click.stop="addOrUpdateHandle()">新增</el-button>
+    <avue-crud
+      ref="crud"
+      :page="page"
+      :data="dataList"
+      :table-loading="dataListLoading"
+      :option="tableOption"
+      @search-change="searchChange"
+      @selection-change="selectionChange"
+      @on-load="getDataList"
+    >
+      <template #menuLeft>
+        <el-button
+          v-if="isAuth('admin:indexImg:save')"
+          type="primary"
+          icon="el-icon-plus"
+          size="small"
+          @click.stop="addOrUpdateHandle()"
+        >
+          新增
+        </el-button>
 
-        <el-button type="danger"
-                   @click="deleteHandle()"
-                   size="small"
-                   v-if="isAuth('admin:indexImg:delete')"
-                   :disabled="dataListSelections.length <= 0">批量删除</el-button>
+        <el-button
+          v-if="isAuth('admin:indexImg:delete')"
+          type="danger"
+          size="small"
+          :disabled="dataListSelections.length <= 0"
+          @click="deleteHandle()"
+        >
+          批量删除
+        </el-button>
       </template>
 
-      <template slot-scope="scope"
-                slot="imgUrl">
-        <img v-if="scope.row.imgUrl" :src="scope.row.imgUrl"
-             width="100"
-             height="100" />
-        <img v-else src="~@/assets/img/def.png"
-             width="100"
-             height="100" />
+      <template
+        #default="scope"
+        #imgUrl
+      >
+        <img
+          v-if="scope.row.imgUrl"
+          :src="scope.row.imgUrl"
+          width="100"
+          height="100"
+        >
+        <img
+          v-else
+          src="~@/assets/img/def.png"
+          width="100"
+          height="100"
+        >
       </template>
-      <template slot-scope="scope"
-                slot="menu">
-        <el-button type="primary"
-                   icon="el-icon-edit"
-                   size="small"
-                   v-if="isAuth('admin:indexImg:update')"
-                   @click="addOrUpdateHandle(scope.row.imgId)">修改</el-button>
-        <el-button type="danger"
-                   icon="el-icon-delete"
-                   size="small"
-                   v-if="isAuth('admin:indexImg:delete')"
-                   @click="deleteHandle(scope.row.imgId)">删除</el-button>
-
+      <template
+        #default="scope"
+        #menu
+      >
+        <el-button
+          v-if="isAuth('admin:indexImg:update')"
+          type="primary"
+          icon="el-icon-edit"
+          size="small"
+          @click="addOrUpdateHandle(scope.row.imgId)"
+        >
+          修改
+        </el-button>
+        <el-button
+          v-if="isAuth('admin:indexImg:delete')"
+          type="danger"
+          icon="el-icon-delete"
+          size="small"
+          @click="deleteHandle(scope.row.imgId)"
+        >
+          删除
+        </el-button>
       </template>
     </avue-crud>
 
     <!-- 弹窗, 新增 / 修改 -->
-    <add-or-update v-if="addOrUpdateVisible"
-                   ref="addOrUpdate"
-                   @refreshDataList="getDataList"></add-or-update>
+    <add-or-update
+      v-if="addOrUpdateVisible"
+      ref="addOrUpdate"
+      @refresh-data-list="getDataList"
+    />
   </div>
 </template>
 
@@ -58,6 +87,9 @@
 import AddOrUpdate from './indexImg-add-or-update'
 import { tableOption } from '@/crud/admin/indexImg'
 export default {
+  components: {
+    AddOrUpdate
+  },
   data () {
     return {
       dataForm: {
@@ -69,16 +101,13 @@ export default {
       addOrUpdateVisible: false,
       resourcesUrl: process.env.VUE_APP_RESOURCES_URL,
       // 修改
-      tableOption: tableOption,
+      tableOption,
       page: {
         total: 0, // 总页数
         currentPage: 1, // 当前页数
         pageSize: 10 // 每页显示多少条
       }
     }
-  },
-  components: {
-    AddOrUpdate
   },
   methods: {
     // 获取数据列表
@@ -118,7 +147,7 @@ export default {
     },
     // 删除
     deleteHandle (id) {
-      var ids = id ? [id] : this.dataListSelections.map(item => {
+      const ids = id ? [id] : this.dataListSelections.map(item => {
         return item.imgId
       })
       this.$confirm(`确定进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {

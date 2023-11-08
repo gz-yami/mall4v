@@ -5,8 +5,8 @@
  * 建议:
  * 1. 代码中路由统一使用name属性跳转(不使用path属性)
  */
-import Vue from 'vue'
-import Router from 'vue-router'
+import * as Vue from 'vue'
+import Router, { createRouter, createWebHashHistory } from 'vue-router'
 import http from '@/utils/httpRequest'
 import { isURL } from '@/utils/validate'
 import { clearLoginInfo } from '@/utils'
@@ -49,7 +49,7 @@ const mainRoutes = {
     { path: '/prodInfo', component: _import('modules/prod/prodInfo'), name: 'prodInfo', meta: { title: '产品详情' } }
   ],
   beforeEnter (to, from, next) {
-    let authorization = Vue.cookie.get('Authorization')
+    const authorization = Vue.cookie.get('Authorization')
     if (!authorization || !/\S/.test(authorization)) {
       clearLoginInfo()
       next({ name: 'login' })
@@ -58,8 +58,8 @@ const mainRoutes = {
   }
 }
 
-const router = new Router({
-  mode: 'hash',
+const router = createRouter({
+  history: createWebHashHistory(),
   scrollBehavior: () => ({ y: 0 }),
   isAddDynamicMenuRoutes: false, // 是否已经添加动态(菜单)路由
   routes: globalRoutes.concat(mainRoutes)
@@ -94,8 +94,8 @@ router.beforeEach((to, from, next) => {
  * @param {*} route 当前路由
  */
 function fnCurrentRouteType (route, globalRoutes = []) {
-  var temp = []
-  for (var i = 0; i < globalRoutes.length; i++) {
+  let temp = []
+  for (let i = 0; i < globalRoutes.length; i++) {
     if (route.path === globalRoutes[i].path) {
       return 'global'
     } else if (globalRoutes[i].children && globalRoutes[i].children.length >= 1) {
@@ -111,13 +111,13 @@ function fnCurrentRouteType (route, globalRoutes = []) {
  * @param {*} routes 递归创建的动态(菜单)路由
  */
 function fnAddDynamicMenuRoutes (menuList = [], routes = []) {
-  var temp = []
-  for (var i = 0; i < menuList.length; i++) {
+  let temp = []
+  for (let i = 0; i < menuList.length; i++) {
     if (menuList[i].list && menuList[i].list.length >= 1) {
       temp = temp.concat(menuList[i].list)
     } else if (menuList[i].url && /\S/.test(menuList[i].url)) {
       menuList[i].url = menuList[i].url.replace(/^\//, '')
-      var route = {
+      const route = {
         path: menuList[i].url.replace('/', '-'),
         component: null,
         name: menuList[i].url.replace('/', '-'),
@@ -131,12 +131,12 @@ function fnAddDynamicMenuRoutes (menuList = [], routes = []) {
       }
       // url以http[s]://开头, 通过iframe展示
       if (isURL(menuList[i].url)) {
-        route['path'] = `i-${menuList[i].menuId}`
-        route['name'] = `i-${menuList[i].menuId}`
-        route['meta']['iframeUrl'] = menuList[i].url
+        route.path = `i-${menuList[i].menuId}`
+        route.name = `i-${menuList[i].menuId}`
+        route.meta.iframeUrl = menuList[i].url
       } else {
         try {
-          route['component'] = _import(`modules/${menuList[i].url}`) || null
+          route.component = _import(`modules/${menuList[i].url}`) || null
         } catch (e) { }
       }
       routes.push(route)
@@ -147,10 +147,9 @@ function fnAddDynamicMenuRoutes (menuList = [], routes = []) {
   } else {
     mainRoutes.name = 'main-dynamic'
     mainRoutes.children = routes
-    router.addRoutes([
-      mainRoutes,
-      { path: '*', redirect: { name: '404' } }
-    ])
+      [
+        (mainRoutes, { path: '*', redirect: { name: '404' } })
+      ].forEach(item => router.addRoute(item))
     sessionStorage.setItem('dynamicMenuRoutes', JSON.stringify(mainRoutes.children || '[]'))
   }
 }

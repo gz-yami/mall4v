@@ -1,29 +1,60 @@
 <template>
   <el-dialog
+    v-model:visible="visible"
     title="修改"
     :modal="false"
     :close-on-click-modal="false"
-    :visible.sync="visible">
-    <el-form :model="dataForm" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
-      <el-form-item v-if="dataForm.type !== 2" label="排序号" prop="seq">
-        <el-input-number v-model="dataForm.seq" controls-position="right" :min="0" label="排序号"></el-input-number>
+  >
+    <!-- native modifier has been removed, please confirm whether the function has been affected  -->
+    <el-form
+      ref="dataForm"
+      :model="dataForm"
+      label-width="80px"
+      @keyup.enter="dataFormSubmit()"
+    >
+      <el-form-item
+        v-if="dataForm.type !== 2"
+        label="排序号"
+        prop="seq"
+      >
+        <el-input-number
+          v-model="dataForm.seq"
+          controls-position="right"
+          :min="0"
+          label="排序号"
+        />
       </el-form-item>
-      <el-form-item label="状态" size="mini" prop="status">
+      <el-form-item
+        label="状态"
+        size="mini"
+        prop="status"
+      >
         <el-radio-group v-model="dataForm.status">
-          <el-radio :label="0">下线</el-radio>
-          <el-radio :label="1">正常</el-radio>
+          <el-radio :label="0">
+            下线
+          </el-radio>
+          <el-radio :label="1">
+            正常
+          </el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>
-    <span slot="footer" class="dialog-footer">
-      <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" @click="dataFormSubmit()">确定</el-button>
-    </span>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="visible = false">取消</el-button>
+        <el-button
+          type="primary"
+          @click="dataFormSubmit()"
+        >确定</el-button>
+      </span>
+    </template>
   </el-dialog>
 </template>
 <script>
 import { Debounce } from '@/utils/debounce'
 export default {
+  emits: ['refreshDataList'],
+
   data () {
     return {
       visible: false,
@@ -35,6 +66,7 @@ export default {
       }
     }
   },
+
   methods: {
     init (addrOrderId) {
       this.dataForm.addrOrderId = addrOrderId
@@ -42,26 +74,26 @@ export default {
         url: this.$http.adornUrl(`/prod/category/listCategory/${this.dataForm.addrOrderId}`),
         method: 'get',
         params: this.$http.adornParams()
-      }).then(({data}) => {
+      }).then(({ data }) => {
         this.dataForm = data
       }).then(() => {
         this.visible = true
         this.$nextTick(() => {
-          this.$refs['dataForm'].resetFields()
+          this.$refs.dataForm.resetFields()
         })
       })
     },
-      // 表单提交
+    // 表单提交
     dataFormSubmit: Debounce(function () {
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs.dataForm.validate((valid) => {
         if (valid) {
           this.$http({
-            url: this.$http.adornUrl(`/prod/category`),
+            url: this.$http.adornUrl('/prod/category'),
             method: this.dataForm.currentId ? 'put' : 'post',
             data: this.$http.adornData({
-              'categoryId': this.dataForm.currentId || undefined
+              categoryId: this.dataForm.currentId || undefined
             })
-          }).then(({data}) => {
+          }).then(({ data }) => {
             this.$message({
               message: '操作成功',
               type: 'success',

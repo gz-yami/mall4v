@@ -1,60 +1,89 @@
 <template>
-  <el-dialog :title="!dataForm.currentId ? '新增' : '修改'"
-             :close-on-click-modal="false"
-             :visible.sync="visible">
-    <el-form :model="dataForm"
-             :rules="dataRule"
-             ref="dataForm"
-             @keyup.enter.native="dataFormSubmit()"
-             label-width="80px">
-      <el-form-item v-if="dataForm.type !== 2"
-                    label="分类图片"
-                    prop="pic">
-        <pic-upload v-model="dataForm.pic"></pic-upload>
+  <el-dialog
+    v-model:visible="visible"
+    :title="!dataForm.currentId ? '新增' : '修改'"
+    :close-on-click-modal="false"
+  >
+    <!-- native modifier has been removed, please confirm whether the function has been affected  -->
+    <el-form
+      ref="dataForm"
+      :model="dataForm"
+      :rules="dataRule"
+      label-width="80px"
+      @keyup.enter="dataFormSubmit()"
+    >
+      <el-form-item
+        v-if="dataForm.type !== 2"
+        label="分类图片"
+        prop="pic"
+      >
+        <pic-upload v-model="dataForm.pic" />
       </el-form-item>
-      <el-form-item v-if="dataForm.type !== 2"
-                    label="分类名称"
-                    prop="categoryName">
-        <el-input v-model="dataForm.categoryName"
-                  controls-position="right"
-                  :min="0"
-                  label="分类名称"></el-input>
+      <el-form-item
+        v-if="dataForm.type !== 2"
+        label="分类名称"
+        prop="categoryName"
+      >
+        <el-input
+          v-model="dataForm.categoryName"
+          controls-position="right"
+          :min="0"
+          label="分类名称"
+        />
       </el-form-item>
       <el-form-item label="上级分类">
-        <el-cascader expand-trigger="hover"
-                     :options="categoryList"
-                     :props="categoryTreeProps"
-                     change-on-select
-                     :clearable="true"
-                     v-model="selectedCategory"
-                     @change="handleChange">
-        </el-cascader>
+        <el-cascader
+          v-model="selectedCategory"
+          expand-trigger="hover"
+          :options="categoryList"
+          :props="categoryTreeProps"
+          change-on-select
+          :clearable="true"
+          @change="handleChange"
+        />
       </el-form-item>
-      <el-form-item v-if="dataForm.type !== 2"
-                    label="排序号"
-                    prop="seq">
-        <el-input-number v-model="dataForm.seq"
-                         controls-position="right"
-                         :min="0"
-                         label="排序号"></el-input-number>
+      <el-form-item
+        v-if="dataForm.type !== 2"
+        label="排序号"
+        prop="seq"
+      >
+        <el-input-number
+          v-model="dataForm.seq"
+          controls-position="right"
+          :min="0"
+          label="排序号"
+        />
       </el-form-item>
-      <el-form-item label="状态"
-                    size="mini"
-                    prop="status">
+      <el-form-item
+        label="状态"
+        size="mini"
+        prop="status"
+      >
         <el-radio-group v-model="dataForm.status">
-          <el-radio :label="0">下线</el-radio>
-          <el-radio :label="1">正常</el-radio>
+          <el-radio :label="0">
+            下线
+          </el-radio>
+          <el-radio :label="1">
+            正常
+          </el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>
-    <span slot="footer"
-          class="dialog-footer">
-      <el-button size="small"
-                 @click="visible = false">取消</el-button>
-      <el-button size="small"
-                 type="primary"
-                 @click="dataFormSubmit()">确定</el-button>
-    </span>
+    <template #footer>
+      <span
+        class="dialog-footer"
+      >
+        <el-button
+          size="small"
+          @click="visible = false"
+        >取消</el-button>
+        <el-button
+          size="small"
+          type="primary"
+          @click="dataFormSubmit()"
+        >确定</el-button>
+      </span>
+    </template>
   </el-dialog>
 </template>
 <script>
@@ -62,6 +91,12 @@ import { treeDataTranslate, idList } from '@/utils'
 import PicUpload from '@/components/pic-upload'
 import { Debounce } from '@/utils/debounce'
 export default {
+
+  components: {
+    PicUpload
+  },
+  emits: ['refreshDataList'],
+
   data () {
     return {
       visible: false,
@@ -93,9 +128,7 @@ export default {
       isSubmit: false
     }
   },
-  components: {
-    PicUpload
-  },
+
   methods: {
     init (id) {
       this.dataForm.currentId = id || 0
@@ -109,7 +142,7 @@ export default {
       }).then(() => {
         this.visible = true
         this.$nextTick(() => {
-          this.$refs['dataForm'].resetFields()
+          this.$refs.dataForm.resetFields()
           this.selectedCategory = []
         })
       }).then(() => {
@@ -145,23 +178,23 @@ export default {
       if (this.selectedCategory.length === 3) {
         this.dataForm.grade = 2
       }
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs.dataForm.validate((valid) => {
         if (valid) {
           if (this.isSubmit) {
             return
           }
           this.isSubmit = true
           this.$http({
-            url: this.$http.adornUrl(`/prod/category`),
+            url: this.$http.adornUrl('/prod/category'),
             method: this.dataForm.categoryId ? 'put' : 'post',
             data: this.$http.adornData({
-              'categoryId': this.dataForm.categoryId || undefined,
-              'categoryName': this.dataForm.categoryName,
-              'status': this.dataForm.status,
-              'seq': this.dataForm.seq,
-              'grade': this.dataForm.grade,
-              'parentId': this.dataForm.parentId,
-              'pic': this.dataForm.pic
+              categoryId: this.dataForm.categoryId || undefined,
+              categoryName: this.dataForm.categoryName,
+              status: this.dataForm.status,
+              seq: this.dataForm.seq,
+              grade: this.dataForm.grade,
+              parentId: this.dataForm.parentId,
+              pic: this.dataForm.pic
             })
           }).then(({ data }) => {
             this.$message({

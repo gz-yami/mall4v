@@ -1,10 +1,10 @@
-import Vue from 'vue'
+import * as Vue from 'vue'
 import axios from 'axios'
 import router from '@/router'
 import qs from 'qs'
 import merge from 'lodash/merge'
 import { clearLoginInfo } from '@/utils'
-import { Message } from 'element-ui'
+import { ElMessage as Message } from 'element-plus'
 
 const http = axios.create({
   timeout: 1000 * 30,
@@ -18,7 +18,7 @@ const http = axios.create({
  * 请求拦截
  */
 http.interceptors.request.use(config => {
-  config.headers['Authorization'] = Vue.cookie.get('Authorization') // 请求头带上token
+  config.headers.Authorization = Vue.cookie.get('Authorization') // 请求头带上token
   return config
 }, error => {
   return Promise.reject(error)
@@ -28,7 +28,7 @@ http.interceptors.request.use(config => {
  * 响应拦截
  */
 http.interceptors.response.use(response => {
-   // blob 格式处理
+  // blob 格式处理
   if (response.request.responseType === 'blob') {
     return response
   }
@@ -141,8 +141,8 @@ http.adornUrl = (actionName) => {
  * @param {*} openDefultParams 是否开启默认参数?
  */
 http.adornParams = (params = {}, openDefultParams = true) => {
-  var defaults = {
-    't': new Date().getTime()
+  const defaults = {
+    t: new Date().getTime()
   }
   return openDefultParams ? merge(defaults, params) : params
 }
@@ -156,8 +156,8 @@ http.adornParams = (params = {}, openDefultParams = true) => {
  *  form: 'application/x-www-form-urlencoded; charset=utf-8'
  */
 http.adornData = (data = {}, openDefultdata = true, contentType = 'json') => {
-  var defaults = {
-    't': new Date().getTime()
+  const defaults = {
+    t: new Date().getTime()
   }
   data = openDefultdata ? merge(defaults, data) : data
   return contentType === 'json' ? JSON.stringify(data) : qs.stringify(data)

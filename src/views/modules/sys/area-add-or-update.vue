@@ -1,36 +1,58 @@
 <template>
-  <el-dialog :title="!dataForm.areaId ? '新增' : '修改'"
-             :close-on-click-modal="false"
-             :visible.sync="visible">
-    <el-form :model="dataForm"
-             :rules="dataRule"
-             ref="dataForm"
-             @keyup.enter.native="dataFormSubmit()"
-             label-width="100px">
-      <el-form-item label="地区名称"
-                    prop="areaName">
-        <el-input v-model="dataForm.areaName" placeholder="请输入地区名称" maxlength="50" show-word-limit></el-input>
+  <el-dialog
+    v-model:visible="visible"
+    :title="!dataForm.areaId ? '新增' : '修改'"
+    :close-on-click-modal="false"
+  >
+    <!-- native modifier has been removed, please confirm whether the function has been affected  -->
+    <el-form
+      ref="dataForm"
+      :model="dataForm"
+      :rules="dataRule"
+      label-width="100px"
+      @keyup.enter="dataFormSubmit()"
+    >
+      <el-form-item
+        label="地区名称"
+        prop="areaName"
+      >
+        <el-input
+          v-model="dataForm.areaName"
+          placeholder="请输入地区名称"
+          maxlength="50"
+          show-word-limit
+        />
       </el-form-item>
-      <el-form-item label="上级地区"
-                    prop="parentId">
-        <el-cascader expand-trigger="hover"
-                     :options="areaList"
-                     :props="categoryTreeProps"
-                     change-on-select
-                     filterable
-                     v-model="selectedOptions"
-                     @change="handleChange">
-        </el-cascader>
+      <el-form-item
+        label="上级地区"
+        prop="parentId"
+      >
+        <el-cascader
+          v-model="selectedOptions"
+          expand-trigger="hover"
+          :options="areaList"
+          :props="categoryTreeProps"
+          change-on-select
+          filterable
+          @change="handleChange"
+        />
       </el-form-item>
     </el-form>
-    <span slot="footer"
-          class="dialog-footer">
-      <el-button @click="visible = false"
-                 size="mini">取消</el-button>
-      <el-button type="primary"
-                 @click="dataFormSubmit()"
-                 size="mini">确定</el-button>
-    </span>
+    <template #footer>
+      <span
+        class="dialog-footer"
+      >
+        <el-button
+          size="mini"
+          @click="visible = false"
+        >取消</el-button>
+        <el-button
+          type="primary"
+          size="mini"
+          @click="dataFormSubmit()"
+        >确定</el-button>
+      </span>
+    </template>
   </el-dialog>
 </template>
 
@@ -38,6 +60,8 @@
 import { treeDataTranslate } from '@/utils'
 import { Debounce } from '@/utils/debounce'
 export default {
+  emits: ['refreshDataList'],
+
   data () {
     return {
       visible: false,
@@ -67,13 +91,14 @@ export default {
       selectedOptions: []
     }
   },
+
   methods: {
     init (areaId) {
       this.dataForm.areaId = areaId || 0
       this.visible = true
       this.selectedOptions = []
       this.$nextTick(() => {
-        this.$refs['dataForm'].resetFields()
+        this.$refs.dataForm.resetFields()
         if (this.dataForm.areaId) {
           this.$http({
             url: this.$http.adornUrl('/admin/area/info/' + this.dataForm.areaId),
@@ -98,7 +123,7 @@ export default {
     },
     // 表单提交
     dataFormSubmit: Debounce(function () {
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs.dataForm.validate((valid) => {
         if (valid) {
           this.$http({
             url: this.$http.adornUrl('/admin/area'),

@@ -2,25 +2,36 @@
   <div class="login">
     <div class="login-box">
       <div class="top">
-        <div class="logo"><img src="~@/assets/img/login-logo.png"
-               alt=""></div>
+        <div class="logo">
+          <img
+            src="~@/assets/img/login-logo.png"
+            alt=""
+          >
+        </div>
       </div>
       <div class="mid">
-        <el-form :model="dataForm"
-                 :rules="dataRule"
-                 ref="dataForm"
-                 @keyup.enter.native="dataFormSubmit()"
-                 status-icon>
+        <!-- native modifier has been removed, please confirm whether the function has been affected  -->
+        <el-form
+          ref="dataForm"
+          :model="dataForm"
+          :rules="dataRule"
+          status-icon
+          @keyup.enter="dataFormSubmit()"
+        >
           <el-form-item prop="userName">
-            <el-input class="info"
-                      v-model="dataForm.userName"
-                      placeholder="帐号"></el-input>
+            <el-input
+              v-model="dataForm.userName"
+              class="info"
+              placeholder="帐号"
+            />
           </el-form-item>
           <el-form-item prop="password">
-            <el-input class="info"
-                      v-model="dataForm.password"
-                      type="password"
-                      placeholder="密码"></el-input>
+            <el-input
+              v-model="dataForm.password"
+              class="info"
+              type="password"
+              placeholder="密码"
+            />
           </el-form-item>
           <!-- <el-form-item prop="captcha">
             <el-row :gutter="20">
@@ -38,14 +49,20 @@
             </el-row>
           </el-form-item> -->
           <el-form-item>
-            <div class="item-btn"><input type="button"
-                     value="登录"
-                     @click="dataFormSubmit()"></div>
+            <div class="item-btn">
+              <input
+                type="button"
+                value="登录"
+                @click="dataFormSubmit()"
+              >
+            </div>
           </el-form-item>
         </el-form>
       </div>
 
-      <div class="bottom">Copyright © 2019 广州市蓝海创新科技有限公司</div>
+      <div class="bottom">
+        Copyright © 2019 广州市蓝海创新科技有限公司
+      </div>
     </div>
     <Verify
       ref="verify"
@@ -86,7 +103,7 @@ export default {
       captchaPath: ''
     }
   },
-  beforeDestroy () {
+  beforeUnmount () {
     document.removeEventListener('keyup', this.handerKeyup)
   },
   created () {
@@ -96,14 +113,14 @@ export default {
   },
   methods: {
     handerKeyup (e) {
-      var keycode = document.all ? event.keyCode : e.which
+      const keycode = document.all ? event.keyCode : e.which
       if (keycode === 13) {
         this.dataFormSubmit()
       }
     },
     // 提交表单
     dataFormSubmit () {
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs.dataForm.validate((valid) => {
         if (valid) {
           this.$refs.verify.show()
         }
@@ -118,9 +135,9 @@ export default {
         url: this.$http.adornUrl('/adminLogin'),
         method: 'post',
         data: this.$http.adornData({
-          'userName': this.dataForm.userName,
-          'passWord': encrypt(this.dataForm.password),
-          'captchaVerification': verifyResult.captchaVerification
+          userName: this.dataForm.userName,
+          passWord: encrypt(this.dataForm.password),
+          captchaVerification: verifyResult.captchaVerification
         })
       }).then(({ data }) => {
         this.$cookie.set('Authorization', data.accessToken)

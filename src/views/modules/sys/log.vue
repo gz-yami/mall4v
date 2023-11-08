@@ -1,12 +1,13 @@
 <template>
   <div class="mod-log">
-    <avue-crud ref="crud"
-               :page="page"
-               :data="dataList"
-               :option="tableOption"
-               @search-change="searchChange"
-               @on-load="getDataList">
-    </avue-crud>
+    <avue-crud
+      ref="crud"
+      :page="page"
+      :data="dataList"
+      :option="tableOption"
+      @search-change="searchChange"
+      @on-load="getDataList"
+    />
   </div>
 </template>
 
@@ -18,7 +19,7 @@ export default {
       dataList: [],
       dataListLoading: false,
       selectionDataList: [],
-      tableOption: tableOption,
+      tableOption,
       page: {
         total: 0, // 总页数
         currentPage: 1, // 当前页数

@@ -1,38 +1,56 @@
 <template>
   <div class="mod-user-userAddr">
-    <avue-crud ref="crud"
-               :page="page"
-               :data="dataList"
-               :table-loading="dataListLoading"
-               :option="tableOption"
-               @search-change="searchChange"
-               @on-load="getDataList"
-               @refresh-change="refreshChange"
-               @row-del="rowDel">
-      <template slot="menuLeft">
-        <el-button type="primary"
-                   icon="el-icon-plus"
-                   size="small"
-                   v-if="isAuth('user:addr:save')"
-                   @click="addOrUpdateHandle()">新增</el-button>
+    <avue-crud
+      ref="crud"
+      :page="page"
+      :data="dataList"
+      :table-loading="dataListLoading"
+      :option="tableOption"
+      @search-change="searchChange"
+      @on-load="getDataList"
+      @refresh-change="refreshChange"
+      @row-del="rowDel"
+    >
+      <template #menuLeft>
+        <el-button
+          v-if="isAuth('user:addr:save')"
+          type="primary"
+          icon="el-icon-plus"
+          size="small"
+          @click="addOrUpdateHandle()"
+        >
+          新增
+        </el-button>
       </template>
-      <template slot-scope="scope"
-                slot="menu">
-        <el-button type="primary"
-                   icon="el-icon-edit"
-                   size="small"
-                   v-if="isAuth('user:addr:update')"
-                   @click="addOrUpdateHandle(scope.row.addrId)">修改</el-button>
-        <el-button type="danger"
-                   icon="el-icon-delete"
-                   size="small"
-                   v-if="isAuth('user:addr:delete')"
-                   @click="rowDel(scope.row,scope.$index)">删除</el-button>
+      <template
+        #default="scope"
+        #menu
+      >
+        <el-button
+          v-if="isAuth('user:addr:update')"
+          type="primary"
+          icon="el-icon-edit"
+          size="small"
+          @click="addOrUpdateHandle(scope.row.addrId)"
+        >
+          修改
+        </el-button>
+        <el-button
+          v-if="isAuth('user:addr:delete')"
+          type="danger"
+          icon="el-icon-delete"
+          size="small"
+          @click="rowDel(scope.row,scope.$index)"
+        >
+          删除
+        </el-button>
       </template>
     </avue-crud>
-    <add-or-update v-if="addOrUpdateVisible"
-                   ref="addOrUpdate"
-                   @refreshDataList="refreshChange"></add-or-update>
+    <add-or-update
+      v-if="addOrUpdateVisible"
+      ref="addOrUpdate"
+      @refresh-data-list="refreshChange"
+    />
   </div>
 </template>
 
@@ -40,6 +58,9 @@
 import { tableOption } from '@/crud/user/addr'
 import AddOrUpdate from './addr-add-or-update'
 export default {
+  components: {
+    AddOrUpdate
+  },
   data () {
     return {
       dataList: [],
@@ -49,7 +70,7 @@ export default {
         pageSize: 10 // 每页显示多少条
       },
       dataListLoading: false,
-      tableOption: tableOption,
+      tableOption,
       permission: {
         delBtn: this.isAuth('user:userAddr:delete')
       },
@@ -59,9 +80,6 @@ export default {
   created () {
   },
   mounted () {
-  },
-  components: {
-    AddOrUpdate
   },
   methods: {
     getDataList (page, params, done) {

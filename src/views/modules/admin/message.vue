@@ -1,60 +1,100 @@
 <template>
   <div class="mod-user">
-    <avue-crud ref="crud"
-               :page="page"
-               :data="dataList"
-               :option="tableOption"
-               :permission="permission"
-               @search-change="searchChange"
-               @selection-change="selectionChange"
-               @on-load="getDataList">
-      <template slot="menuLeft">
-        <el-button type="primary"
-                   icon="el-icon-plus"
-                   size="small"
-                   v-if="isAuth('admin:message:save')"
-                   @click.stop="addOrUpdateHandle()">新增</el-button>
+    <avue-crud
+      ref="crud"
+      :page="page"
+      :data="dataList"
+      :option="tableOption"
+      :permission="permission"
+      @search-change="searchChange"
+      @selection-change="selectionChange"
+      @on-load="getDataList"
+    >
+      <template #menuLeft>
+        <el-button
+          v-if="isAuth('admin:message:save')"
+          type="primary"
+          icon="el-icon-plus"
+          size="small"
+          @click.stop="addOrUpdateHandle()"
+        >
+          新增
+        </el-button>
 
-        <el-button type="danger"
-                   @click="deleteHandle()"
-                   v-if="isAuth('admin:message:delete')"
-                   :disabled="dataListSelections.length <= 0">批量删除</el-button>
+        <el-button
+          v-if="isAuth('admin:message:delete')"
+          type="danger"
+          :disabled="dataListSelections.length <= 0"
+          @click="deleteHandle()"
+        >
+          批量删除
+        </el-button>
       </template>
 
-      <template slot-scope="scope"
-                slot="status">
-        <el-tag v-if="scope.row.status === 0"
-                size="small"
-                type="danger">未审核</el-tag>
-        <el-tag v-else
-                size="small">审核通过</el-tag>
+      <template
+        #default="scope"
+        #status
+      >
+        <el-tag
+          v-if="scope.row.status === 0"
+          size="small"
+          type="danger"
+        >
+          未审核
+        </el-tag>
+        <el-tag
+          v-else
+          size="small"
+        >
+          审核通过
+        </el-tag>
       </template>
 
-      <template slot-scope="scope"
-                slot="menu">
-        <el-button type="text"
-                   size="small"
-                   v-if="isAuth('admin:message:release')"
-                   @click="setMessageRelease(scope.row.id)">公开留言</el-button>
-        <el-button type="text"
-                   size="small"
-                   v-if="isAuth('admin:message:cancel')"
-                   @click="setMessageCancel(scope.row.id)">取消公开</el-button>
-        <el-button type="text"
-                   size="small"
-                   v-if="isAuth('admin:message:update')"
-                   @click="addOrUpdateHandle(scope.row.id)">修改</el-button>
-        <el-button type="text"
-                   size="small"
-                   v-if="isAuth('admin:message:delete')"
-                   @click="deleteHandle(scope.row.id)">删除</el-button>
+      <template
+        #default="scope"
+        #menu
+      >
+        <el-button
+          v-if="isAuth('admin:message:release')"
+          type="text"
+          size="small"
+          @click="setMessageRelease(scope.row.id)"
+        >
+          公开留言
+        </el-button>
+        <el-button
+          v-if="isAuth('admin:message:cancel')"
+          type="text"
+          size="small"
+          @click="setMessageCancel(scope.row.id)"
+        >
+          取消公开
+        </el-button>
+        <el-button
+          v-if="isAuth('admin:message:update')"
+          type="text"
+          size="small"
+          @click="addOrUpdateHandle(scope.row.id)"
+        >
+          修改
+        </el-button>
+        <el-button
+          v-if="isAuth('admin:message:delete')"
+          type="text"
+          size="small"
+          @click="deleteHandle(scope.row.id)"
+        >
+          删除
+        </el-button>
       </template>
     </avue-crud>
 
     <!-- 弹窗, 新增 / 修改 -->
-    <add-or-update v-if="addOrUpdateVisible"
-                   ref="addOrUpdate"
-                   @refreshDataList="getDataList"></add-or-update>
+    <add-or-update
+      v-if="addOrUpdateVisible"
+      ref="addOrUpdate"
+      @refresh-data-list="getDataList"
+    />
   </div>
 </template>
 
@@ -62,6 +102,9 @@
 import AddOrUpdate from './message-add-or-update'
 import { tableOption } from '@/crud/admin/message'
 export default {
+  components: {
+    AddOrUpdate
+  },
   data () {
     return {
       dataForm: {
@@ -74,7 +117,7 @@ export default {
       dataListLoading: false,
       dataListSelections: [],
       addOrUpdateVisible: false,
-      tableOption: tableOption,
+      tableOption,
       page: {
         total: 0, // 总页数
         currentPage: 1, // 当前页数
@@ -84,9 +127,6 @@ export default {
         delBtn: this.isAuth('prod:prod:delete')
       }
     }
-  },
-  components: {
-    AddOrUpdate
   },
   methods: {
     // 获取数据列表
@@ -128,7 +168,7 @@ export default {
           url: this.$http.adornUrl(`/admin/message/release/${id}`),
           method: 'put',
           data: this.$http.adornData({
-            id: id
+            id
           })
         }).then(({ data }) => {
           this.$message({
@@ -150,7 +190,7 @@ export default {
           url: this.$http.adornUrl(`/admin/message/cancel/${id}`),
           method: 'put',
           data: this.$http.adornData({
-            id: id
+            id
           })
         }).then(({ data }) => {
           this.$message({
@@ -167,11 +207,9 @@ export default {
     },
     // 删除
     deleteHandle (id) {
-      var ids = id
-        ? [id]
-        : this.dataListSelections.map(item => {
-          return item.id
-        })
+      const ids = id ? [id] : this.dataListSelections.map(item => {
+        return item.id
+      })
       this.$confirm(`确定进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',

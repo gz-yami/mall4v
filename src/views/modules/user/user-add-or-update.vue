@@ -1,44 +1,70 @@
 <template>
-  <el-dialog :title="!dataForm.userId ? '新增' : '修改'"
-             :close-on-click-modal="false"
-             :visible.sync="visible">
-    <el-form :model="dataForm"
-             :rules="dataRule"
-             ref="dataForm"
-             @keyup.enter.native="dataFormSubmit()"
-             label-width="80px">
-      <el-form-item label="用户头像"
-                    prop="pic">
-        <img :src="dataForm.pic"
-             class="image">
+  <el-dialog
+    v-model:visible="visible"
+    :title="!dataForm.userId ? '新增' : '修改'"
+    :close-on-click-modal="false"
+  >
+    <!-- native modifier has been removed, please confirm whether the function has been affected  -->
+    <el-form
+      ref="dataForm"
+      :model="dataForm"
+      :rules="dataRule"
+      label-width="80px"
+      @keyup.enter="dataFormSubmit()"
+    >
+      <el-form-item
+        label="用户头像"
+        prop="pic"
+      >
+        <img
+          :src="dataForm.pic"
+          class="image"
+        >
       </el-form-item>
-      <el-form-item label="用户昵称"
-                    prop="nickName">
-        <el-input v-model="dataForm.nickName"
-                  :disabled="true"
-                  placeholder="用户昵称"></el-input>
+      <el-form-item
+        label="用户昵称"
+        prop="nickName"
+      >
+        <el-input
+          v-model="dataForm.nickName"
+          :disabled="true"
+          placeholder="用户昵称"
+        />
       </el-form-item>
-      <el-form-item label="状态"
-                    size="mini"
-                    prop="status">
+      <el-form-item
+        label="状态"
+        size="mini"
+        prop="status"
+      >
         <el-radio-group v-model="dataForm.status">
-          <el-radio :label="0">禁用</el-radio>
-          <el-radio :label="1">正常</el-radio>
+          <el-radio :label="0">
+            禁用
+          </el-radio>
+          <el-radio :label="1">
+            正常
+          </el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>
-    <span slot="footer"
-          class="dialog-footer">
-      <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary"
-                 @click="dataFormSubmit()">确定</el-button>
-    </span>
+    <template #footer>
+      <span
+        class="dialog-footer"
+      >
+        <el-button @click="visible = false">取消</el-button>
+        <el-button
+          type="primary"
+          @click="dataFormSubmit()"
+        >确定</el-button>
+      </span>
+    </template>
   </el-dialog>
 </template>
 
 <script>
 import { Debounce } from '@/utils/debounce'
 export default {
+  emits: ['refreshDataList'],
+
   data () {
     return {
       visible: false,
@@ -61,6 +87,7 @@ export default {
       }
     }
   },
+
   methods: {
     init (id) {
       this.dataForm.userId = id || 0
@@ -80,10 +107,10 @@ export default {
     },
     // 表单提交
     dataFormSubmit: Debounce(function () {
-      this.$refs['dataForm'].validate(valid => {
+      this.$refs.dataForm.validate(valid => {
         if (valid) {
           this.$http({
-            url: this.$http.adornUrl(`/admin/user`),
+            url: this.$http.adornUrl('/admin/user'),
             method: this.dataForm.userId ? 'put' : 'post',
             data: this.$http.adornData({
               userId: this.dataForm.userId || undefined,

@@ -1,57 +1,87 @@
 <template>
   <div class="mod-hotSearcch">
+    <avue-crud
+      ref="crud"
+      :page="page"
+      :data="dataList"
+      :table-loading="dataListLoading"
+      :option="tableOption"
+      @search-change="searchChange"
+      @on-load="getDataList"
+      @refresh-change="refreshChange"
+      @selection-change="selectionChange"
+    >
+      <template #menuLeft>
+        <el-button
+          v-if="isAuth('admin:hotSearch:save')"
+          type="primary"
+          size="small"
+          icon="el-icon-plus"
+          @click="addOrUpdateHandle()"
+        >
+          新增
+        </el-button>
 
-    <avue-crud ref="crud"
-               :page="page"
-               :data="dataList"
-               :table-loading="dataListLoading"
-               :option="tableOption"
-               @search-change="searchChange"
-               @on-load="getDataList"
-               @refresh-change="refreshChange"
-               @selection-change="selectionChange">
-      <template slot="menuLeft">
-        <el-button v-if="isAuth('admin:hotSearch:save')"
-                   type="primary"
-                   size="small"
-                   icon="el-icon-plus"
-                   @click="addOrUpdateHandle()">新增</el-button>
-
-        <el-button type="danger"
-                   size="small"
-                   @click.stop="deleteHandle"
-                   :disabled="dataListSelections.length <= 0">批量删除</el-button>
+        <el-button
+          type="danger"
+          size="small"
+          :disabled="dataListSelections.length <= 0"
+          @click.stop="deleteHandle"
+        >
+          批量删除
+        </el-button>
       </template>
 
-      <template slot-scope="scope"
-                slot="status">
-        <el-tag v-if="scope.row.status === 0"
-                size="small"
-                type="danger">未启用</el-tag>
-        <el-tag v-else
-                size="small">启用</el-tag>
+      <template
+        #default="scope"
+        #status
+      >
+        <el-tag
+          v-if="scope.row.status === 0"
+          size="small"
+          type="danger"
+        >
+          未启用
+        </el-tag>
+        <el-tag
+          v-else
+          size="small"
+        >
+          启用
+        </el-tag>
       </template>
 
-      <template slot-scope="scope"
-                slot="menu">
-        <el-button v-if="isAuth('admin:hotSearch:update')"
-                   type="primary"
-                   size="small"
-                   icon="el-icon-edit"
-                   @click="addOrUpdateHandle(scope.row.hotSearchId)">修改</el-button>
-        <el-button v-if="isAuth('admin:hotSearch:delete')"
-                   type="danger"
-                   icon="el-icon-delete"
-                   size="small"
-                   @click.stop="deleteHandle(scope.row,scope.index)">删除</el-button>
+      <template
+        #default="scope"
+        #menu
+      >
+        <el-button
+          v-if="isAuth('admin:hotSearch:update')"
+          type="primary"
+          size="small"
+          icon="el-icon-edit"
+          @click="addOrUpdateHandle(scope.row.hotSearchId)"
+        >
+          修改
+        </el-button>
+        <el-button
+          v-if="isAuth('admin:hotSearch:delete')"
+          type="danger"
+          icon="el-icon-delete"
+          size="small"
+          @click.stop="deleteHandle(scope.row,scope.index)"
+        >
+          删除
+        </el-button>
       </template>
-
     </avue-crud>
 
     <!-- 弹窗, 新增 / 修改 -->
-    <add-or-update v-if="addOrUpdateVisible"
-                   ref="addOrUpdate"
-                   @refreshDataList="getDataList"></add-or-update>
+    <add-or-update
+      v-if="addOrUpdateVisible"
+      ref="addOrUpdate"
+      @refresh-data-list="getDataList"
+    />
   </div>
 </template>
 
@@ -59,6 +89,9 @@
 import { tableOption } from '@/crud/shop/hotSearch'
 import AddOrUpdate from './hotSearch-add-or-update'
 export default {
+  components: {
+    AddOrUpdate
+  },
   data () {
     return {
       dataForm: {
@@ -73,11 +106,8 @@ export default {
       dataListLoading: false,
       dataListSelections: [],
       addOrUpdateVisible: false,
-      tableOption: tableOption
+      tableOption
     }
-  },
-  components: {
-    AddOrUpdate
   },
   methods: {
     // 获取数据列表
@@ -118,7 +148,7 @@ export default {
     },
     // 删除
     deleteHandle (row, index) {
-      var ids = row.hotSearchId ? [row.hotSearchId] : this.dataListSelections.map(item => {
+      const ids = row.hotSearchId ? [row.hotSearchId] : this.dataListSelections.map(item => {
         return item.hotSearchId
       })
       this.$confirm(`确定进行[${row.hotSearchId ? '删除' : '批量删除'}]操作?`, '提示', {

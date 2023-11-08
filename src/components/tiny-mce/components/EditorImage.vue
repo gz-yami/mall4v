@@ -1,15 +1,36 @@
 <template>
   <div class="upload-container">
-    <el-tooltip v-if="tinymceUploadType === 'prod'" :content="this.$i18n.t('product.uploadDetailPicTips')" placement="top">
-      <el-button :style="{background:color,borderColor:color}" icon="el-icon-upload" size="mini" type="primary" @click="clickUpload()">
+    <el-tooltip
+      v-if="tinymceUploadType === 'prod'"
+      :content="$i18n.t('product.uploadDetailPicTips')"
+      placement="top"
+    >
+      <el-button
+        :style="{background:color,borderColor:color}"
+        icon="el-icon-upload"
+        size="mini"
+        type="primary"
+        @click="clickUpload()"
+      >
         {{ $t('components.uploadImage') }}
       </el-button>
     </el-tooltip>
-    <el-button v-else :style="{background:color,borderColor:color}" icon="el-icon-upload" size="mini" type="primary" @click="clickUpload()">
+    <el-button
+      v-else
+      :style="{background:color,borderColor:color}"
+      icon="el-icon-upload"
+      size="mini"
+      type="primary"
+      @click="clickUpload()"
+    >
       {{ $t('components.uploadImage') }}
     </el-button>
     <!-- 弹窗, 新增图片 -->
-    <elx-imgbox v-if="elxImgboxVisible" ref="elxImgbox" @refreshPic="refreshPic"></elx-imgbox>
+    <elx-imgbox
+      v-if="elxImgboxVisible"
+      ref="elxImgbox"
+      @refresh-pic="refreshPic"
+    />
   </div>
 </template>
 
@@ -18,6 +39,12 @@ import ImgsUpload from '@/components/imgs-upload'
 import ElxImgbox from '@/components/elx-imgbox'
 export default {
   name: 'EditorSlideUpload',
+
+  components: {
+    ImgsUpload,
+    ElxImgbox
+  },
+
   props: {
     color: {
       type: String,
@@ -28,6 +55,8 @@ export default {
       type: String
     }
   },
+  emits: ['successCBK'],
+
   data () {
     return {
       elxImgboxVisible: false,
@@ -36,10 +65,7 @@ export default {
       resourcesUrl: process.env.VUE_APP_RESOURCES_URL
     }
   },
-  components: {
-    ImgsUpload,
-    ElxImgbox
-  },
+
   methods: {
     /**
      * 打开图片选择窗
@@ -55,8 +81,8 @@ export default {
      * 接收回调的图片数据
      */
     refreshPic (imagePath) {
-      let imageArray = imagePath.split(',')
-      var data = []
+      const imageArray = imagePath.split(',')
+      const data = []
       imageArray.forEach(img => {
         data.push(this.resourcesUrl + img)
       })
@@ -81,7 +107,7 @@ export default {
 <style lang="scss" scoped>
 .editor-slide-upload {
   margin-bottom: 20px;
-  ::v-deep .el-upload--picture-card {
+  ::v-deep(.el-upload--picture-card) {
     width: 100%;
   }
 }

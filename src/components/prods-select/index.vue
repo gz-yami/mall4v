@@ -1,65 +1,96 @@
 <template>
-  <el-dialog title="选择商品"
-             :modal="false"
-             :close-on-click-modal="false"
-             :visible.sync="visible">
-    <el-table ref="prodTable"
-              :data="dataList"
-              border
-              v-loading="dataListLoading"
-              @selection-change="selectChangeHandle"
-              style="width: 100%;"
-              >
-      <el-table-column v-if="isSingle" width="50"
-                       header-align="center"
-                       align="center">
-        <template slot-scope="scope">
+  <el-dialog
+    v-model:visible="visible"
+    title="选择商品"
+    :modal="false"
+    :close-on-click-modal="false"
+  >
+    <el-table
+      ref="prodTable"
+      v-loading="dataListLoading"
+      :data="dataList"
+      border
+      style="width: 100%;"
+      @selection-change="selectChangeHandle"
+    >
+      <el-table-column
+        v-if="isSingle"
+        width="50"
+        header-align="center"
+        align="center"
+      >
+        <template #default="scope">
           <div>
-            <el-radio :label="scope.row.prodId"
-                      v-model="singleSelectProdId"
-                      @change.native="getSelectProdRow(scope.row)">&nbsp;</el-radio>
+            <!-- native modifier has been removed, please confirm whether the function has been affected  -->
+            <el-radio
+              v-model="singleSelectProdId"
+              :label="scope.row.prodId"
+              @change="getSelectProdRow(scope.row)"
+            >
+&nbsp;
+            </el-radio>
           </div>
         </template>
       </el-table-column>
-      <el-table-column v-if="!isSingle"
-                       type="selection"
-                       header-align="center"
-                       align="center"
-                       width="50">
-      </el-table-column>
-      <el-table-column prop="prodName"
-                       header-align="center"
-                       align="center"
-                       label="产品名称">
-      </el-table-column>
-      <el-table-column align="center"
-                       width="140"
-                       label="产品图片">
-        <template slot-scope="scope">
-          <img :src="scope.row.pic"
-               width="100"
-               height="100" />
+      <el-table-column
+        v-if="!isSingle"
+        type="selection"
+        header-align="center"
+        align="center"
+        width="50"
+      />
+      <el-table-column
+        prop="prodName"
+        header-align="center"
+        align="center"
+        label="产品名称"
+      />
+      <el-table-column
+        align="center"
+        width="140"
+        label="产品图片"
+      >
+        <template #default="scope">
+          <img
+            :src="scope.row.pic"
+            width="100"
+            height="100"
+          >
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination @size-change="sizeChangeHandle"
-                   @current-change="currentChangeHandle"
-                   :current-page="pageIndex"
-                   :page-sizes="[10, 20, 50, 100]"
-                   :page-size="pageSize"
-                   :total="totalPage"
-                   layout="total, sizes, prev, pager, next, jumper">
-    </el-pagination>
-    <span slot="footer">
-      <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary"
-                 @click="submitProds()">确定</el-button>
-    </span>
+    <el-pagination
+      :current-page="pageIndex"
+      :page-sizes="[10, 20, 50, 100]"
+      :page-size="pageSize"
+      :total="totalPage"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="sizeChangeHandle"
+      @current-change="currentChangeHandle"
+    />
+    <template #footer>
+      <span>
+        <el-button @click="visible = false">取消</el-button>
+        <el-button
+          type="primary"
+          @click="submitProds()"
+        >确定</el-button>
+      </span>
+    </template>
   </el-dialog>
 </template>
 
 <script>
 export default {
+
+  props: {
+    isSingle: {
+      default: false,
+      type: Boolean
+    }
+  },
+  emits: ['refreshSelectProds'],
+
   data () {
     return {
       visible: false,
@@ -78,15 +109,11 @@ export default {
       addOrUpdateVisible: false
     }
   },
-  props: {
-    isSingle: {
-      default: false,
-      type: Boolean
-    }
-  },
+
   activated () {
     this.getDataList()
   },
+
   methods: {
     // 获取数据列表
     init (selectProds) {
@@ -122,7 +149,7 @@ export default {
         if (this.selectProds) {
           this.$nextTick(() => {
             this.selectProds.forEach(row => {
-              let index = this.dataList.findIndex((prodItem) => prodItem.prodId === row.prodId)
+              const index = this.dataList.findIndex((prodItem) => prodItem.prodId === row.prodId)
               this.$refs.prodTable.toggleRowSelection(this.dataList[index])
             })
           })
@@ -147,13 +174,13 @@ export default {
     // 多选点击事件
     selectChangeHandle (selection) {
       this.dataList.forEach((tableItem) => {
-        let selectedProdIndex = selection.findIndex((selectedProd) => {
+        const selectedProdIndex = selection.findIndex((selectedProd) => {
           if (!selectedProd) {
             return false
           }
           return selectedProd.prodId === tableItem.prodId
         })
-        let dataSelectedProdIndex = this.dataListSelections.findIndex((dataSelectedProd) => dataSelectedProd.prodId === tableItem.prodId)
+        const dataSelectedProdIndex = this.dataListSelections.findIndex((dataSelectedProd) => dataSelectedProd.prodId === tableItem.prodId)
         if (selectedProdIndex > -1 && dataSelectedProdIndex === -1) {
           this.dataListSelections.push(tableItem)
         } else if (selectedProdIndex === -1 && dataSelectedProdIndex > -1) {
@@ -172,9 +199,9 @@ export default {
         })
         return
       }
-      let prods = []
+      const prods = []
       this.dataListSelections.forEach(item => {
-        let prodIndex = prods.findIndex((prod) => prod.prodId === item.prodId)
+        const prodIndex = prods.findIndex((prod) => prod.prodId === item.prodId)
         if (prodIndex === -1) {
           prods.push({ prodId: item.prodId, prodName: item.prodName, pic: item.pic })
         }

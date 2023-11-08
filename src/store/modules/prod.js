@@ -25,10 +25,10 @@ export default {
     removeSkuTag (state, tagIndex) {
       state.skuTags.splice(tagIndex, 1)
     },
-    removeSkuTagItem (state, {tagIndex, tagItemIndex}) {
+    removeSkuTagItem (state, { tagIndex, tagItemIndex }) {
       state.skuTags[tagIndex].tagItems.splice(tagItemIndex, 1)
     },
-    addSkuTagItem (state, {tagIndex, tagItem}) {
+    addSkuTagItem (state, { tagIndex, tagItem }) {
       state.skuTags[tagIndex].tagItems.push(tagItem)
     }
   }

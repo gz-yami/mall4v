@@ -1,6 +1,13 @@
 <template>
-  <div :class="{fullscreen:fullscreen}" class="tinymce-container" :style="{width:containerWidth}">
-    <textarea :id="tinymceId" class="tinymce-textarea" />
+  <div
+    :class="{fullscreen:fullscreen}"
+    class="tinymce-container"
+    :style="{width:containerWidth}"
+  >
+    <textarea
+      :id="tinymceId"
+      class="tinymce-textarea"
+    />
     <div class="editor-custom-btn-container">
       <el-upload
         class="upload-demo"
@@ -9,8 +16,14 @@
         :headers="{Authorization: $cookie.get('Authorization')}"
         :on-success="imageSuccessCBK"
         :show-file-list="false"
-        :before-upload="beforeAvatarUpload">
-        <el-button size="small" type="primary">点击上传图片</el-button>
+        :before-upload="beforeAvatarUpload"
+      >
+        <el-button
+          size="small"
+          type="primary"
+        >
+          点击上传图片
+        </el-button>
       </el-upload>
     </div>
   </div>
@@ -34,6 +47,7 @@ const resourceCdn3 = 'https://unpkg.com/tinymce-all-in-one@4.9.3/tinymce.min.js'
 export default {
   name: 'Tinymce',
   components: { mulPicUpload },
+
   props: {
     id: {
       type: String,
@@ -67,6 +81,8 @@ export default {
       default: 'auto'
     }
   },
+  emits: ['input'],
+
   data () {
     return {
       hasChange: false,
@@ -76,6 +92,7 @@ export default {
       resourcesUrl: process.env.VUE_APP_RESOURCES_URL
     }
   },
+
   computed: {
     language () {
       return localStorage.getItem('lang') || 'zh_CN'
@@ -88,6 +105,7 @@ export default {
       return width
     }
   },
+
   watch: {
     value (val) {
       if (!this.hasChange && this.hasInit) {
@@ -100,20 +118,25 @@ export default {
       this.$nextTick(() => this.initTinymce())
     }
   },
+
   mounted () {
     this.init()
   },
+
   activated () {
     if (window.tinymce) {
       this.initTinymce()
     }
   },
+
   deactivated () {
     this.destroyTinymce()
   },
-  destroyed () {
+
+  unmounted () {
     this.destroyTinymce()
   },
+
   methods: {
     init () {
       // dynamic load tinymce from cdn
@@ -147,7 +170,7 @@ export default {
         object_resizing: false,
         toolbar: this.toolbar.length > 0 ? this.toolbar : toolbar,
         menubar: this.menubar,
-        plugins: plugins,
+        plugins,
         end_container_on_empty_block: true,
         powerpaste_word_import: 'clean',
         code_dialog_height: 450,

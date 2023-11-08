@@ -10,7 +10,12 @@
                  'background-size' : setSize.imgWidth + ' '+ setSize.imgHeight,
                  'margin-bottom': vSpace + 'px'}"
       >
-        <div v-show="showRefresh" class="verify-refresh" style="z-index:3" @click="refresh">
+        <div
+          v-show="showRefresh"
+          class="verify-refresh"
+          style="z-index:3"
+          @click="refresh"
+        >
           <i class="iconfont icon-refresh" />
         </div>
         <img
@@ -47,9 +52,9 @@
     <div
       class="verify-bar-area"
       :style="{'width': setSize.imgWidth,
-               'color': this.barAreaColor,
-               'border-color': this.barAreaBorderColor,
-               'line-height':this.barSize.height}"
+               'color': barAreaColor,
+               'border-color': barAreaBorderColor,
+               'line-height':barSize.height}"
     >
       <span class="verify-msg">{{ text }}</span>
     </div>
@@ -73,7 +78,7 @@ export default {
       default: 'fixed'
     },
     captchaType: {
-      type: String,
+      type: String
     },
     // 间隔
     vSpace: {
@@ -82,7 +87,7 @@ export default {
     },
     imgSize: {
       type: Object,
-      default() {
+      default () {
         return {
           width: '310px',
           height: '155px'
@@ -91,7 +96,7 @@ export default {
     },
     barSize: {
       type: Object,
-      default() {
+      default () {
         return {
           width: '310px',
           height: '40px'
@@ -103,7 +108,7 @@ export default {
       default: ''
     }
   },
-  data() {
+  data () {
     return {
       secretKey: '', // 后端返回的ase加密秘钥
       checkNum: 3, // 默认需要点击的字数
@@ -128,7 +133,7 @@ export default {
     }
   },
   computed: {
-    resetSize() {
+    resetSize () {
       return resetSize
     }
   },
@@ -136,19 +141,19 @@ export default {
     // type变化则全面刷新
     type: {
       immediate: true,
-      handler() {
+      handler () {
         this.init()
       }
     }
   },
-  mounted() {
+  mounted () {
     // 禁止拖拽
-    this.$el.onselectstart = function() {
+    this.$el.onselectstart = function () {
       return false
     }
   },
   methods: {
-    init() {
+    init () {
       // 加载页面
       this.fontPos.splice(0, this.fontPos.length)
       this.checkPosArr.splice(0, this.checkPosArr.length)
@@ -159,7 +164,7 @@ export default {
         this.$parent.$emit('ready', this)
       })
     },
-    canvasClick(e) {
+    canvasClick (e) {
       this.checkPosArr.push(this.getMousePos(this.$refs.canvas, e))
       if (this.num == this.checkNum) {
         this.num = this.createPoint(this.getMousePos(this.$refs.canvas, e))
@@ -169,11 +174,11 @@ export default {
         setTimeout(() => {
           // var flag = this.comparePos(this.fontPos, this.checkPosArr);
           // 发送后端请求
-          var captchaVerification = this.secretKey ? aesEncrypt(this.backToken + '---' + JSON.stringify(this.checkPosArr), this.secretKey) : this.backToken + '---' + JSON.stringify(this.checkPosArr)
+          const captchaVerification = this.secretKey ? aesEncrypt(this.backToken + '---' + JSON.stringify(this.checkPosArr), this.secretKey) : this.backToken + '---' + JSON.stringify(this.checkPosArr)
           const data = {
             captchaType: this.captchaType,
-            'pointJson': this.secretKey ? aesEncrypt(JSON.stringify(this.checkPosArr), this.secretKey) : JSON.stringify(this.checkPosArr),
-            'token': this.backToken
+            pointJson: this.secretKey ? aesEncrypt(JSON.stringify(this.checkPosArr), this.secretKey) : JSON.stringify(this.checkPosArr),
+            token: this.backToken
           }
           reqCheck(data).then(res => {
             if (res.repCode == '0000') {
@@ -206,17 +211,17 @@ export default {
     },
 
     // 获取坐标
-    getMousePos: function(obj, e) {
-      var x = e.offsetX
-      var y = e.offsetY
+    getMousePos: function (obj, e) {
+      const x = e.offsetX
+      const y = e.offsetY
       return { x, y }
     },
     // 创建坐标点
-    createPoint: function(pos) {
+    createPoint: function (pos) {
       this.tempPoints.push(Object.assign({}, pos))
       return ++this.num
     },
-    refresh: function() {
+    refresh: function () {
       this.tempPoints.splice(0, this.tempPoints.length)
       this.barAreaColor = '#000'
       this.barAreaBorderColor = '#ddd'
@@ -230,11 +235,11 @@ export default {
     },
 
     // 请求背景图片和验证图片
-    getPictrue() {
+    getPictrue () {
       const data = {
         captchaType: this.captchaType,
         clientUid: localStorage.getItem('point'),
-        ts: Date.now(), // 现在的时间戳
+        ts: Date.now() // 现在的时间戳
       }
       reqGet(data).then(res => {
         if (res.repCode == '0000') {
@@ -254,8 +259,8 @@ export default {
       })
     },
     // 坐标转换函数
-    pointTransfrom(pointArr, imgSize) {
-      var newPointArr = pointArr.map(p => {
+    pointTransfrom (pointArr, imgSize) {
+      const newPointArr = pointArr.map(p => {
         const x = Math.round(310 * p.x / parseInt(imgSize.imgWidth))
         const y = Math.round(155 * p.y / parseInt(imgSize.imgHeight))
         return { x, y }
@@ -263,6 +268,6 @@ export default {
       // console.log(newPointArr,"newPointArr");
       return newPointArr
     }
-  },
+  }
 }
 </script>

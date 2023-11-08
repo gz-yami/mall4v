@@ -1,94 +1,142 @@
 <template>
-  <el-dialog :title="!dataForm.addrId ? '新增' : '修改'"
-             :close-on-click-modal="false"
-             :visible.sync="visible">
-    <el-form :model="dataForm"
-             :rules="dataRule"
-             ref="dataForm"
-             @keyup.enter.native="dataFormSubmit()"
-             label-width="100px">
-      <el-form-item label="收货人姓名"
-                    prop="receiver">
-        <el-input v-model="dataForm.receiver"></el-input>
+  <el-dialog
+    v-model:visible="visible"
+    :title="!dataForm.addrId ? '新增' : '修改'"
+    :close-on-click-modal="false"
+  >
+    <!-- native modifier has been removed, please confirm whether the function has been affected  -->
+    <el-form
+      ref="dataForm"
+      :model="dataForm"
+      :rules="dataRule"
+      label-width="100px"
+      @keyup.enter="dataFormSubmit()"
+    >
+      <el-form-item
+        label="收货人姓名"
+        prop="receiver"
+      >
+        <el-input v-model="dataForm.receiver" />
       </el-form-item>
       <el-form-item label="省份">
         <el-col :span="8">
           <el-form-item prop="province">
-            <el-select v-model="dataForm.provinceId"
-                       placeholder="请选择"
-                       @change="selectProvince">
-              <el-option v-for="province in provinceList"
-                         :key="province.areaId"
-                         :label="province.areaName"
-                         :value="province.areaId"></el-option>
+            <el-select
+              v-model="dataForm.provinceId"
+              placeholder="请选择"
+              @change="selectProvince"
+            >
+              <el-option
+                v-for="province in provinceList"
+                :key="province.areaId"
+                :label="province.areaName"
+                :value="province.areaId"
+              />
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item prop="city">
-            <el-select v-model="dataForm.cityId"
-                       placeholder="请选择"
-                       @change="selectCity">
-              <el-option v-for="city in cityList"
-                         :key="city.areaId"
-                         :label="city.areaName"
-                         :value="city.areaId"></el-option>
+            <el-select
+              v-model="dataForm.cityId"
+              placeholder="请选择"
+              @change="selectCity"
+            >
+              <el-option
+                v-for="city in cityList"
+                :key="city.areaId"
+                :label="city.areaName"
+                :value="city.areaId"
+              />
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item prop="area">
-            <el-select v-model="dataForm.areaId"
-                       placeholder="请选择">
-              <el-option v-for="area in areaList"
-                         :key="area.areaId"
-                         :label="area.areaName"
-                         :value="area.areaId"></el-option>
+            <el-select
+              v-model="dataForm.areaId"
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="area in areaList"
+                :key="area.areaId"
+                :label="area.areaName"
+                :value="area.areaId"
+              />
             </el-select>
           </el-form-item>
         </el-col>
       </el-form-item>
-      <el-form-item label="详细地址"
-                    prop="addr">
-        <el-input v-model="dataForm.addr"></el-input>
+      <el-form-item
+        label="详细地址"
+        prop="addr"
+      >
+        <el-input v-model="dataForm.addr" />
       </el-form-item>
-      <el-form-item label="邮编"
-                    prop="postCode">
-        <el-input v-model="dataForm.postCode"></el-input>
+      <el-form-item
+        label="邮编"
+        prop="postCode"
+      >
+        <el-input v-model="dataForm.postCode" />
       </el-form-item>
-      <el-form-item label="手机"
-                    prop="mobile">
-        <el-input v-model="dataForm.mobile"></el-input>
+      <el-form-item
+        label="手机"
+        prop="mobile"
+      >
+        <el-input v-model="dataForm.mobile" />
       </el-form-item>
-      <el-form-item label="状态"
-                    prop="status">
-        <el-radio-group v-model="dataForm.status"
-                        size="medium">
-          <el-radio :label="1">正常</el-radio>
-          <el-radio :label="0">禁用</el-radio>
+      <el-form-item
+        label="状态"
+        prop="status"
+      >
+        <el-radio-group
+          v-model="dataForm.status"
+          size="medium"
+        >
+          <el-radio :label="1">
+            正常
+          </el-radio>
+          <el-radio :label="0">
+            禁用
+          </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="默认地址"
-                    prop="commonAddr">
-        <el-radio-group v-model="dataForm.commonAddr"
-                        size="medium">
-          <el-radio :label="0">否</el-radio>
-          <el-radio :label="1">是</el-radio>
+      <el-form-item
+        label="默认地址"
+        prop="commonAddr"
+      >
+        <el-radio-group
+          v-model="dataForm.commonAddr"
+          size="medium"
+        >
+          <el-radio :label="0">
+            否
+          </el-radio>
+          <el-radio :label="1">
+            是
+          </el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>
-    <span slot="footer"
-          class="dialog-footer">
-      <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary"
-                 @click="dataFormSubmit()">确定</el-button>
-    </span>
+    <template #footer>
+      <span
+        class="dialog-footer"
+      >
+        <el-button @click="visible = false">取消</el-button>
+        <el-button
+          type="primary"
+          @click="dataFormSubmit()"
+        >确定</el-button>
+      </span>
+    </template>
   </el-dialog>
 </template>
 
 <script>
 import { Debounce } from '@/utils/debounce'
 export default {
+  emits: ['refreshDataList'],
+
   data () {
     return {
       visible: false,
@@ -116,12 +164,13 @@ export default {
       }
     }
   },
+
   methods: {
     init (addrId) {
       this.dataForm.addrId = addrId || 0
       this.visible = true
       this.$nextTick(() => {
-        this.$refs['dataForm'].resetFields()
+        this.$refs.dataForm.resetFields()
         this.cityList = []
         this.areaList = []
         this.dataForm.provinceId = null
@@ -155,7 +204,7 @@ export default {
     listAreaByParentId (pid) {
       if (!pid) pid = 0
       return this.$http({
-        url: this.$http.adornUrl(`/admin/area/listByPid`),
+        url: this.$http.adornUrl('/admin/area/listByPid'),
         method: 'get',
         params: this.$http.adornParams({ pid })
       })
@@ -199,7 +248,7 @@ export default {
           this.dataForm.area = this.areaList[i].areaName
         }
       }
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs.dataForm.validate((valid) => {
         if (valid) {
           this.$http({
             url: this.$http.adornUrl('/user/addr'),
@@ -212,7 +261,7 @@ export default {
               duration: 1500,
               onClose: () => {
                 this.visible = false
-                this.$refs['dataForm'].resetFields()
+                this.$refs.dataForm.resetFields()
                 this.$emit('refreshDataList')
               }
             })

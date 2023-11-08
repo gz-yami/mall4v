@@ -1,89 +1,131 @@
 <template>
   <div class="mod-prod-info">
-    <el-form :model="dataForm"
-             ref="dataForm"
-             label-width="100px">
+    <el-form
+      ref="dataForm"
+      :model="dataForm"
+      label-width="100px"
+    >
       <el-form-item label="产品图片">
         <mul-pic-upload v-model="dataForm.imgs" />
       </el-form-item>
       <el-form-item label="状态">
         <el-radio-group v-model="dataForm.status">
-          <el-radio :label="1">上架</el-radio>
-          <el-radio :label="0">下架</el-radio>
+          <el-radio :label="1">
+            上架
+          </el-radio>
+          <el-radio :label="0">
+            下架
+          </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="产品分类"
-                    :rules="[{ required: true, message: '请选择产品分类'}]"
-                    prop="categoryId">
+      <el-form-item
+        label="产品分类"
+        :rules="[{ required: true, message: '请选择产品分类'}]"
+        prop="categoryId"
+      >
         <el-col :span="8">
-          <el-cascader expand-trigger="hover"
-                        :options="category.list"
-                        :props="category.props"
-                        v-model="category.selected"
-                        change-on-select
-                        @change="handleCategoryChange">
-          </el-cascader>
+          <el-cascader
+            v-model="category.selected"
+            expand-trigger="hover"
+            :options="category.list"
+            :props="category.props"
+            change-on-select
+            @change="handleCategoryChange"
+          />
         </el-col>
       </el-form-item>
-      <el-form-item label="产品分组" :rules="[{ required: true, message: '请选择产品分组'}]">
+      <el-form-item
+        label="产品分组"
+        :rules="[{ required: true, message: '请选择产品分组'}]"
+      >
         <el-col :span="8">
-          <el-select v-model="dataForm.tagList"
-                    multiple
-                    style="width: 250px"
-                    placeholder="请选择">
-            <el-option v-for="item in this.tags"
-                      :key="item.id"
-                      :label="item.title"
-                      :value="item.id">
-            </el-option>
+          <el-select
+            v-model="dataForm.tagList"
+            multiple
+            style="width: 250px"
+            placeholder="请选择"
+          >
+            <el-option
+              v-for="item in tags"
+              :key="item.id"
+              :label="item.title"
+              :value="item.id"
+            />
           </el-select>
         </el-col>
       </el-form-item>
-      <el-form-item label="产品名称"
-                    prop="prodName"
-                    :rules="[
-                      { required: true, message: '产品名称不能为空'},
-                      { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的产品名称', trigger: 'blur' }
-                    ]">
+      <el-form-item
+        label="产品名称"
+        prop="prodName"
+        :rules="[
+          { required: true, message: '产品名称不能为空'},
+          { pattern: /\s\S+|S+\s|\S/, message: '请输入正确的产品名称', trigger: 'blur' }
+        ]"
+      >
         <el-col :span="8">
-          <el-input v-model="dataForm.prodName"
-                    placeholder="产品名称"
-                    maxlength="50"></el-input>
+          <el-input
+            v-model="dataForm.prodName"
+            placeholder="产品名称"
+            maxlength="50"
+          />
         </el-col>
       </el-form-item>
-      <el-form-item label="产品卖点"
-                    prop="brief":rules="[
-                      { required: false, pattern: /\s\S+|S+\s|\S/, message: '请输入正确的产品卖点', trigger: 'blur' }
-                    ]">
+      <el-form-item
+        label="产品卖点"
+        prop="brief"
+        :rules="[
+          { required: false, pattern: /\s\S+|S+\s|\S/, message: '请输入正确的产品卖点', trigger: 'blur' }
+        ]"
+      >
         <el-col :span="8">
-          <el-input v-model="dataForm.brief"
-                    type="textarea"
-                    :autosize="{minRows: 2, maxRows: 4}"
-                    placeholder="产品卖点"></el-input>
+          <el-input
+            v-model="dataForm.brief"
+            type="textarea"
+            :autosize="{minRows: 2, maxRows: 4}"
+            placeholder="产品卖点"
+          />
         </el-col>
       </el-form-item>
       <el-form-item label="配送方式">
-        <el-checkbox v-model="dataForm.deliveryMode.hasShopDelivery">商家配送</el-checkbox>
-        <el-checkbox v-model="dataForm.deliveryMode.hasUserPickUp">用户自提</el-checkbox>
+        <el-checkbox v-model="dataForm.deliveryMode.hasShopDelivery">
+          商家配送
+        </el-checkbox>
+        <el-checkbox v-model="dataForm.deliveryMode.hasUserPickUp">
+          用户自提
+        </el-checkbox>
       </el-form-item>
-      <prod-transport v-show="dataForm.deliveryMode.hasShopDelivery"
-                      v-model="dataForm.deliveryTemplateId"></prod-transport>
-      <sku-tag ref="skuTag"
-                :skuList="dataForm.skuList"
-               @change="skuTagChangeSkuHandler"></sku-tag>
-      <sku-table ref="skuTable"
-                 v-model="dataForm.skuList"
-                 :prodName.sync="dataForm.prodName"></sku-table>
+      <prod-transport
+        v-show="dataForm.deliveryMode.hasShopDelivery"
+        v-model="dataForm.deliveryTemplateId"
+      />
+      <sku-tag
+        ref="skuTag"
+        :sku-list="dataForm.skuList"
+        @change="skuTagChangeSkuHandler"
+      />
+      <sku-table
+        ref="skuTable"
+        v-model="dataForm.skuList"
+        v-model:prodName="dataForm.prodName"
+      />
 
-      <el-form-item label="产品详情"
-                    prop="content">
-        <tiny-mce v-model="dataForm.content"
-                  ref="content"
-                  style="width:1000px"></tiny-mce>
+      <el-form-item
+        label="产品详情"
+        prop="content"
+      >
+        <tiny-mce
+          ref="content"
+          v-model="dataForm.content"
+          style="width:1000px"
+        />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary"
-                   @click="dataFormSubmit()">确定</el-button>
+        <el-button
+          type="primary"
+          @click="dataFormSubmit()"
+        >
+          确定
+        </el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -99,6 +141,16 @@ import TinyMce from '@/components/tiny-mce'
 import { Debounce } from '@/utils/debounce'
 
 export default {
+
+  components: {
+    MulPicUpload,
+    ProdTransport,
+    TinyMce,
+    SkuTag,
+    SkuTable
+  },
+  emits: ['refreshDataList'],
+
   data () {
     return {
       // 分类树展示与回显
@@ -132,22 +184,18 @@ export default {
       resourcesUrl: process.env.VUE_APP_RESOURCES_URL
     }
   },
-  components: {
-    MulPicUpload,
-    ProdTransport,
-    TinyMce,
-    SkuTag,
-    SkuTable
-  },
+
   computed: {
     defalutSku () {
       return this.$store.state.prod.defalutSku
     }
   },
+
   activated () {
     this.dataForm.prodId = this.$route.query.prodId
     this.getDataList()
   },
+
   methods: {
     // 获取分类数据
     getDataList () {
@@ -169,7 +217,7 @@ export default {
           })
         } else {
           this.$nextTick(() => {
-            this.$refs['dataForm'].resetFields()
+            this.$refs.dataForm.resetFields()
             this.$refs.skuTag.init()
             this.dataForm.pic = ''
             this.dataForm.imgs = ''
@@ -193,7 +241,7 @@ export default {
     },
     // 表单提交
     dataFormSubmit: Debounce(function () {
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs.dataForm.validate((valid) => {
         if (!valid) {
           return
         }
@@ -209,7 +257,7 @@ export default {
           this.errorMsg('请选择运费模板')
           return
         }
-        let param = Object.assign({}, this.dataForm)
+        const param = Object.assign({}, this.dataForm)
         // 设置价格和库存
         this.paramSetPriceAndStocks(param)
 
@@ -218,7 +266,7 @@ export default {
         // 商品主图
         param.pic = this.dataForm.imgs.split(',')[0]
         this.$http({
-          url: this.$http.adornUrl(`/prod/prod`),
+          url: this.$http.adornUrl('/prod/prod'),
           method: param.prodId ? 'put' : 'post',
           data: this.$http.adornData(param)
         }).then(({ data }) => {
@@ -271,7 +319,7 @@ export default {
       skuList.forEach(sku => {
         if (sku.properties) {
           sku.skuName = ''
-          let properties = sku.properties.split(';')
+          const properties = sku.properties.split(';')
           for (const propertiesKey in properties) {
             sku.skuName += properties[propertiesKey].split(':')[1] + ' '
           }
@@ -282,7 +330,7 @@ export default {
     },
     errorMsg (message) {
       this.$message({
-        message: message,
+        message,
         type: 'error',
         duration: 1500
       })

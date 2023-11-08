@@ -1,47 +1,69 @@
 <template>
   <div class="mod-pickAddr">
-    <avue-crud ref="crud"
-               :page="page"
-               :data="dataList"
-               :option="tableOption"
-               :permission="permission"
-               @search-change="searchChange"
-               @selection-change="selectionChange"
-               @on-load="getDataList">
-      <template slot="menuLeft">
-        <el-button type="primary"
-                   icon="el-icon-plus"
-                   size="small"
-                   v-if="isAuth('shop:pickAddr:save')"
-                   @click.stop="addOrUpdateHandle()">新增</el-button>
+    <avue-crud
+      ref="crud"
+      :page="page"
+      :data="dataList"
+      :option="tableOption"
+      :permission="permission"
+      @search-change="searchChange"
+      @selection-change="selectionChange"
+      @on-load="getDataList"
+    >
+      <template #menuLeft>
+        <el-button
+          v-if="isAuth('shop:pickAddr:save')"
+          type="primary"
+          icon="el-icon-plus"
+          size="small"
+          @click.stop="addOrUpdateHandle()"
+        >
+          新增
+        </el-button>
 
-        <el-button type="danger"
-                   @click="deleteHandle()"
-                   v-if="isAuth('shop:pickAddr:delete')"
-                   size="small"
-                   :disabled="dataListSelections.length <= 0">批量删除</el-button>
+        <el-button
+          v-if="isAuth('shop:pickAddr:delete')"
+          type="danger"
+          size="small"
+          :disabled="dataListSelections.length <= 0"
+          @click="deleteHandle()"
+        >
+          批量删除
+        </el-button>
       </template>
 
-      <template slot-scope="scope"
-                slot="menu">
-        <el-button type="primary"
-                   icon="el-icon-edit"
-                   size="small"
-                   v-if="isAuth('shop:pickAddr:update')"
-                   @click.stop="addOrUpdateHandle(scope.row.addrId)">编辑</el-button>
+      <template
+        #default="scope"
+        #menu
+      >
+        <el-button
+          v-if="isAuth('shop:pickAddr:update')"
+          type="primary"
+          icon="el-icon-edit"
+          size="small"
+          @click.stop="addOrUpdateHandle(scope.row.addrId)"
+        >
+          编辑
+        </el-button>
 
-        <el-button type="danger"
-                   icon="el-icon-delete"
-                   size="small"
-                   v-if="isAuth('shop:pickAddr:delete')"
-                   @click.stop="deleteHandle(scope.row.addrId)">删除</el-button>
+        <el-button
+          v-if="isAuth('shop:pickAddr:delete')"
+          type="danger"
+          icon="el-icon-delete"
+          size="small"
+          @click.stop="deleteHandle(scope.row.addrId)"
+        >
+          删除
+        </el-button>
       </template>
     </avue-crud>
 
     <!-- 弹窗, 新增 / 修改 -->
-    <add-or-update v-if="addOrUpdateVisible"
-                   ref="addOrUpdate"
-                   @refreshDataList="getDataList"></add-or-update>
+    <add-or-update
+      v-if="addOrUpdateVisible"
+      ref="addOrUpdate"
+      @refresh-data-list="getDataList"
+    />
   </div>
 </template>
 
@@ -49,6 +71,9 @@
 import AddOrUpdate from './pickAddr-add-or-update'
 import { tableOption } from '@/crud/shop/pickAddr'
 export default {
+  components: {
+    AddOrUpdate
+  },
   data () {
     return {
       dataForm: {
@@ -58,7 +83,7 @@ export default {
       dataListLoading: false,
       dataListSelections: [],
       addOrUpdateVisible: false,
-      tableOption: tableOption,
+      tableOption,
       page: {
         total: 0, // 总页数
         currentPage: 1, // 当前页数
@@ -68,9 +93,6 @@ export default {
         delBtn: this.isAuth('prod:prod:delete')
       }
     }
-  },
-  components: {
-    AddOrUpdate
   },
   methods: {
     // 获取数据列表
@@ -106,13 +128,11 @@ export default {
     },
     // 删除
     deleteHandle (id) {
-      var ids = id
-        ? [id]
-        : this.dataListSelections.map(item => {
-          return item.addrId
-        })
+      const ids = id ? [id] : this.dataListSelections.map(item => {
+        return item.addrId
+      })
       this.$confirm(
-        `确定进行删除操作?`, '提示',
+        '确定进行删除操作?', '提示',
         {
           confirmButtonText: '确定',
           cancelButtonText: '取消',

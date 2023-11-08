@@ -1,56 +1,83 @@
 <template>
   <div class="mod-hotSearch-add-or-update">
-    <el-dialog :title="!dataForm.hotSearchId ? '新增' : '修改'"
-               :close-on-click-modal="false"
-               :visible.sync="visible">
-      <el-form :model="dataForm"
-               :rules="dataRule"
-               ref="dataForm"
-               @keyup.enter.native="dataFormSubmit()"
-               label-width="80px">
-
-        <el-form-item label="标题"
-                      prop="title">
-          <el-input v-model="dataForm.title"
-                    controls-position="right"
-                    :min="0"
-                    maxlength="50"
-                    show-word-limit
-                    label="标题"></el-input>
+    <el-dialog
+      v-model:visible="visible"
+      :title="!dataForm.hotSearchId ? '新增' : '修改'"
+      :close-on-click-modal="false"
+    >
+      <!-- native modifier has been removed, please confirm whether the function has been affected  -->
+      <el-form
+        ref="dataForm"
+        :model="dataForm"
+        :rules="dataRule"
+        label-width="80px"
+        @keyup.enter="dataFormSubmit()"
+      >
+        <el-form-item
+          label="标题"
+          prop="title"
+        >
+          <el-input
+            v-model="dataForm.title"
+            controls-position="right"
+            :min="0"
+            maxlength="50"
+            show-word-limit
+            label="标题"
+          />
         </el-form-item>
 
-        <el-form-item label="内容"
-                      prop="content">
-          <el-input v-model="dataForm.content"
-                    controls-position="right"
-                    type="textarea"
-                    :min="0"
-                    maxlength="255"
-                    show-word-limit
-                    label="内容"></el-input>
+        <el-form-item
+          label="内容"
+          prop="content"
+        >
+          <el-input
+            v-model="dataForm.content"
+            controls-position="right"
+            type="textarea"
+            :min="0"
+            maxlength="255"
+            show-word-limit
+            label="内容"
+          />
         </el-form-item>
-        <el-form-item label="排序号"
-                      prop="seq">
-          <el-input-number v-model="dataForm.seq"
-                           controls-position="right"
-                           :min="0"
-                           label="排序号"></el-input-number>
+        <el-form-item
+          label="排序号"
+          prop="seq"
+        >
+          <el-input-number
+            v-model="dataForm.seq"
+            controls-position="right"
+            :min="0"
+            label="排序号"
+          />
         </el-form-item>
-        <el-form-item label="状态"
-                      size="mini"
-                      prop="status">
+        <el-form-item
+          label="状态"
+          size="mini"
+          prop="status"
+        >
           <el-radio-group v-model="dataForm.status">
-            <el-radio :label="0">下线</el-radio>
-            <el-radio :label="1">正常</el-radio>
+            <el-radio :label="0">
+              下线
+            </el-radio>
+            <el-radio :label="1">
+              正常
+            </el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
-      <span slot="footer"
-            class="dialog-footer">
-        <el-button @click="visible = false">取消</el-button>
-        <el-button type="primary"
-                   @click="dataFormSubmit()">确定</el-button>
-      </span>
+      <template #footer>
+        <span
+          class="dialog-footer"
+        >
+          <el-button @click="visible = false">取消</el-button>
+          <el-button
+            type="primary"
+            @click="dataFormSubmit()"
+          >确定</el-button>
+        </span>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -58,6 +85,10 @@
 <script>
 import { Debounce } from '@/utils/debounce'
 export default {
+
+  components: {},
+  emits: ['refreshDataList'],
+
   data () {
     return {
       dataForm: {
@@ -90,19 +121,19 @@ export default {
       }
     }
   },
-  components: {},
+
   methods: {
     init (id) {
       this.dataForm.hotSearchId = id || 0
       this.visible = true
       this.$nextTick(() => {
-        this.$refs['dataForm'].resetFields()
+        this.$refs.dataForm.resetFields()
         if (this.dataForm.hotSearchId) {
           this.$http({
             url: this.$http.adornUrl('/admin/hotSearch/info/' + this.dataForm.hotSearchId),
             method: 'get',
             params: this.$http.adornParams()
-          }).then(({data}) => {
+          }).then(({ data }) => {
             this.dataForm = data
           })
         }
@@ -110,11 +141,11 @@ export default {
     },
     // 表单提交
     dataFormSubmit: Debounce(function () {
-      this.$refs['dataForm'].validate(valid => {
+      this.$refs.dataForm.validate(valid => {
         if (valid) {
-          let param = this.dataForm
+          const param = this.dataForm
           this.$http({
-            url: this.$http.adornUrl(`/admin/hotSearch`),
+            url: this.$http.adornUrl('/admin/hotSearch'),
             method: param.hotSearchId ? 'put' : 'post',
             data: this.$http.adornData(param)
           }).then(({ data }) => {

@@ -1,58 +1,82 @@
 <template>
-  <el-dialog :title="!this.dataList[0].propId ? '新增' : '修改'"
-             :close-on-click-modal="false"
-             :visible.sync="visible">
-    <el-table :data="dataList"
-              border
-              style="width: 100%;">
-      <el-table-column prop="propName"
-                       header-align="center"
-                       align="center"
-                       label="属性名称">
-        <template slot-scope="scope">
-          <el-input placeholder="请输入内容"
-                    v-model="scope.row.propName"
-                    maxlength="10"
-                    show-word-limit
-                    clearable></el-input>
+  <el-dialog
+    v-model:visible="visible"
+    :title="!dataList[0].propId ? '新增' : '修改'"
+    :close-on-click-modal="false"
+  >
+    <el-table
+      :data="dataList"
+      border
+      style="width: 100%;"
+    >
+      <el-table-column
+        prop="propName"
+        header-align="center"
+        align="center"
+        label="属性名称"
+      >
+        <template #default="scope">
+          <el-input
+            v-model="scope.row.propName"
+            placeholder="请输入内容"
+            maxlength="10"
+            show-word-limit
+            clearable
+          />
         </template>
       </el-table-column>
-      <el-table-column prop="prodPropValues"
-                       header-align="center"
-                       align="center"
-                       label="属性值">
-        <template slot-scope="scope">
-          <el-col :span="12"
-                  v-for="item in scope.row.prodPropValues"
-                  :key="item.valueId">
-            <el-input placeholder="请输入内容"
-                      v-model="item.propValue"
-                      class="prop-value-input"
-                      @clear="clearProdPropValues"
-                      maxlength="20"
-                      show-word-limit
-                      clearable></el-input>
+      <el-table-column
+        prop="prodPropValues"
+        header-align="center"
+        align="center"
+        label="属性值"
+      >
+        <template #default="scope">
+          <el-col
+            v-for="item in scope.row.prodPropValues"
+            :key="item.valueId"
+            :span="12"
+          >
+            <el-input
+              v-model="item.propValue"
+              placeholder="请输入内容"
+              class="prop-value-input"
+              maxlength="20"
+              show-word-limit
+              clearable
+              @clear="clearProdPropValues"
+            />
           </el-col>
           <el-col :span="4">
-            <el-button v-show="scope.row.prodPropValues[scope.row.prodPropValues.length-1].propValue" type="primary"
-            class="add-input"
-                       icon="el-icon-circle-plus"
-                       @click="addInput()"></el-button>
+            <el-button
+              v-show="scope.row.prodPropValues[scope.row.prodPropValues.length-1].propValue"
+              type="primary"
+              class="add-input"
+              icon="el-icon-circle-plus"
+              @click="addInput()"
+            />
           </el-col>
         </template>
       </el-table-column>
     </el-table>
-    <span slot="footer"
-          class="dialog-footer">
-      <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary"
-                 @click="dataFormSubmit()">确定</el-button>
-    </span>
+    <template #footer>
+      <span
+        class="dialog-footer"
+      >
+        <el-button @click="visible = false">取消</el-button>
+        <el-button
+          type="primary"
+          @click="dataFormSubmit()"
+        >确定</el-button>
+      </span>
+    </template>
   </el-dialog>
 </template>
 <script>
 import { Debounce } from '@/utils/debounce'
 export default {
+  emits: ['refreshDataList'],
+
   data () {
     return {
       visible: false,
@@ -69,6 +93,7 @@ export default {
       }
     }
   },
+
   methods: {
     init (val) {
       if (val) {
@@ -83,7 +108,7 @@ export default {
     // 表单提交
     dataFormSubmit: Debounce(function () {
       if (this.dataList[0].prodPropValues) {
-        let temp = []
+        const temp = []
         for (const key in this.dataList[0].prodPropValues) {
           if (this.dataList[0].prodPropValues.hasOwnProperty(key)) {
             const element = this.dataList[0].prodPropValues[key]
@@ -117,7 +142,7 @@ export default {
         return
       }
       this.$http({
-        url: this.$http.adornUrl(`/prod/spec`),
+        url: this.$http.adornUrl('/prod/spec'),
         method: this.dataList[0].propId ? 'put' : 'post',
         data: this.$http.adornData({
           propId: this.dataList[0].propId || undefined,
@@ -148,7 +173,7 @@ export default {
       }
     },
     addInput () {
-      let temp = this.dataList[0].prodPropValues
+      const temp = this.dataList[0].prodPropValues
       if (temp[temp.length - 1].propValue) {
         temp.push({})
       }

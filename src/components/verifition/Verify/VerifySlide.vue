@@ -10,11 +10,24 @@
         :style="{width: setSize.imgWidth,
                  height: setSize.imgHeight,}"
       >
-        <img :src="backImgBase?('data:image/png;base64,'+backImgBase):defaultImg" alt="" style="width:100%;height:100%;display:block">
-        <div v-show="showRefresh" class="verify-refresh" @click="refresh"><i class="iconfont icon-refresh" />
+        <img
+          :src="backImgBase?('data:image/png;base64,'+backImgBase):defaultImg"
+          alt=""
+          style="width:100%;height:100%;display:block"
+        >
+        <div
+          v-show="showRefresh"
+          class="verify-refresh"
+          @click="refresh"
+        >
+          <i class="iconfont icon-refresh" />
         </div>
         <transition name="tips">
-          <span v-if="tipWords" class="verify-tips" :class="passFlag ?'suc-bg':'err-bg'">{{ tipWords }}</span>
+          <span
+            v-if="tipWords"
+            class="verify-tips"
+            :class="passFlag ?'suc-bg':'err-bg'"
+          >{{ tipWords }}</span>
         </transition>
       </div>
     </div>
@@ -25,12 +38,18 @@
                height: barSize.height,
                'line-height':barSize.height}"
     >
-      <span class="verify-msg" v-text="text" />
+      <span
+        class="verify-msg"
+        v-text="text"
+      />
       <div
         class="verify-left-bar"
         :style="{width: (leftBarWidth!==undefined)?leftBarWidth: barSize.height, height: barSize.height, 'border-color': leftBarBorderColor, transaction: transitionWidth}"
       >
-        <span class="verify-msg" v-text="finishText" />
+        <span
+          class="verify-msg"
+          v-text="finishText"
+        />
         <div
           class="verify-move-block"
           :style="{width: barSize.height, height: barSize.height, 'background-color': moveBlockBackgroundColor, left: moveBlockLeft, transition: transitionLeft}"
@@ -50,7 +69,11 @@
                      'background-size': setSize.imgWidth + ' ' + setSize.imgHeight,
             }"
           >
-            <img :src="'data:image/png;base64,'+blockBackImgBase" alt="" style="width:100%;height:100%;display:block">
+            <img
+              :src="'data:image/png;base64,'+blockBackImgBase"
+              alt=""
+              style="width:100%;height:100%;display:block"
+            >
           </div>
         </div>
       </div>
@@ -71,7 +94,7 @@ export default {
   name: 'VerifySlide',
   props: {
     captchaType: {
-      type: String,
+      type: String
     },
     type: {
       type: String,
@@ -92,7 +115,7 @@ export default {
     },
     imgSize: {
       type: Object,
-      default() {
+      default () {
         return {
           width: '310px',
           height: '155px'
@@ -101,7 +124,7 @@ export default {
     },
     blockSize: {
       type: Object,
-      default() {
+      default () {
         return {
           width: '50px',
           height: '50px'
@@ -110,7 +133,7 @@ export default {
     },
     barSize: {
       type: Object,
-      default() {
+      default () {
         return {
           width: '310px',
           height: '40px'
@@ -122,7 +145,7 @@ export default {
       default: ''
     }
   },
-  data() {
+  data () {
     return {
       secretKey: '', // 后端返回的加密秘钥 字段
       passFlag: '', // 是否通过的标识
@@ -158,10 +181,10 @@ export default {
     }
   },
   computed: {
-    barArea() {
+    barArea () {
       return this.$el.querySelector('.verify-bar-area')
     },
-    resetSize() {
+    resetSize () {
       return resetSize
     }
   },
@@ -169,65 +192,65 @@ export default {
     // type变化则全面刷新
     type: {
       immediate: true,
-      handler() {
+      handler () {
         this.init()
       }
     }
   },
-  mounted() {
+  mounted () {
     // 禁止拖拽
-    this.$el.onselectstart = function() {
+    this.$el.onselectstart = function () {
       return false
     }
     console.log(this.defaultImg)
   },
   methods: {
-    init() {
+    init () {
       this.text = this.explain
       this.getPictrue()
       this.$nextTick(() => {
         const setSize = this.resetSize(this)	// 重新设置宽度高度
         for (const key in setSize) {
-          this.$set(this.setSize, key, setSize[key])
+          this.setSize[key] = setSize[key]
         }
         this.$parent.$emit('ready', this)
       })
 
-      var _this = this
+      const _this = this
 
-      window.removeEventListener('touchmove', function(e) {
+      window.removeEventListener('touchmove', function (e) {
         _this.move(e)
       })
-      window.removeEventListener('mousemove', function(e) {
-        _this.move(e)
-      })
-
-      // 鼠标松开
-      window.removeEventListener('touchend', function() {
-        _this.end()
-      })
-      window.removeEventListener('mouseup', function() {
-        _this.end()
-      })
-
-      window.addEventListener('touchmove', function(e) {
-        _this.move(e)
-      })
-      window.addEventListener('mousemove', function(e) {
+      window.removeEventListener('mousemove', function (e) {
         _this.move(e)
       })
 
       // 鼠标松开
-      window.addEventListener('touchend', function() {
+      window.removeEventListener('touchend', function () {
         _this.end()
       })
-      window.addEventListener('mouseup', function() {
+      window.removeEventListener('mouseup', function () {
+        _this.end()
+      })
+
+      window.addEventListener('touchmove', function (e) {
+        _this.move(e)
+      })
+      window.addEventListener('mousemove', function (e) {
+        _this.move(e)
+      })
+
+      // 鼠标松开
+      window.addEventListener('touchend', function () {
+        _this.end()
+      })
+      window.addEventListener('mouseup', function () {
         _this.end()
       })
     },
 
     // 鼠标按下
-    start: function(e) {
+    start: function (e) {
       e = e || window.event
       if (!e.touches) { // 兼容PC端
         var x = e.clientX
@@ -246,7 +269,7 @@ export default {
       }
     },
     // 鼠标移动
-    move: function(e) {
+    move: function (e) {
       e = e || window.event
       if (this.status && this.isEnd == false) {
         if (!e.touches) { // 兼容PC端
@@ -254,8 +277,8 @@ export default {
         } else { // 兼容移动端
           var x = e.touches[0].pageX
         }
-        var bar_area_left = this.barArea.getBoundingClientRect().left
-        var move_block_left = x - bar_area_left // 小方块相对于父元素的left值
+        const bar_area_left = this.barArea.getBoundingClientRect().left
+        let move_block_left = x - bar_area_left // 小方块相对于父元素的left值
         if (move_block_left >= this.barArea.offsetWidth - parseInt(parseInt(this.blockSize.width) / 2) - 2) {
           move_block_left = this.barArea.offsetWidth - parseInt(parseInt(this.blockSize.width) / 2) - 2
         }
@@ -269,17 +292,17 @@ export default {
     },
 
     // 鼠标松开
-    end: function() {
+    end: function () {
       this.endMovetime = +new Date()
-      var _this = this
+      const _this = this
       // 判断是否重合
       if (this.status && this.isEnd == false) {
-        var moveLeftDistance = parseInt((this.moveBlockLeft || '').replace('px', ''))
+        let moveLeftDistance = parseInt((this.moveBlockLeft || '').replace('px', ''))
         moveLeftDistance = moveLeftDistance * 310 / parseInt(this.setSize.imgWidth)
         const data = {
           captchaType: this.captchaType,
-          'pointJson': this.secretKey ? aesEncrypt(JSON.stringify({ x: moveLeftDistance, y: 5.0 }), this.secretKey) : JSON.stringify({ x: moveLeftDistance, y: 5.0 }),
-          'token': this.backToken
+          pointJson: this.secretKey ? aesEncrypt(JSON.stringify({ x: moveLeftDistance, y: 5.0 }), this.secretKey) : JSON.stringify({ x: moveLeftDistance, y: 5.0 }),
+          token: this.backToken
         }
         reqCheck(data).then(res => {
           res = res.data
@@ -298,7 +321,7 @@ export default {
             }
             this.passFlag = true
             this.tipWords = `${((this.endMovetime - this.startMoveTime) / 1000).toFixed(2)}s验证成功`
-            var captchaVerification = this.secretKey ? aesEncrypt(this.backToken + '---' + JSON.stringify({ x: moveLeftDistance, y: 5.0 }), this.secretKey) : this.backToken + '---' + JSON.stringify({ x: moveLeftDistance, y: 5.0 })
+            const captchaVerification = this.secretKey ? aesEncrypt(this.backToken + '---' + JSON.stringify({ x: moveLeftDistance, y: 5.0 }), this.secretKey) : this.backToken + '---' + JSON.stringify({ x: moveLeftDistance, y: 5.0 })
             setTimeout(() => {
               this.tipWords = ''
               this.$parent.closeBox()
@@ -310,7 +333,7 @@ export default {
             this.iconColor = '#fff'
             this.iconClass = 'icon-close'
             this.passFlag = false
-            setTimeout(function() {
+            setTimeout(function () {
               _this.refresh()
             }, 1000)
             this.$parent.$emit('error', this)
@@ -324,7 +347,7 @@ export default {
       }
     },
 
-    refresh: function() {
+    refresh: function () {
       this.showRefresh = true
       this.finishText = ''
 
@@ -349,11 +372,11 @@ export default {
     },
 
     // 请求背景图片和验证图片
-    getPictrue() {
+    getPictrue () {
       const data = {
         captchaType: this.captchaType,
         clientUid: localStorage.getItem('slider'),
-        ts: Date.now(), // 现在的时间戳
+        ts: Date.now() // 现在的时间戳
       }
       reqGet(data).then(res => {
         if (res.data.repCode == '0000') {
@@ -371,8 +394,7 @@ export default {
           this.blockBackImgBase = null
         }
       })
-    },
-  },
+    }
+  }
 }
 </script>
-

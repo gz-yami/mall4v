@@ -1,41 +1,57 @@
 <template>
   <div class="mod-prod-prodComm">
-    <avue-crud ref="crud"
-               :page="page"
-               :data="dataList"
-               :table-loading="dataListLoading"
-               :option="tableOption"
-               @search-change="searchChange"
-               @on-load="getDataList"
-               @refresh-change="refreshChange"
-               @row-del="rowDel">
-
-      <template slot-scope="scope"
-                slot="nickName">
-        {{scope.row.user.nickName}}
+    <avue-crud
+      ref="crud"
+      :page="page"
+      :data="dataList"
+      :table-loading="dataListLoading"
+      :option="tableOption"
+      @search-change="searchChange"
+      @on-load="getDataList"
+      @refresh-change="refreshChange"
+      @row-del="rowDel"
+    >
+      <template
+        #default="scope"
+        #nickName
+      >
+        {{ scope.row.user.nickName }}
       </template>
-      <template slot-scope="scope"
-                slot="replyTime">
-        {{scope.row.replyTime ? scope.row.replyTime : '-'}}
+      <template
+        #default="scope"
+        #replyTime
+      >
+        {{ scope.row.replyTime ? scope.row.replyTime : '-' }}
       </template>
 
-      <template slot-scope="scope"
-                slot="menu">
-        <el-button type="primary"
-                   size="small"
-                   icon="el-icon-edit"
-                   @click="addOrUpdateHandle(scope.row.prodCommId,true)">编辑</el-button>
+      <template
+        #default="scope"
+        #menu
+      >
+        <el-button
+          type="primary"
+          size="small"
+          icon="el-icon-edit"
+          @click="addOrUpdateHandle(scope.row.prodCommId,true)"
+        >
+          编辑
+        </el-button>
 
-        <el-button type="success"
-                   size="small"
-                   icon="el-icon-view"
-                   @click="addOrUpdateHandle(scope.row.prodCommId,false)">查看</el-button>
-
+        <el-button
+          type="success"
+          size="small"
+          icon="el-icon-view"
+          @click="addOrUpdateHandle(scope.row.prodCommId,false)"
+        >
+          查看
+        </el-button>
       </template>
     </avue-crud>
-    <add-or-update v-if="addOrUpdateVisible"
-                   ref="addOrUpdate"
-                   @refreshDataList="refreshChange"></add-or-update>
+    <add-or-update
+      v-if="addOrUpdateVisible"
+      ref="addOrUpdate"
+      @refresh-data-list="refreshChange"
+    />
   </div>
 </template>
 
@@ -43,6 +59,9 @@
 import { tableOption } from '@/crud/prod/prodComm'
 import AddOrUpdate from './prodComm-add-or-update'
 export default {
+  components: {
+    AddOrUpdate
+  },
   data () {
     return {
       dataList: [],
@@ -52,15 +71,12 @@ export default {
         pageSize: 20 // 每页显示多少条
       },
       dataListLoading: false,
-      tableOption: tableOption,
+      tableOption,
       permission: {
         delBtn: this.isAuth('prod:prodComm:delete')
       },
       addOrUpdateVisible: false
     }
-  },
-  components: {
-    AddOrUpdate
   },
   created () {
   },

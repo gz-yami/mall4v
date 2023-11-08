@@ -1,72 +1,106 @@
 <template>
-  <el-dialog :title="!dataForm.addrId ? '新增' : '修改'"
-             :close-on-click-modal="false"
-             :visible.sync="visible">
-    <el-form :model="dataForm"
-             :rules="dataRule"
-             ref="dataForm"
-             @keyup.enter.native="dataFormSubmit()"
-             label-width="80px">
-      <el-form-item label="名称"
-                    prop="addrName">
-        <el-input v-model="dataForm.addrName"
-                  placeholder="自提点名称"></el-input>
+  <el-dialog
+    v-model:visible="visible"
+    :title="!dataForm.addrId ? '新增' : '修改'"
+    :close-on-click-modal="false"
+  >
+    <!-- native modifier has been removed, please confirm whether the function has been affected  -->
+    <el-form
+      ref="dataForm"
+      :model="dataForm"
+      :rules="dataRule"
+      label-width="80px"
+      @keyup.enter="dataFormSubmit()"
+    >
+      <el-form-item
+        label="名称"
+        prop="addrName"
+      >
+        <el-input
+          v-model="dataForm.addrName"
+          placeholder="自提点名称"
+        />
       </el-form-item>
       <el-form-item label="省份">
         <el-col :span="8">
           <el-form-item prop="province">
-            <el-select v-model="dataForm.provinceId"
-                       placeholder="请选择"
-                       @change="selectProvince">
-              <el-option v-for="province in provinceList"
-                         :key="province.areaId"
-                         :label="province.areaName"
-                         :value="province.areaId"></el-option>
+            <el-select
+              v-model="dataForm.provinceId"
+              placeholder="请选择"
+              @change="selectProvince"
+            >
+              <el-option
+                v-for="province in provinceList"
+                :key="province.areaId"
+                :label="province.areaName"
+                :value="province.areaId"
+              />
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item prop="city">
-            <el-select v-model="dataForm.cityId"
-                       placeholder="请选择"
-                       @change="selectCity">
-              <el-option v-for="city in cityList"
-                         :key="city.areaId"
-                         :label="city.areaName"
-                         :value="city.areaId"></el-option>
+            <el-select
+              v-model="dataForm.cityId"
+              placeholder="请选择"
+              @change="selectCity"
+            >
+              <el-option
+                v-for="city in cityList"
+                :key="city.areaId"
+                :label="city.areaName"
+                :value="city.areaId"
+              />
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item prop="area">
-            <el-select v-model="dataForm.areaId"
-                       placeholder="请选择">
-              <el-option v-for="area in areaList"
-                         :key="area.areaId"
-                         :label="area.areaName"
-                         :value="area.areaId"></el-option>
+            <el-select
+              v-model="dataForm.areaId"
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="area in areaList"
+                :key="area.areaId"
+                :label="area.areaName"
+                :value="area.areaId"
+              />
             </el-select>
           </el-form-item>
         </el-col>
       </el-form-item>
-      <el-form-item label="地址"
-                    prop="addr">
-        <el-input v-model="dataForm.addr"
-                  placeholder="地址"></el-input>
+      <el-form-item
+        label="地址"
+        prop="addr"
+      >
+        <el-input
+          v-model="dataForm.addr"
+          placeholder="地址"
+        />
       </el-form-item>
-      <el-form-item label="手机号"
-                    prop="mobile">
-        <el-input v-model="dataForm.mobile"
-                  maxlength="11"
-                  placeholder="手机号"></el-input>
+      <el-form-item
+        label="手机号"
+        prop="mobile"
+      >
+        <el-input
+          v-model="dataForm.mobile"
+          maxlength="11"
+          placeholder="手机号"
+        />
       </el-form-item>
     </el-form>
-    <span slot="footer"
-          class="dialog-footer">
-      <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary"
-                 @click="dataFormSubmit()">确定</el-button>
-    </span>
+    <template #footer>
+      <span
+        class="dialog-footer"
+      >
+        <el-button @click="visible = false">取消</el-button>
+        <el-button
+          type="primary"
+          @click="dataFormSubmit()"
+        >确定</el-button>
+      </span>
+    </template>
   </el-dialog>
 </template>
 
@@ -75,8 +109,10 @@ import { isMobile } from '@/utils/validate'
 import { Debounce } from '@/utils/debounce'
 
 export default {
+  emits: ['refreshDataList'],
+
   data () {
-    var validateMobile = (rule, value, callback) => {
+    const validateMobile = (rule, value, callback) => {
       if (!isMobile(value)) {
         callback(new Error('手机号格式错误'))
       } else {
@@ -126,6 +162,7 @@ export default {
       }
     }
   },
+
   methods: {
     init (id) {
       this.dataForm.addrId = id || 0
@@ -167,7 +204,7 @@ export default {
     listAreaByParentId (pid) {
       if (!pid) pid = 0
       return this.$http({
-        url: this.$http.adornUrl(`/admin/area/listByPid`),
+        url: this.$http.adornUrl('/admin/area/listByPid'),
         method: 'get',
         params: this.$http.adornParams({ pid })
       })
@@ -210,10 +247,10 @@ export default {
           this.dataForm.area = this.areaList[i].areaName
         }
       }
-      this.$refs['dataForm'].validate(valid => {
+      this.$refs.dataForm.validate(valid => {
         if (valid) {
           this.$http({
-            url: this.$http.adornUrl(`/shop/pickAddr`),
+            url: this.$http.adornUrl('/shop/pickAddr'),
             method: this.dataForm.addrId ? 'put' : 'post',
             data: this.$http.adornData({
               addrId: this.dataForm.addrId || undefined,
