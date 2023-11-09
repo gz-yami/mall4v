@@ -96,7 +96,7 @@ router.beforeEach((to, from, next) => {
       method: 'get',
       params: http.adornParams()
     }).then(({ data }) => {
-      sessionStorage.setItem('Authorization', JSON.stringify(data.authorities || '[]'))
+      sessionStorage.setItem('Authorities', JSON.stringify(data.authorities || '[]'))
       fnAddDynamicMenuRoutes(data.menuList)
       router.options.isAddDynamicMenuRoutes = true
       const rList = []
@@ -168,7 +168,7 @@ function fnCurrentRouteType (route, globalRoutes = []) {
  */
 function fnAddDynamicMenuRoutes (menuList = [], routes = []) {
   let temp = []
-  const modules = import.meta.glob('../views/modules/**/**.vue')
+  const modules = import.meta.glob('../views/modules/**/index.vue')
   for (let i = 0; i < menuList.length; i++) {
     if (menuList[i].list && menuList[i].list.length >= 1) {
       temp = temp.concat(menuList[i].list)
@@ -193,7 +193,7 @@ function fnAddDynamicMenuRoutes (menuList = [], routes = []) {
         route.meta.iframeUrl = menuList[i].url
       } else {
         try {
-          route.component = modules[`../views/modules/${menuList[i].url}.vue`] || null
+          route.component = modules[`../views/modules/${menuList[i].url}/index.vue`] || null
         } catch (e) {}
       }
       routes.push(route)

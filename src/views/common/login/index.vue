@@ -146,53 +146,54 @@ const getCaptcha = () => {
   background: url('../../../assets/img/login-bg.png') no-repeat;
   background-size: cover;
   position: fixed;
-}
-.login .login-box {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  height: 100%;
-  padding-top: 10%;
-}
-.login .login-box .top {
-  margin-bottom: 30px;
-  text-align: center;
-}
-.login .login-box .top .logo {
-  font-size: 0;
-  max-width: 50%;
-  margin: 0 auto;
-}
-.login .login-box .top :deep(.company) {
-  font-size: 16px;
-  margin-top: 10px;
-}
-.login .login-box .mid {
-  font-size: 14px;
-}
-.login .login-box .mid .item-btn {
-  margin-top: 20px;
-}
-.login .login-box .mid .item-btn input {
-  border: 0;
-  width: 100%;
-  height: 40px;
-  background: #1f87e8;
-  color: #fff;
-  border-radius: 3px;
+  .login-box {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 100%;
+    padding-top: 10%;
+    .top {
+      margin-bottom: 30px;
+      text-align: center;
+      .logo {
+        font-size: 0;
+        max-width: 50%;
+        margin: 0 auto;
+      }
+      &:deep(.company) {
+        font-size: 16px;
+        margin-top: 10px;
+      }
+    }
+    .mid {
+      font-size: 14px;
+      .item-btn {
+        width: 410px;
+        margin-top: 20px;
+        input {
+          border: 0;
+          width: 100%;
+          height: 40px;
+          background: #1f87e8;
+          color: #fff;
+          border-radius: 3px;
+        }
+      }
+    }
+    .bottom {
+      position: absolute;
+      bottom: 10%;
+      width: 100%;
+      color: #999;
+      font-size: 12px;
+      text-align: center;
+    }
+  }
 }
 .info {
   width: 410px;
 }
 :deep(.login-captcha) {
   height: 40px;
-}
-.login .login-box .bottom {
-  position: absolute;
-  bottom: 10%;
-  width: 100%;
-  color: #999;
-  font-size: 12px;
-  text-align: center;
 }
 </style>

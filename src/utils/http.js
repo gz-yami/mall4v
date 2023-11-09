@@ -20,7 +20,6 @@ const http = axios.create({
 http.interceptors.request.use(
   config => {
     config.headers.Authorization = cookie.get('Authorization') // 请求头带上token
-    config.headers.locale = localStorage.getItem('b2cLang') || 'zh_CN'
     // 只针对get方式进行序列化
     if (config.method === 'get' || config.method === 'GET') {
       config.paramsSerializer = function (params) {
@@ -68,7 +67,7 @@ http.interceptors.response.use(
       // eslint-disable-next-line no-console
       console.error('============== 请求异常 ==============', '\n', `接口地址: ${response.config.url.replace(import.meta.env.VITE_APP_BASE_API, '')}`, '\n', `异常信息: ${res}`, '\n', '============== 请求异常 end ==========')
       ElMessage({
-        message: $t('utils.serverErr'),
+        message: '服务器出了点小差，请稍后再试',
         type: 'error',
         duration: 1.5 * 1000,
         customClass: 'element-error-message-zindex'
@@ -94,7 +93,7 @@ http.interceptors.response.use(
         break
       case 405:
         ElMessage({
-          message: $t('utils.requestErr'),
+          message: 'http请求方式有误',
           type: 'error',
           duration: 1500,
           customClass: 'element-error-message-zindex'
@@ -102,7 +101,7 @@ http.interceptors.response.use(
         break
       case 500:
         ElMessage({
-          message: $t('utils.serverErr'),
+          message: '服务器出了点小差，请稍后再试',
           type: 'error',
           duration: 1500,
           customClass: 'element-error-message-zindex'
@@ -110,7 +109,7 @@ http.interceptors.response.use(
         break
       case 501:
         ElMessage({
-          message: $t('utils.serverNoSupp'),
+          message: '服务器不支持当前请求所需要的某个功能',
           type: 'error',
           duration: 1500,
           customClass: 'element-error-message-zindex'
