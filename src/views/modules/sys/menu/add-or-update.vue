@@ -197,7 +197,9 @@ onMounted(() => {
   onLoadIcons()
 })
 const iconList = []
-// 加载图标
+/**
+ * 加载图标
+ */
 const onLoadIcons = () => {
   const icons = import.meta.glob('@/icons/svg/*.svg')
   for (const icon in icons) {
@@ -251,11 +253,16 @@ defineExpose({ init })
 const handleSelectMenuChange = (val) => {
   dataForm.parentId = val[val.length - 1]
 }
-// 图标选中
+/**
+ * 图标选中
+ * @param iconName
+ */
 const iconActiveHandle = (iconName) => {
   dataForm.icon = iconName
 }
-// 表单提交
+/**
+ * 表单提交
+ */
 const onSubmit = Debounce(() => {
   dataFormRef.value?.validate((valid) => {
     if (valid) {

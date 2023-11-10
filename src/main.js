@@ -6,6 +6,10 @@ import moment from 'moment'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import router from '@/router'
+import locale from 'element-plus/lib/locale/lang/zh-cn'
+import Avue from '@smallwei/avue'
+import '@smallwei/avue/lib/index.css'
+
 // 全局样式
 import '@/styles/index.scss'
 // svg
@@ -34,8 +38,10 @@ app.use(pinia)
 
 app.component('SvgIcon', svgIcon)
 
+// Avue
+app.use(Avue)
 // element-plus
-app.use(ElementPlus)
+app.use(ElementPlus, { locale })
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
