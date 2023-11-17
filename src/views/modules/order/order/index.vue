@@ -204,7 +204,10 @@
       </div>
     </div>
     <!-- 空 -->
-    <div class="empty-tips">
+    <div
+      v-if="!dataList.length"
+      class="empty-tips"
+    >
       暂无数据
     </div>
     <el-pagination

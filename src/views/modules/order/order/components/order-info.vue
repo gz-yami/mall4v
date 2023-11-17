@@ -293,6 +293,7 @@
 
 <script setup>
 import DevyAdd from './order-devy.vue'
+const resourcesUrl = import.meta.env.VITE_APP_RESOURCES_URL
 const dataForm = ref({
   orderId: 0,
   orderNumber: '',

@@ -16,10 +16,14 @@
         prop="pic"
       >
         <img
+          v-if="dataForm.pic"
           :src="dataForm.pic"
           class="image"
           alt=""
         >
+        <div v-else>
+          无
+        </div>
       </el-form-item>
       <el-form-item
         label="用户昵称"

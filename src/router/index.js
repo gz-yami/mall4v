@@ -31,6 +31,11 @@ export const mainRoutes = {
       path: 'home',
       name: 'home',
       component: () => import('@/views/common/home/index.vue')
+    },
+    {
+      path: '/prodInfo',
+      name: 'prodInfo',
+      component: () => import('@/views/modules/prod/prodInfo/index.vue')
     }
   ],
   // eslint-disable-next-line no-unused-vars

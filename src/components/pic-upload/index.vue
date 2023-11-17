@@ -2,23 +2,22 @@
   <div>
     <el-upload
       class="pic-uploader-component"
-      :action="http.adornUrl('/admin/file/upload/element')"
+      :action="uploadAction"
+      :headers="uploadHeaders"
       accept=".png,.jpg,.jpeg,.gif"
-      :headers="{Authorization: $cookie.get('Authorization')}"
       :show-file-list="false"
       :on-success="handleUploadSuccess"
       :before-upload="beforeAvatarUpload"
     >
       <img
-        v-if="value"
+        v-if="modelValue"
         alt=""
-        :src="resourcesUrl + value"
+        :src="resourcesUrl + modelValue"
         class="pic"
       >
-      <i
-        v-else
-        class="el-icon-plus pic-uploader-icon"
-      />
+      <el-icon v-else>
+        <Plus />
+      </el-icon>
     </el-upload>
   </div>
 </template>
@@ -26,10 +25,12 @@
 <script setup>
 import $cookie from 'vue-cookies'
 import { ElMessage } from 'element-plus'
+const uploadHeaders = { Authorization: $cookie.get('Authorization') }
+const uploadAction = http.adornUrl('/admin/file/upload/element')
 const emit = defineEmits(['update:modelValue'])
 // eslint-disable-next-line no-unused-vars
 const props = defineProps({
-  value: {
+  modelValue: {
     default: '',
     type: String
   }
@@ -84,5 +85,4 @@ const beforeAvatarUpload = (file) => {
 .pic-uploader-component :deep(.el-upload:hover) {
   border-color: #409EFF;
 }
-
 </style>

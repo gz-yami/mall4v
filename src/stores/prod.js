@@ -5,50 +5,38 @@ export const scoreProdStore = defineStore('prod', {
       id: 0,
       skuTags: [],
       defalutSku: {
-        price: 0.01, // 销售价
-        oriPrice: 0.01, // 市场价
+        price: 0, // 销售价
+        oriPrice: 0, // 市场价
         stocks: 0, // 库存
-        skuScore: 1, // 积分价格
         properties: '', // 销售属性组合字符串
         skuName: '', // sku名称
         prodName: '', // 商品名称
-        partyCode: '', // 商品编码
         weight: 0, // 商品重量
         volume: 0, // 商品体积
-        status: 1, // 0 禁用 1 启用
-        stockWarning: 0, // 库存预警
-        prodNameCn: '',
-        prodNameEn: '',
-        skuSingleProds: []
+        status: 1 // 0 禁用 1 启用
       }
     }
   },
   actions: {
-    updateSkuTags (skuTags) {
+    // eslint-disable-next-line no-unused-vars
+    updateSkuTags (state, skuTags) {
       this.skuTags = skuTags
     },
-    updateSkuTag ({ skuTag, index }) {
-      index = parseInt(index)
-      if (skuTag && typeof index === 'number') {
-        this.skuTags.splice(index, 1, skuTag)
-      }
-    },
-    addSkuTag (skuTag) {
+    // eslint-disable-next-line no-unused-vars
+    addSkuTag (state, skuTag) {
       this.skuTags.push(skuTag)
     },
-    removeSkuTag (tagIndex) {
+    // eslint-disable-next-line no-unused-vars
+    removeSkuTag (state, tagIndex) {
       this.skuTags.splice(tagIndex, 1)
     },
-    removeSkuTagItem ({ tagIndex, tagItemIndex }) {
+    // eslint-disable-next-line no-unused-vars
+    removeSkuTagItem (state, { tagIndex, tagItemIndex }) {
       this.skuTags[tagIndex].tagItems.splice(tagItemIndex, 1)
     },
-    addSkuTagItem ({ tagIndex, tagItem }) {
+    // eslint-disable-next-line no-unused-vars
+    addSkuTagItem (state, { tagIndex, tagItem }) {
       this.skuTags[tagIndex].tagItems.push(tagItem)
-    },
-    updateSkuTagItem ({ skuTagItem, tagIndex, tagItemIndex }) {
-      if (skuTagItem) {
-        this.skuTags[tagIndex].tagItems.splice(tagItemIndex, 1, skuTagItem)
-      }
     }
   }
 })
