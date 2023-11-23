@@ -142,7 +142,6 @@
 </template>
 
 <script setup>
-import PicUpload from '@/components/pic-upload'
 import { scoreProdStore } from '@/stores/prod.js'
 
 const props = defineProps({

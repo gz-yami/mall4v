@@ -138,20 +138,7 @@ const skuTags = computed({
   set (val) { prod.updateSkuTags(val) }
 })
 
-/**
- * 未使用的规格, 通过计算属性计算
- */
-const unUseTags = computed(() => {
-  const res = []
-  for (let i = 0; i < dbTags.length; i++) {
-    const dbTag = dbTags[i]
-    const specIndex = skuTags.value?.findIndex(tag => tag.tagName === dbTag.propName)
-    if (specIndex === -1) {
-      res.push(dbTag)
-    }
-  }
-  return res
-})
+const unUseTags = ref([])
 
 const defalutSku = computed(() => {
   return prod.defalutSku
@@ -177,7 +164,7 @@ watch(() => skuTags.value,
       const properties = tagName + ':' + tagItemName.value
       // 增加或删除规格
       let tempSkuList = []
-      val.forEach(tag => {
+      val?.forEach(tag => {
         if (skuList.length === 0) {
           if (tagName === tag.tagName) {
             const sku = Object.assign({}, defalutSku.value)
@@ -220,7 +207,7 @@ watch(() => skuTags.value,
     } else {
       // 增加或删除规格
       let tempSkuList = []
-      val.forEach(tag => {
+      val?.forEach(tag => {
         if (skuList.length === 0) {
           tag.tagItems.forEach(tagItem => {
             const sku = Object.assign({}, defalutSku.value)
@@ -258,6 +245,15 @@ onMounted(() => {
       dbTags = data
       if (data) {
         maxPropId = Math.max.apply(Math, data.map(item => item.propId))
+        const res = []
+        for (let i = 0; i < dbTags.length; i++) {
+          const dbTag = dbTags[i]
+          const specIndex = skuTags.value?.findIndex(tag => tag.tagName === dbTag.propName)
+          if (specIndex === -1) {
+            res.push(dbTag)
+          }
+        }
+        unUseTags.value = res
       } else {
         maxPropId = 0
       }

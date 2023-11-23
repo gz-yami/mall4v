@@ -18,24 +18,19 @@ export const scoreProdStore = defineStore('prod', {
     }
   },
   actions: {
-    // eslint-disable-next-line no-unused-vars
-    updateSkuTags (state, skuTags) {
+    updateSkuTags (skuTags) {
       this.skuTags = skuTags
     },
-    // eslint-disable-next-line no-unused-vars
-    addSkuTag (state, skuTag) {
+    addSkuTag (skuTag) {
       this.skuTags.push(skuTag)
     },
-    // eslint-disable-next-line no-unused-vars
-    removeSkuTag (state, tagIndex) {
+    removeSkuTag (tagIndex) {
       this.skuTags.splice(tagIndex, 1)
     },
-    // eslint-disable-next-line no-unused-vars
-    removeSkuTagItem (state, { tagIndex, tagItemIndex }) {
+    removeSkuTagItem ({ tagIndex, tagItemIndex }) {
       this.skuTags[tagIndex].tagItems.splice(tagItemIndex, 1)
     },
-    // eslint-disable-next-line no-unused-vars
-    addSkuTagItem (state, { tagIndex, tagItem }) {
+    addSkuTagItem ({ tagIndex, tagItem }) {
       this.skuTags[tagIndex].tagItems.push(tagItem)
     }
   }
