@@ -34,7 +34,6 @@
           <el-button
             type="text"
             icon="el-icon-delete"
-
             @click="() => remove(node, data)"
           >
             删除
@@ -47,6 +46,7 @@
       v-if="addOrUpdateVisible"
       ref="addOrUpdateRef"
       @refresh-data-list="getDataList"
+      @close="addOrUpdateVisible=false"
     />
   </div>
 </template>

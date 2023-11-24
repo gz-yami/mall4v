@@ -15,7 +15,11 @@
         :src="resourcesUrl + modelValue"
         class="pic"
       >
-      <el-icon v-else>
+      <el-icon
+        v-else
+        color="#8c939d"
+        size="28"
+      >
         <Plus />
       </el-icon>
     </el-upload>
@@ -84,5 +88,9 @@ const beforeAvatarUpload = (file) => {
 }
 .pic-uploader-component :deep(.el-upload:hover) {
   border-color: #409EFF;
+}
+:deep(.el-upload) {
+  width: 148px;
+  height: 148px;
 }
 </style>

@@ -41,6 +41,7 @@
           :options="menuList"
           :props="menuListTreeProps"
           change-on-select
+          :clearable="true"
           @change="handleSelectMenuChange"
         />
       </el-form-item>
@@ -172,7 +173,8 @@ const menuList = ref([])
 const selectedMenu = ref([])
 const menuListTreeProps = {
   value: 'menuId',
-  label: 'name'
+  label: 'name',
+  checkStrictly: true
 }
 
 // eslint-disable-next-line no-unused-vars

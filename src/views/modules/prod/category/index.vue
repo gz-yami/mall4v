@@ -93,6 +93,7 @@
       v-if="addOrUpdateVisible"
       ref="addOrUpdateRef"
       @refresh-data-list="getDataList"
+      @close="addOrUpdateVisible=false"
     />
   </div>
 </template>

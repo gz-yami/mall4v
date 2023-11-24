@@ -9,13 +9,26 @@
         :init="init"
         api-key="i6mv006qcwsfu1t7ebisntg5w261vpowkwirnx9cnse3ho5o"
       />
+      <!-- 增加图片区域 -->
       <div
         class="add-or-upload"
       >
-        <add-or-upload
-          v-show="isLoaded"
-          @success-c-b-k="imageSuccessCBK"
-        />
+        <el-upload
+          class="upload-demo"
+          list-type="picture"
+          :action="uploadAction"
+          :headers="uploadHeaders"
+          :on-success="imageSuccessCBK"
+          :show-file-list="false"
+          :before-upload="beforeAvatarUpload"
+        >
+          <el-button
+            size="small"
+            type="primary"
+          >
+            点击上传图片
+          </el-button>
+        </el-upload>
       </div>
     </div>
   </div>
@@ -23,7 +36,11 @@
 
 <script setup>
 import Editor from '@tinymce/tinymce-vue'
-import AddOrUpload from './add-or-upload.vue'
+import $cookie from 'vue-cookies'
+
+const uploadHeaders = { Authorization: $cookie.get('Authorization') }
+const uploadAction = http.adornUrl('/admin/file/upload/element')
+
 const props = defineProps({
   modelValue: {
     type: String,
@@ -46,6 +63,7 @@ const props = defineProps({
     default: 'auto'
   }
 })
+
 const toxFullscreen = ref(false)
 const hasChange = ref(false)
 const hasInit = ref(false)
@@ -131,12 +149,28 @@ const destroyTinymce = () => {
     tinymce.destroy()
   }
 }
-const imageSuccessCBK = (arr) => {
-  arr.forEach(v => {
-    window.tinymce.get(props.id).insertContent(`<img alt="" class="wscnph" src="${v}" >`)
+const resourcesUrl = import.meta.env.VITE_APP_RESOURCES_URL
+// eslint-disable-next-line no-unused-vars
+const imageSuccessCBK = (response, file, fileList) => {
+  fileList.forEach(v => {
+    window.tinymce.get(props.id).insertContent(`<img alt="" src="${resourcesUrl + v.response.data}" >`)
   })
 }
 
+/**
+ * 限制图片上传大小
+ */
+const beforeAvatarUpload = (file) => {
+  const isJPG = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/gif' || file.type === 'image/jpg'
+  if (!isJPG) {
+    this.$message.error('上传图片只能是jpeg/jpg/png/gif 格式!')
+  }
+  const isLt2M = file.size / 1024 / 1024 < 2
+  if (!isLt2M) {
+    this.$message.error('上传图片大小不能超过 2MB!')
+  }
+  return isLt2M && isJPG
+}
 </script>
 <!--eslint-disable-next-line vue-scoped-css/enforce-style-type -->
 <style lang="scss">

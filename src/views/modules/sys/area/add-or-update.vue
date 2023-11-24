@@ -77,7 +77,8 @@ const dataForm = ref({
 })
 const categoryTreeProps = reactive({
   value: 'areaId',
-  label: 'areaName'
+  label: 'areaName',
+  checkStrictly: true
 })
 const selectedOptions = ref([])
 const dataFormRef = ref(null)
@@ -92,20 +93,23 @@ const init = (areaId) => {
         url: http.adornUrl('/admin/area/info/' + dataForm.value.areaId),
         method: 'get',
         params: http.adornParams()
-      }).then(({ data }) => {
-        dataForm.value = data
-        selectedOptions.value.push(dataForm.value.parentId)
-        categoryTreeProps.areaId = dataForm.value.areaId
-        categoryTreeProps.areaName = dataForm.value.areaName
       })
+        .then(({ data }) => {
+          dataForm.value = data
+          selectedOptions.value = dataForm.value.parentId
+          selectedOptions.level = dataForm.value.level
+          categoryTreeProps.areaId = dataForm.value.areaId
+          categoryTreeProps.areaName = dataForm.value.areaName
+        })
     }
     http({
       url: http.adornUrl('/admin/area/list'),
       method: 'get',
       params: http.adornParams()
-    }).then(({ data }) => {
-      areaList.value = treeDataTranslate(data, 'areaId', 'parentId')
     })
+      .then(({ data }) => {
+        areaList.value = treeDataTranslate(data, 'areaId', 'parentId')
+      })
   })
 }
 defineExpose({ init })

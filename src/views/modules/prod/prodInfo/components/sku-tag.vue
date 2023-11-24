@@ -150,13 +150,13 @@ watch(() => skuTags.value,
       initing = false
       return
     }
-    let skuList = []
+    let skuListArr = []
     if (type.value === 4) {
       // 删除规格值
       props.skuList?.forEach(sku => {
         const propertiesArray = sku.properties.split(';')
         if (tagItemName.value !== propertiesArray[tagNameIndex].split(':')[1]) {
-          skuList.push(sku)
+          skuListArr.push(sku)
         }
       })
     } else if (type.value === 2) {
@@ -165,25 +165,25 @@ watch(() => skuTags.value,
       // 增加或删除规格
       let tempSkuList = []
       val?.forEach(tag => {
-        if (skuList.length === 0) {
+        if (skuListArr.length === 0) {
           if (tagName === tag.tagName) {
             const sku = Object.assign({}, defalutSku.value)
             sku.properties = properties // 销售属性组合字符串
-            skuList.push(sku)
+            skuListArr.push(sku)
           } else {
             tag.tagItems.forEach(tagItem => {
               const sku = Object.assign({}, defalutSku.value)
               sku.properties = `${tag.tagName}:${tagItem.propValue}` // 销售属性组合字符串
-              skuList.push(sku)
+              skuListArr.push(sku)
             })
           }
           if (val.length === 1) {
-            skuList = props.skuList.concat(skuList)
+            skuListArr = props.skuList.concat(skuListArr)
           }
         } else {
           tempSkuList = []
           if (tagName === tag.tagName) {
-            skuList.forEach(sku => {
+            skuListArr.forEach(sku => {
               if (sku.properties.indexOf(tagName) === -1) {
                 const newSku = Object.assign({}, sku)
                 newSku.properties = `${sku.properties};${properties}`
@@ -192,7 +192,7 @@ watch(() => skuTags.value,
             })
           } else {
             tag.tagItems.forEach(tagItem => {
-              skuList.forEach(sku => {
+              skuListArr.forEach(sku => {
                 if (sku.properties.indexOf(tag.tagName) === -1) {
                   const newSku = Object.assign({}, sku)
                   newSku.properties = `${sku.properties};${tag.tagName}:${tagItem.propValue}`
@@ -201,37 +201,40 @@ watch(() => skuTags.value,
               })
             })
           }
-          skuList = props.skuList.concat(tempSkuList)
+          skuListArr = props.skuList.concat(tempSkuList)
         }
       })
     } else {
       // 增加或删除规格
       let tempSkuList = []
       val?.forEach(tag => {
-        if (skuList.length === 0) {
+        if (skuListArr.length === 0) {
           tag.tagItems.forEach(tagItem => {
             const sku = Object.assign({}, defalutSku.value)
             sku.properties = `${tag.tagName}:${tagItem.propValue}` // 销售属性组合字符串
-            skuList.push(sku)
+            skuListArr.push(sku)
           })
         } else {
           tempSkuList = []
           tag.tagItems.forEach(tagItem => {
-            skuList.forEach(sku => {
+            skuListArr.forEach(sku => {
               const newSku = Object.assign({}, sku)
               newSku.properties = `${sku.properties};${tag.tagName}:${tagItem.propValue}`
               tempSkuList.push(newSku)
             })
           })
-          skuList = tempSkuList
+          skuListArr = tempSkuList
         }
       })
     }
-    if (!skuList.length) {
-      skuList.push(Object.assign({}, defalutSku.value))
+    if (!skuListArr.length) {
+      skuListArr.push(Object.assign({}, defalutSku.value))
     }
     // debugger
-    emit('change', skuList)
+    emit('change', skuListArr)
+  },
+  {
+    deep: true
   }
 )
 

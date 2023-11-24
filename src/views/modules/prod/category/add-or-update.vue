@@ -112,7 +112,8 @@ const categoryList = ref([])
 const selectedCategory = ref([])
 const categoryTreeProps = reactive({
   value: 'categoryId',
-  label: 'categoryName'
+  label: 'categoryName',
+  checkStrictly: true
 })
 const isSubmit = ref(false)
 const dataFormRef = ref(null)
