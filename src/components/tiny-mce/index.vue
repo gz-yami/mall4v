@@ -152,9 +152,7 @@ const destroyTinymce = () => {
 const resourcesUrl = import.meta.env.VITE_APP_RESOURCES_URL
 // eslint-disable-next-line no-unused-vars
 const imageSuccessCBK = (response, file, fileList) => {
-  fileList.forEach(v => {
-    window.tinymce.get(props.id).insertContent(`<img alt="" src="${resourcesUrl + v.response.data}" >`)
-  })
+  window.tinymce.get(props.id).insertContent(`<img alt="" src="${resourcesUrl + file.response.data}" >`)
 }
 
 /**

@@ -268,7 +268,9 @@ const onSubmit = Debounce(() => {
           type: 'success',
           duration: 1500,
           onClose: () => {
-            router.push({ name: 'prod-prodList' })
+            router.push({
+              path: '/prod/prodList'
+            })
             emit('refreshDataList')
           }
         })

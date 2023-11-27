@@ -512,4 +512,7 @@ const changeOrder = (orderNumber) => {
     }
   }
 }
+:deep(.el-steps--horizontal) {
+  flex: 25% 1 1;
+}
 </style>

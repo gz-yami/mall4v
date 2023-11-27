@@ -126,9 +126,10 @@ const type = ref(0)
 const tagItemName = ref('')
 const tagItemInputs = ref([])
 const dbTagValues = ref([]) // 根据选定的规格所查询出来的规格值
+const dbTags = ref([]) // 数据库中的规格
+
 let tagName = ''
 let tagNameIndex = 0
-let dbTags = [] // 数据库中的规格
 let maxValueId = 0 // 规格值id最大
 let maxPropId = 0 // 规格id 最大
 let initing = false
@@ -138,7 +139,20 @@ const skuTags = computed({
   set (val) { prod.updateSkuTags(val) }
 })
 
-const unUseTags = ref([])
+/**
+ * 未使用的规格, 通过计算属性计算
+ */
+const unUseTags = computed(() => {
+  const res = []
+  for (let i = 0; i < dbTags.value.length; i++) {
+    const dbTag = dbTags.value[i]
+    const specIndex = skuTags.value?.findIndex(tag => tag.tagName === dbTag.propName)
+    if (specIndex === -1) {
+      res.push(dbTag)
+    }
+  }
+  return res
+})
 
 const defalutSku = computed(() => {
   return prod.defalutSku
@@ -245,18 +259,9 @@ onMounted(() => {
     params: http.adornParams()
   })
     .then(({ data }) => {
-      dbTags = data
+      dbTags.value = data
       if (data) {
         maxPropId = Math.max.apply(Math, data.map(item => item.propId))
-        const res = []
-        for (let i = 0; i < dbTags.length; i++) {
-          const dbTag = dbTags[i]
-          const specIndex = skuTags.value?.findIndex(tag => tag.tagName === dbTag.propName)
-          if (specIndex === -1) {
-            res.push(dbTag)
-          }
-        }
-        unUseTags.value = res
       } else {
         maxPropId = 0
       }
@@ -310,7 +315,7 @@ defineExpose({ init })
  * 显示规格名、规格值输入框
  */
 const shopTagInput = () => {
-  isShowTagInput.value = !isShowTagInput.value
+  isShowTagInput.value = true
 }
 
 /**
@@ -378,12 +383,12 @@ const handleTagClick = () => {
   dbTagValues.value = []
   addTagInput.value.selectValues = []
   // 判断规格名输入的值是否为数据库中已有的值
-  const specsIndex = dbTags.findIndex(spec => spec.propName === addTagInput.value.propName)
+  const specsIndex = dbTags.value?.findIndex(spec => spec.propName === addTagInput.value.propName)
   // 如果不是，则说明为用户随便输入
   if (specsIndex === -1) return
   // 如果数据库已有该规格名，则获取根据id获取该规格名称含有的规格值
   http({
-    url: http.adornUrl(`/prod/spec/listSpecValue/${dbTags[specsIndex].propId}`),
+    url: http.adornUrl(`/prod/spec/listSpecValue/${dbTags.value[specsIndex].propId}`),
     method: 'get',
     params: http.adornParams()
   }).then(({ data }) => {
@@ -522,5 +527,8 @@ const checkTagItem = (tagIndex) => {
 :deep(.tagTree){
   margin-left: 18px;
   padding-bottom:8px;
+}
+.el-form-item__content div {
+  width: 100%;
 }
 </style>

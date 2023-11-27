@@ -160,8 +160,8 @@ let initing = false
 
 const tableLeftTitles = computed(() => {
   const res = []
-  for (let i = 0; i < skuTags.length; i++) {
-    const skuTag = skuTags[i]
+  for (let i = 0; i < skuTags.value.length; i++) {
+    const skuTag = skuTags.value[i]
     res.push(skuTag.tagName)
   }
   return res

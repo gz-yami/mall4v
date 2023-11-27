@@ -27,7 +27,7 @@ export const scoreProdStore = defineStore('prod', {
     removeSkuTag (tagIndex) {
       this.skuTags.splice(tagIndex, 1)
     },
-    removeSkuTagItem ({ tagIndex, tagItemIndex }) {
+    removeSkuTagItem (tagIndex, tagItemIndex) {
       this.skuTags[tagIndex].tagItems.splice(tagItemIndex, 1)
     },
     addSkuTagItem ({ tagIndex, tagItem }) {

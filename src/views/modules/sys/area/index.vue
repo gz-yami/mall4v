@@ -22,7 +22,7 @@
       :expand-on-click-node="false"
     >
       <template #default="{ node, data }">
-        <span>{{ node.label }}</span>
+        <span class="addr-name">{{ node.label }}</span>
         <span>
           <el-button
             type="text"
@@ -158,5 +158,8 @@ const filterNode = (value, data) => {
   .area-add-btn {
     float: right;
   }
+}
+:deep(.el-tree-node) .addr-name {
+  width: 100%;
 }
 </style>
