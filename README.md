@@ -27,27 +27,42 @@ vue中后台：https://gitee.com/gz-yami/mall4v
 
 ## 部署教程
 
-### 1.启动
+### 1.安装nodejs
 
-- 安装node模块 (推荐使用淘宝镜像，`cnpm install`)
+[NodeJS](https://nodejs.org/) 项目要求最低 18.12.0，推荐 20.9.0
+
+如果不了解怎么安装nodejs的，可以参考 [菜鸟教程的nodejs相关](https://www.runoob.com/nodejs/nodejs-install-setup.html)
+
+### 2.启动
+
+- 项目要求使用 [pnpm](https://www.pnpm.cn/) 包管理工具
+- 使用编辑器打开项目，在根目录执行以下命令安装依赖
 
 ```
-npm install
+pnpm install
 ```
 
 - 运行
 
 ```
-npm run dev
+pnpm run dev
 ```
 
 - 部署
 
 ```
-npm run build
+pnpm run build
 ```
 
+- 如果不想使用 pnpm，请删除 `package.json` 文件中 `preinstall` 脚本后再进行安装
 
+```json
+{
+    "scripts" : {
+        "preinstall": "npx only-allow pnpm"  // 使用其他包管理工具（npm、yarn、cnpm等）请删除此命令
+    }
+}
+```
 
 ## 相关截图
 
