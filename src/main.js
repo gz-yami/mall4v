@@ -1,34 +1,49 @@
-import Vue from 'vue'
-import ElementUI from 'element-ui'
-import App from '@/App'
-import router from '@/router'                 // api: https://github.com/vuejs/vue-router
-import store from '@/store'                   // api: https://github.com/vuejs/vuex
-import VueCookie from 'vue-cookie'            // api: https://github.com/alfhen/vue-cookie
-import '@/icons'                              // api: http://www.iconfont.cn/
-import '@/element-ui-theme/style.css'
-import Avue from '@smallwei/avue'             // api: https://avue.top
+import { createApp } from 'vue'
+import App from './App.vue'
+import { createPinia } from 'pinia'
+import ElementPlus from 'element-plus'
+import moment from 'moment'
+import 'element-plus/dist/index.css'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import router from '@/router'
+import locale from 'element-plus/lib/locale/lang/zh-cn'
+import Avue from '@smallwei/avue'
 import '@smallwei/avue/lib/index.css'
-import '@/assets/scss/index.scss'
-import httpRequest from '@/utils/httpRequest' // api: https://github.com/axios/axios
-import { isAuth } from '@/utils'
-// import cloneDeep from 'lodash/cloneDeep'
 
-Vue.use(Avue)
-Vue.use(VueCookie)
-Vue.use(ElementUI)
-Vue.config.productionTip = false
-
-// 挂载全局
-Vue.prototype.$http = httpRequest // ajax请求方法
-Vue.prototype.isAuth = isAuth     // 权限方法
-
-// 保存整站vuex本地储存初始状态
-// process.env.VUE_APP_RESOURCES_URL['storeState'] = cloneDeep(store.state)
-
-/* eslint-disable no-new */
-new Vue({
-  el: '#app',
-  router,
-  store,
-  render: h => h(App)
+// 全局样式
+import '@/styles/index.scss'
+// svg
+import 'virtual:svg-icons-register'
+import svgIcon from '@/icons/SvgIcon.vue'
+moment.locale('zh-cn', {
+  longDateFormat: {
+    LT: 'HH:mm',
+    LTS: 'HH:mm:ss',
+    L: 'YYYY-MM-DD',
+    LL: 'YYYY-MM-DD HH:mm:ss'
+  },
+  week: {
+    // GB/T 7408-1994《数据元和交换格式·信息交换·日期和时间表示法》与ISO 8601:1988等效
+    dow: 1, // 星期一， 是一个星期的第一天
+    doy: 4 // 1月4日所在的的一周是一年的第一周
+  }
 })
+const app = createApp(App)
+
+// router
+app.use(router)
+// pinia
+const pinia = createPinia()
+app.use(pinia)
+
+app.component('SvgIcon', svgIcon)
+
+// Avue
+app.use(Avue)
+// element-plus
+app.use(ElementPlus, { locale })
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  app.component(key, component)
+}
+
+app.mount('#app')

@@ -2,5 +2,8 @@
 /config/
 /dist/
 /*.js
+/src/components/verifition
 /test/unit/coverage/
 /src/icons/iconfont.js
+/components.d.ts
+/src/auto-import

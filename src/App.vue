@@ -1,15 +1,12 @@
 <template>
-  <transition name="fade">
-    <router-view></router-view>
-  </transition>
+  <el-config-provider
+    namespace="el"
+  >
+    <router-view />
+  </el-config-provider>
 </template>
 
-<script>
-export default {
-  computed: {
-    key () {
-      return this.$route.path + Math.random()
-    }
-  }
-}
-</script>
+<!-- eslint-disable-next-line vue-scoped-css/enforce-style-type -->
+<style lang="scss">
+@use '@/assets/app.scss';
+</style>
