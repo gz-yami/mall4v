@@ -12,26 +12,5 @@
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
-    <script>
-      console.log('mall4j.v231106')
-      const webConfigData = JSON.parse(localStorage.getItem('b2cWebConfigData'));
-      if (webConfigData) {
-        let lang = localStorage.getItem('b2cLang')
-        if (lang !== 'en') {
-          document.title = webConfigData.bsTitleContentCn || ''
-        } else {
-          document.title = webConfigData.bsTitleContentEn || ''
-        }
-        let facicon = document.querySelector('link[rel="icon"]')
-        if (facicon !== null) {
-          facicon.href = webConfigData.bsTitleImg
-        } else {
-          facicon = document.createElement('link')
-          facicon.rel = 'icon'
-          facicon.href = webConfigData.bsTitleImg
-          document.head.appendChild(facicon)
-        }
-      }
-    </script>
   </body>
 </html>
