@@ -86,7 +86,5 @@ pnpm run build
 
 - Mall4j官方技术QQ 2群：729888395
 
-  ![QQ群](https://gitee.com/gz-yami/mall4j/raw/master/screenshot/qqGroup.png)
-
 - 官网：<[https://www.mall4j.com](https://www.mall4j.com)>
 
