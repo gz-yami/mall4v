@@ -10,17 +10,19 @@
 
 ## 授权
 
-Mall4j官网 https://www.mall4j.com
+Mall4j官网 [https://www.mall4j.com](https://www.mall4j.com)
 
-Mall4j 使用 AGPLv3 开源，请遵守 AGPLv3 的相关条款，或者联系作者获取商业授权(https://www.mall4j.com)
+Mall4j 使用 AGPLv3 开源，请遵守 AGPLv3 的相关条款，或者联系作者获取商业授权([https://www.mall4j.com](https://www.mall4j.com))
 
 ## 项目链接
 
-java后台：https://gitee.com/gz-yami/mall4j
+java后台：[https://gitee.com/gz-yami/mall4j](https://gitee.com/gz-yami/mall4j)
 
-vue中后台：https://gitee.com/gz-yami/mall4v
+vue后台前端：[https://gitee.com/gz-yami/mall4v](https://gitee.com/gz-yami/mall4v)
 
-小程序：https://gitee.com/gz-yami/mall4m
+小程序：[https://gitee.com/gz-yami/mall4m](https://gitee.com/gz-yami/mall4m)
+
+uni-app：[https://gitee.com/gz-yami/mall4uni](https://gitee.com/gz-yami/mall4uni)
 
 
 
@@ -80,12 +82,11 @@ pnpm run build
 
 ## 提交反馈
 
-提问之前，请先阅读[提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)：
+- Mall4j官方技术QQ 1群：722835385（3000人群已满）
 
-- QQ群：722835385
+- Mall4j官方技术QQ 2群：729888395
 
   ![QQ群](https://gitee.com/gz-yami/mall4j/raw/master/screenshot/qqGroup.png)
 
-- 论坛：<http://bbs.mall4j.com>
+- 官网：<[https://www.mall4j.com](https://www.mall4j.com)>
 
-- 商务邮箱：yamitech@163.com
