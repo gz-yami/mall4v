@@ -92,5 +92,5 @@ pnpm run build
 ![输入图片说明](https://img.mall4j.com/contact.png-v)
 
 
-## 更多信息请查看Mall4j商城官网 <[https://www.mall4j.com](https://www.mall4j.com)>
+## 更多信息请查看Mall4j商城官网 [https://www.mall4j.com](https://www.mall4j.com)
 
