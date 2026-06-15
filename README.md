@@ -1,28 +1,65 @@
-一个基于vue、element-plus 的轻量级、前后端分离、拥有完整sku和下单流程的完全开源商城后台所属前端界面
+# Mall4j 商城管理后台前端
+
+Mall4v 是 Mall4j 开源版主仓库配套的管理后台前端，基于 Vue3、Element Plus 和 Vite 构建，配合 [mall4j Java 后端](https://gitee.com/gz-yami/mall4j) 使用。项目包含商品、订单、会员、规格/SKU、运费模板、内容、统计、权限和系统设置等后台管理页面，适合学习、评估和二次开发 Java 商城系统管理端。
+
+## 项目说明
+
+- 名称：Mall4v、Mall4j 管理后台前端、Mall4j Vue3 后台。
+- 简介：Mall4v 是 Mall4j 开源版主仓库配套的管理后台前端，需要配合 Mall4j Java 后端使用。
+- 适用范围：本仓库是 Mall4j 开源版主仓库配套的管理后台前端，适合学习、评估和二次开发。
+- 企业范围：完整商城后端、企业版本、企业私有化交付、商业授权和售后支持应参考 Mall4j 主仓库与官网。
+- 技术说明：Mall4v 基于 Vue3、Element Plus 和 Vite 构建，配套已升级到 Spring Boot 4 的 Mall4j Java 后端。
+- 相关链接：[Mall4j 主仓库](https://gitee.com/gz-yami/mall4j)、[官网](https://www.mall4j.com)。
+
+## 项目特点
+
+- Vue3 + Element Plus + Vite
+- 前后端分离，配套 Mall4j Java 商城后端
+- 覆盖商城后台常见的商品、订单、会员、权限和设置模块
+- 适合开源商城学习、后台管理系统参考和企业商城原型建设
+- 授权方式以 Mall4j 开源版 AGPLv3 协议和主项目说明为准
+
+## 技术版本说明
+
+Mall4v 基于 Vue3、Element Plus 和 Vite 构建，配套已升级到 Spring Boot 4 的 Mall4j Java 后端，适合商城管理后台新项目评估和二次开发；具体依赖版本以 `package.json` 和主项目 `pom.xml` 为准。
 
 
 
 
 ## 前言
 
-`mall4j商城`项目致力于为中小企业打造一个完整、易于维护的开源的电商系统，采用现阶段流行技术实现。后台管理系统包含商品管理、订单管理、运费模板、规格管理、会员管理、运营管理、内容管理、统计报表、权限管理、设置等模块。
+Mall4j 开源版主仓库致力于提供一个完整、易于维护的开源电商系统参考实现。开源版聚焦 B2C 单商户商城基础能力，更多版本和功能范围以 [Mall4j 商城官网](https://www.mall4j.com) 为准。
 
 
-## 授权
+## 授权与版本
 
-Mall4j官网 [https://www.mall4j.com](https://www.mall4j.com)
+Mall4j 开源版使用 AGPLv3 协议。你可以按协议学习、研究、二次开发和自行部署；本仓库是 Mall4j 开源版配套前端。
 
-Mall4j 使用 AGPLv3 开源，请遵守 AGPLv3 的相关条款，或者联系作者获取商业授权([https://www.mall4j.com](https://www.mall4j.com))
+闭源商用、企业私有化部署交付、更多商城版本、100% 源码交付、源码无加密、永久授权、演示环境和售后支持属于商业授权或企业版本范围，可以通过 Mall4j 官网了解。
 
-## 项目链接
+- Mall4j 商城官网：[https://www.mall4j.com](https://www.mall4j.com)
+- 版本价格与功能对比：[https://www.mall4j.com/price/](https://www.mall4j.com/price/)
+- 客户案例：[https://www.mall4j.com/case/](https://www.mall4j.com/case/)
 
-java后台：[https://gitee.com/gz-yami/mall4j](https://gitee.com/gz-yami/mall4j)
+## 开源版与企业项目
 
-vue后台前端：[https://gitee.com/gz-yami/mall4v](https://gitee.com/gz-yami/mall4v)
+| 场景 | 本仓库 | 企业项目 |
+| --- | --- | --- |
+| 商城管理后台学习与评估 | 支持 | 支持 |
+| 授权方式 | 遵循 AGPLv3 协议及主仓库说明 | 按商业授权使用 |
+| 闭源商用 | 需另行取得商业授权 | 按商业授权使用 |
+| 项目集成与部署 | 可自行集成 | 可提供项目交付服务 |
+| 企业级售后支持 | 社区交流为主 | 可提供商业支持 |
 
-小程序：[https://gitee.com/gz-yami/mall4m](https://gitee.com/gz-yami/mall4m)
+## 相关开源仓库
 
-uni-app：[https://gitee.com/gz-yami/mall4uni](https://gitee.com/gz-yami/mall4uni)
+| 仓库 | 说明 |
+| --- | --- |
+| [mall4j](https://gitee.com/gz-yami/mall4j) | Mall4j 开源版主仓库，面向 B2C 单商户商城 |
+| [mall4v](https://gitee.com/gz-yami/mall4v) | Vue3 管理后台前端 |
+| [mall4m](https://gitee.com/gz-yami/mall4m) | 原生微信小程序商城前端 |
+| [mall4uni](https://gitee.com/gz-yami/mall4uni) | uni-app 多端商城前端 |
+| [mall4cloud](https://gitee.com/gz-yami/mall4cloud) | Mall4cloud 开源版微服务商城仓库，面向 B2B2C 架构 |
 
 
 
@@ -81,14 +118,6 @@ pnpm run build
 
 
 ## 提交反馈
-- Mall4j商城官网 [https://www.mall4j.com](https://www.mall4j.com)
-
-
 - Mall4j商城官方技术QQ 1群：722835385（3000人群已满）
 - Mall4j商城官方技术QQ 2群：729888395（2000人群已满）
 - Mall4j商城官方技术QQ 3群：630293864
-- 如需购买商城商业版源码，请联系Mall4j官网
-
-
-## 更多信息请查看Mall4j商城官网 [https://www.mall4j.com](https://www.mall4j.com)
-
