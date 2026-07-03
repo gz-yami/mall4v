@@ -1,0 +1,90 @@
+{
+  // 指向本地 schema，方便编辑器做字段提示和校验。
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // 声明当前项目默认运行在浏览器环境，并启用 ES6 全局变量集。
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  // 注册项目里会直接访问的全局变量，避免被误判成未定义。
+  "globals": {},
+  // 显式声明迁移期真正需要的插件集合，避免继续吃到默认插件带来的额外噪音。
+  // 这里先只保留最接近原 ESLint 8 方案的 eslint 核心规则和 vue 脚本规则。
+  // 注意：设置 plugins 会覆盖 Oxlint 默认插件集合，所以需要的插件必须全部写全。
+  "plugins": ["eslint", "vue"],
+  // 统一维护不参与 lint 的目录，减少本地与 CI 结果偏差。
+  "ignorePatterns": [
+    "build/**",
+    "config/**",
+    "dist/**",
+    "public/**",
+    "test/unit/coverage/**",
+    "src/icons/iconfont.js",
+    "src/auto-import/**",
+    "types/auto-import/**"
+  ],
+  // 先启用最有价值的规则分类，避免一次性引入过多历史噪音。
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  // 这里放项目级基础规则，优先覆盖原先 ESLint 中保留下来的核心校验。
+  // 迁移初期先追求和旧项目体感接近，再逐步补回更严格的规则。
+  "rules": {
+    // 禁止随手输出调试日志，但保留 console.error 作为异常排查和兜底告警的输出通道。
+    "no-console": [
+      "warn",
+      {
+        "allow": ["error"]
+      }
+    ],
+    // 允许在本地联调阶段临时使用 debugger，避免影响现有排查流程。
+    "no-debugger": "off",
+    // 禁止继续使用 var，统一收敛到 let / const，减少变量提升带来的作用域问题。
+    "no-var": "error",
+    // 防止 for 循环的自增自减方向写反，避免出现死循环或根本不执行的情况。
+    "for-direction": "error",
+    // 要求 getter 必须显式返回值，避免读取属性时得到难以排查的 undefined。
+    "getter-return": "error",
+    // 禁止在块级作用域中声明易产生歧义的函数或变量，降低兼容性风险。
+    "no-inner-declarations": "error",
+    // 避免异步场景对同一变量的读写互相覆盖，减少竞态条件问题。
+    "require-atomic-updates": "error",
+    // 旧项目里这类变量名遮蔽并没有被大量提示，迁移期先关闭避免噪音过高。
+    "no-shadow": "off",
+    // 兼容现有代码里常见的“条件成立才执行”写法，避免把短路表达式都判成错误。
+    "no-unused-expressions": [
+      "error",
+      {
+        "allowShortCircuit": true,
+        "allowTernary": true
+      }
+    ],
+    // 旧项目并没有强制限制字符串拼接，这里先关闭避免产生额外迁移噪音。
+    "no-useless-concat": "off"
+  },
+  // 按文件类型细分规则，降低 JS 与 Vue 场景下的误报。
+  "overrides": [
+    {
+      // JS 文件继续保留较宽松的未使用变量策略，兼容现有代码风格。
+      "files": ["src/**/*.js"],
+      "rules": {
+        "no-unused-vars": [
+          "warn",
+          {
+            // 继续检查函数参数，帮助发现历史遗留的无效入参。
+            "args": "all",
+            // 不强制要求 catch 参数必须被使用，兼容现有异常捕获写法。
+            "caughtErrors": "none",
+            // 允许对象剩余解构时的兄弟字段暂时未使用，减少常见场景下的误报。
+            "ignoreRestSiblings": true,
+            // 对局部变量仍然给出提示，便于逐步清理废弃状态和冗余逻辑。
+            "vars": "all",
+            // 保留项目里常见的占位参数命名，避免批量改名造成无意义 diff。
+            "argsIgnorePattern": "^[rule, value, i, to, from, binding]"
+          }
+        ]
+      }
+    }
+  ]
+}

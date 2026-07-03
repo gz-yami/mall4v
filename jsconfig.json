@@ -1,0 +1,18 @@
+{
+  // 仅为编辑器与 Volar 提供路径别名和自动生成声明文件的索引能力。
+  "compilerOptions": {
+    // 对齐 Vite 的 @ 别名，避免业务源码和自动生成声明文件中的路径在编辑器里报错。
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    // 当前项目以 JavaScript 为主，不启用严格的 TS 检查。
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true
+  },
+  // 排除依赖目录与构建产物，减少编辑器项目分析开销。
+  "exclude": ["node_modules", "dist"],
+  // 同时索引业务源码与自动生成声明文件，和 b2c 项目保持一致。
+  "include": ["src/**/*.js", "src/**/*.vue", "types/**/*.d.ts"]
+}

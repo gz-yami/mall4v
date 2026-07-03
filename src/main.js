@@ -6,7 +6,7 @@ import moment from 'moment'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import router from '@/router'
-import locale from 'element-plus/lib/locale/lang/zh-cn'
+import locale from 'element-plus/es/locale/lang/zh-cn'
 import Avue from '@smallwei/avue'
 import '@smallwei/avue/lib/index.css'
 

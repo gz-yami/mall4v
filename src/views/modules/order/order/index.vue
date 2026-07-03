@@ -555,5 +555,8 @@ const getSoldExcel = () => {
     margin: 50px 0;
     color: #999;
   }
+  .el-select {
+    width: 200px
+  }
 }
 </style>

@@ -24,7 +24,6 @@ const globalRoutes = [
 export const mainRoutes = {
   path: '/',
   component: Layout,
-  name: 'home',
   redirect: '/home',
   children: [
     {

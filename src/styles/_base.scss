@@ -1,3 +1,6 @@
+@use "sass:color";
+@use "./variables" as *;
+
 *,
 *:before,
 *:after {
@@ -11,11 +14,11 @@ body {
   background-color: #fff;
 }
 a {
-  color: mix(#fff, $--color-primary, 20%);
+  color: color.mix(#fff, $color-primary, 20%);
   text-decoration: none;
   &:focus,
   &:hover {
-    color: $--color-primary;
+    color: $color-primary;
     text-decoration: underline;
   }
 }
@@ -108,7 +111,7 @@ img {
   z-index: 1030;
   height: 50px;
   // box-shadow: 0 2px 4px rgba(0, 0, 0, .08);
-  background-color: $navbar--background-color;
+  background-color: $navbar-background-color;
 
   &__header {
     position: relative;
@@ -199,7 +202,7 @@ img {
 
   &--dark,
   &--dark-popper {
-    background-color: $sidebar--background-color-dark;
+    background-color: $sidebar-background-color-dark;
   }
   &__inner {
     position: relative;
@@ -235,10 +238,7 @@ img {
     padding-top: 50px;
     margin-left: 230px;
     min-height: 100%;
-    background: $content--background-color;
-  }
-  &--tabs {
-    padding: 55px 0 0;
+    background: $content-background-color;
   }
 }
 

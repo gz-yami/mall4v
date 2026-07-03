@@ -1,0 +1,18 @@
+{
+  // 指向本地 schema，方便编辑器识别 Oxfmt 的配置字段。
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  // 与现有项目代码风格保持一致：不自动补分号。
+  "semi": false,
+  // 与既有 JS / Vue 文件风格保持一致：优先使用单引号。
+  "singleQuote": true,
+  // 单参数箭头函数也强制保留括号，避免保存时因默认值或编辑器差异出现风格漂移。
+  "arrowParens": "always",
+  // HTML、Vue、JSX 标签中的属性强制一行一个，和原有 ESLint 风格保持一致。
+  "singleAttributePerLine": true,
+  // 避免保存时自动补尾逗号，减少无意义 diff。
+  "trailingComma": "none",
+  // package.json 保持人工控制字段顺序，避免依赖区块被自动重排。
+  "sortPackageJson": false,
+  // 忽略生成物与公开静态资源，避免格式化覆盖工具产物。
+  "ignorePatterns": ["dist/**", "public/**", "src/auto-import/**", "types/auto-import/**"]
+}
