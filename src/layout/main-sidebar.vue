@@ -222,7 +222,8 @@ const routeJump = menu => {
   height: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding: 0 12px;
 }
 .menu-mod .menu-left-item1 {
   width: 100%;
