@@ -9,6 +9,10 @@ import { ElMessage } from 'element-plus'
 const http = axios.create({
   timeout: 1000 * 30,
   withCredentials: true,
+  // 开启基于双重提交Cookie的CSRF防护，自动从XSRF-TOKEN cookie读取并带上X-XSRF-TOKEN请求头
+  withXSRFToken: true,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
   headers: {
     'Content-Type': 'application/json; charset=utf-8'
   }
