@@ -125,3 +125,4 @@ pnpm run build
 - Mall4j商城官方技术QQ 1群：722835385（3000人群已满）
 - Mall4j商城官方技术QQ 2群：729888395（2000人群已满）
 - Mall4j商城官方技术QQ 3群：630293864
+- Mall4j 商城官网：[https://www.mall4j.com](https://www.mall4j.com)
